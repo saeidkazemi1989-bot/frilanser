@@ -1,9 +1,10 @@
 name: build-windows-exe
 
 on:
-  workflow_dispatch:          # اجرای دستی از تب Actions
   push:
-    tags: ["v*"]              # و انتشار خودکار همراه با تگ نسخه
+    branches: ["**"]          # هر push روی هر شاخه → ساخت و بارگذاری فایل اجرایی
+    tags: ["v*"]              # تگ نسخه → علاوه بر آن، انتشار در Release
+  workflow_dispatch:          # اجرای دستی از تب Actions (وقتی روی شاخه‌ی پیش‌فرض باشد)
 
 permissions:
   contents: write
@@ -40,10 +41,11 @@ jobs:
       - name: تست نسخه‌ی اجرایی (smoke test)
         shell: bash
         run: |
-          mkdir -p /tmp/exetest && cd /tmp/exetest
+          mkdir -p "$RUNNER_TEMP/exetest" && cd "$RUNNER_TEMP/exetest"
           "$GITHUB_WORKSPACE/dist/frilanser.exe" --help
           "$GITHUB_WORKSPACE/dist/frilanser.exe" run --demos 1
-          ls -R "$GITHUB_WORKSPACE/dist"
+          echo "== خروجی‌های تولیدشده توسط EXE =="
+          ls -R . | head -40
 
       - name: بارگذاری فایل اجرایی
         uses: actions/upload-artifact@v4
