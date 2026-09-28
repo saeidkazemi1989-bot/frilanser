@@ -7,6 +7,9 @@ on:
     paths:                    # فقط وقتی چیزی که روی خروجی اثر دارد تغییر کند
       - "frilanser/**"
       - "frilanser_app.py"
+      - "frilanser_gui.py"
+      - "scripts/**"
+      - "tests/**"
       - "config.toml"
       - "data/raw/**"
       - "requirements.txt"
