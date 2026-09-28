@@ -94,8 +94,7 @@ jobs:
           echo "نسخه: $VERSION"
           python scripts/make_manifest.py set android dist/frilanser.apk \
             --version "$VERSION" \
-            --notes "نسخه‌ی اندروید فریلنس‌یار آرنا
-داشبورد داخلی روی خود گوشی + به‌روزرسانی درون‌برنامه‌ای"
+            --notes "نسخه‌ی اندروید: داشبورد داخلی روی خود گوشی + به‌روزرسانی درون‌برنامه‌ای"
 
       - name: انتشار به‌عنوان Release (منبع به‌روزرسانی)
         if: success()
