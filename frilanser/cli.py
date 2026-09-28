@@ -97,6 +97,8 @@ def cmd_demo(args):
         cfg, store,
         verdicts=tuple(v.strip() for v in args.verdicts.split(",") if v.strip()),
         limit=args.limit, base_url=args.base_url, force=args.force,
+        style=getattr(args, "style", "") or "",
+        only=getattr(args, "project", "") or "",
     )
     print(f"تعداد دموهای ساخته‌شده: {res['built']}")
     return 0
@@ -298,6 +300,8 @@ def build_parser() -> argparse.ArgumentParser:
     p.set_defaults(func=cmd_propose)
 
     p = sub.add_parser("demo", help="ساخت دمو")
+    p.add_argument("--style", default="", help="سبک طراحی (مثل glassmorphism؛ خالی = خودکار)")
+    p.add_argument("--project", default="", help="فقط این پروژه (شناسه یا بخشی از عنوان)")
     p.add_argument("--limit", type=int, default=3)
     p.add_argument("--verdicts", default="candidate,review")
     p.add_argument("--base-url", default="")

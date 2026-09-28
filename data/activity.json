@@ -1072,5 +1072,23 @@
     "action": "report",
     "project": "-",
     "detail": "/home/user/frilanser/outbox/reports/2026-09-28.md"
+  },
+  {
+    "at": "2026-09-28T11:43:55",
+    "action": "demo",
+    "project": "-",
+    "detail": "1 دمو ساخته شد"
+  },
+  {
+    "at": "2026-09-28T11:44:13",
+    "action": "demo",
+    "project": "-",
+    "detail": "1 دمو ساخته شد"
+  },
+  {
+    "at": "2026-09-28T11:44:13",
+    "action": "demo",
+    "project": "-",
+    "detail": "1 دمو ساخته شد"
   }
 ]

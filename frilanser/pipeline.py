@@ -86,16 +86,20 @@ def price_projects(cfg: Config, store: Store, force: bool = False) -> dict:
 
 # ------------------------------------------------------------------ demos
 def build_demos(cfg: Config, store: Store, verdicts: Iterable[str] = ("candidate", "review"),
-                limit: int | None = None, base_url: str = "", force: bool = False) -> dict:
+                limit: int | None = None, base_url: str = "", force: bool = False,
+                style: str = "", only: str = "") -> dict:
     targets = [p for p in store.all()
                if p.verdict in verdicts and (force or not p.demo)]
+    if only:  # فقط پروژه‌ی مشخص‌شده (id یا بخشی از آن)
+        targets = [p for p in targets if only in p.id or only in p.title] or [
+            p for p in store.all() if only in p.id or only in p.title]
     if limit:
         targets = targets[:limit]
 
     built = []
     for project in targets:
         meta = build_demo(project, project.screening or {}, project.proposal,
-                          cfg.demo_dir, base_url=base_url)
+                          cfg.demo_dir, base_url=base_url, style_override=style)
         project.demo = meta
         if project.status in ("new", STATUS_SCREENED):
             project.status = STATUS_AWAITING if project.verdict == "candidate" else STATUS_SCREENED

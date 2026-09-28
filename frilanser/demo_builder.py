@@ -1062,7 +1062,7 @@ def choose_kind(screening: dict, project: Project) -> str:
 
 
 def build_demo(project: Project, screening: dict, proposal: dict | None, out_dir: Path,
-               base_url: str = "") -> dict:
+               base_url: str = "", style_override: str = "") -> dict:
     """دو فایل می‌سازد: index.html (داخلی) و client.html (ارسال به کارفرما)."""
     kind = choose_kind(screening, project)
     archetype = detect_archetype(project, screening)
@@ -1070,10 +1070,11 @@ def build_demo(project: Project, screening: dict, proposal: dict | None, out_dir
     try:
         from .config import load_config as _load
 
-        style_override = (str(_load().raw.get("demo", {}).get("style", "auto") or "auto").strip().lower())
+        style_override_from_config = str(_load().raw.get("demo", {}).get("style", "auto") or "auto")
     except Exception:  # noqa: BLE001
-        style_override = "auto"
-    style = ds.pick_style(project, archetype, "" if style_override in ("auto", "", "خودکار") else style_override)
+        style_override_from_config = "auto"
+    chosen = (style_override or style_override_from_config).strip().lower()
+    style = ds.pick_style(project, archetype, "" if chosen in ("auto", "", "خودکار") else chosen)
     palette = ds.palette_of(style)
     bilingual = bool(re.search(r"انگلیسی|دو ?زبانه|چند ?زبانه|bilingual", project.title + project.description, re.I))
     c = _content(archetype, brand)
