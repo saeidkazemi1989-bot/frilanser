@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="fa" dir="rtl"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>استخراج ساختاریافته محتوای حدود ۱۵۰ کتاب — دمو</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f5f6fb;color:#1d2130;font-family:"Vazirmatn","IRANSans","B Nazanin",Tahoma,"Segoe UI",sans-serif;direction:rtl;line-height:1.9;font-size:15px}
+a{color:#3b5bdb;text-decoration:none}
+.wrap{max-width:1080px;margin:0 auto;padding:0 18px 60px}
+header.hero{background:linear-gradient(120deg,#2b3a67 0%,#3b5bdb 55%,#22b8cf 100%);color:#fff;padding:34px 0 30px;box-shadow:0 8px 30px rgba(43,58,103,.25)}
+header.hero .wrap{padding-bottom:0}
+.eyebrow{font-size:12.5px;opacity:.85;letter-spacing:.3px}
+header.hero h1{margin:6px 0 10px;font-size:26px;line-height:1.5}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.chip{background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.25);padding:4px 12px;border-radius:999px;font-size:12.5px;backdrop-filter:blur(4px)}
+.meta{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:22px 0 8px}
+.meta .box{background:#fff;border:1px solid #e5e8f0;border-radius:14px;padding:12px 14px}
+.meta .box .k{font-size:12px;color:#6b7280}
+.meta .box .v{font-weight:700;font-size:17px;margin-top:2px}
+.notice{background:#fff8e6;border:1px solid #ffe08a;color:#7a5b00;border-radius:12px;padding:10px 14px;font-size:13px;margin:18px 0}
+.card{background:#fff;border:1px solid #e5e8f0;border-radius:16px;padding:18px;margin-bottom:16px;box-shadow:0 2px 10px rgba(20,30,60,.04)}
+.card h2{margin:0 0 12px;font-size:18px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px}
+.feat{background:#f8f9fe;border:1px solid #e6e9f5;border-radius:12px;padding:14px}
+.feat .t{font-weight:700;margin-bottom:4px}
+.feat .d{color:#5b6478;font-size:13.5px}
+.nav{display:flex;flex-wrap:wrap;gap:6px;margin:14px 0}
+.nav button{background:#fff;border:1px solid #d9deeb;border-radius:999px;padding:7px 16px;cursor:pointer;font:inherit;font-size:13.5px;color:#39405a}
+.nav button.active{background:#3b5bdb;border-color:#3b5bdb;color:#fff}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th,td{padding:9px 10px;border-bottom:1px solid #eceff7;text-align:right}
+th{background:#f3f5fb;color:#4a5578;font-size:12.5px;white-space:nowrap}
+tr:hover td{background:#fafbff}
+input,select,textarea{font:inherit;padding:9px 12px;border:1px solid #d9deeb;border-radius:10px;width:100%;background:#fff;color:#1d2130}
+.btn{background:#3b5bdb;color:#fff;border:0;border-radius:10px;padding:10px 18px;font:inherit;cursor:pointer}
+.btn:hover{filter:brightness(1.07)}
+.btn.ghost{background:#fff;color:#3b5bdb;border:1px solid #c9d2f0}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px}
+.kpi{background:linear-gradient(160deg,#fff,#f4f6fd);border:1px solid #e5e8f0;border-radius:14px;padding:14px}
+.kpi .k{font-size:12.5px;color:#6b7280}
+.kpi .v{font-size:24px;font-weight:800;margin-top:2px}
+.kpi .d{font-size:12px;color:#22a06b}
+.bar{fill:url(#g)}
+.rowflex{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.muted{color:#6b7280;font-size:13px}
+.badge{display:inline-block;padding:2px 9px;border-radius:999px;font-size:11.5px;border:1px solid}
+.b-ok{background:#e7f8ef;color:#1a7f4b;border-color:#b7e6cd}
+.b-wait{background:#fff4e0;color:#8a5a00;border-color:#ffe0a8}
+.b-run{background:#e8f0ff;color:#2b4cb8;border-color:#c5d5ff}
+.b-bad{background:#fdeaea;color:#a02626;border-color:#f6c9c9}
+.log{background:#111827;color:#c8f0d8;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;border-radius:12px;padding:12px;height:150px;overflow:auto;line-height:1.7}
+.progress{height:9px;background:#e9edf7;border-radius:999px;overflow:hidden;margin:10px 0}
+.progress i{display:block;height:100%;width:0;background:linear-gradient(90deg,#3b5bdb,#22b8cf);transition:width .25s}
+.drop{border:2px dashed #c9d2f0;border-radius:14px;padding:26px;text-align:center;background:#fbfcff;cursor:pointer}
+.drop.hover{background:#eef3ff;border-color:#3b5bdb}
+pre.json{background:#0f172a;color:#d7e3ff;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px;border-radius:12px;padding:14px;overflow:auto;max-height:260px;text-align:left;direction:ltr}
+.phone{max-width:420px;margin:0 auto;background:#fff;border:14px solid #1d2130;border-radius:34px;overflow:hidden}
+.chat{height:360px;overflow:auto;padding:12px;background:#eef1f8}
+.msg{margin:6px 0;padding:8px 12px;border-radius:14px;max-width:78%;font-size:13.5px;line-height:1.8}
+.me{background:#3b5bdb;color:#fff;margin-left:auto;border-bottom-left-radius:4px}
+.you{background:#fff;border:1px solid #e2e7f2;border-bottom-right-radius:4px}
+.steps{counter-reset:s}
+.step{position:relative;padding:0 34px 16px 0;border-right:2px solid #e3e8f5}
+.step:last-child{border-right-color:transparent}
+.step:before{counter-increment:s;content:counter(s);position:absolute;right:-13px;top:0;width:24px;height:24px;border-radius:50%;background:#3b5bdb;color:#fff;font-size:12px;display:flex;align-items:center;justify-content:center}
+footer.foot{border-top:1px solid #e5e8f0;margin-top:26px;padding-top:16px;color:#6b7280;font-size:12.5px}
+@media(max-width:640px){header.hero h1{font-size:20px}.wrap{padding:0 12px 40px}}
+</style></head>
+<body>
+<header class="hero"><div class="wrap">
+<div class="eyebrow">نسخه‌ی نمونه (دمو) — آماده‌شده برای آگهی فریلنسری</div>
+<h1>استخراج ساختاریافته محتوای حدود ۱۵۰ کتاب</h1>
+<div style="opacity:.9">سلام، ما بالغ بر 150 جلد کتاب به صورت PDF یا epub داریم و دنبال فرد یا تیمی هستیم که بتونه محتوای این کتاب ها رو به صورت تمیز و مرتب استخراج کنه. خروجی نهایی باید شامل متن کامل، فرمول های دقیق و بدون به هم ریختگی، جداول…</div>
+<div class="chips"><span class="chip">منبع: پونیشا</span><span class="chip">دسته: استخراج و پردازش داده</span><span class="chip">امتیاز اجراپذیری: 95/۱۰۰</span><span class="chip">نوع دمو: pipeline</span></div>
+</div></header>
+<div class="wrap">
+<div class="meta">
+<div class="box"><div class="k">دسته‌بندی</div><div class="v">استخراج و پردازش داده</div></div>
+<div class="box"><div class="k">زمان اجرا (برآورد)</div><div class="v">10.8 ساعت</div></div>
+<div class="box"><div class="k">زمان تحویل</div><div class="v">2 روز کاری</div></div>
+<div class="box"><div class="k">قیمت پیشنهادی</div><div class="v">—</div></div>
+<div class="box"><div class="k">بودجه کارفرما</div><div class="v">300,000,000 تومان</div></div>
+</div>
+<div class="notice">⚠️ این صفحه یک <b>دموی تعاملی</b> است که با داده‌های نمونه ساخته شده تا خروجیِ نهایی پروژه
+را پیش از عقد قرارداد نشان دهد. متن آگهی: «استخراج ساختاریافته محتوای حدود ۱۵۰ کتاب»</div>
+<div class="card"><h2>۱. انتخاب ورودی</h2>
+<div class="drop" id="zone">فایل‌های خود را اینجا بکشید یا کلیک کنید (در این دمو از فایل‌های نمونه استفاده می‌شود)</div>
+<table style="margin-top:14px"><thead><tr><th></th><th>نام فایل</th><th>حجم</th><th>تعداد صفحه</th><th>وضعیت</th></tr></thead>
+<tbody id="filelist"></tbody></table></div>
+
+<div class="card"><h2>۲. اجرای pipeline</h2>
+<div class="rowflex"><button class="btn" id="run">شروع استخراج</button>
+<button class="btn ghost" onclick="document.querySelectorAll('#filelist input').forEach(c=>c.checked=true)">انتخاب همه</button></div>
+<div class="progress"><i></i></div>
+<div class="log" id="log">› منتظر شروع…</div></div>
+
+<div class="card" id="results" style="display:none"><h2>۳. خروجی ساختاریافته</h2>
+<table><thead><tr><th>فایل</th><th>صفحات</th><th>جداول</th><th>فرمول‌ها</th><th>تصاویر</th><th>کیفیت</th><th>خروجی</th></tr></thead>
+<tbody id="tbody"></tbody></table>
+<div class="notice" style="margin-top:14px">نمونه‌ی خروجی JSON (همان چیزی که تحویل می‌شود):</div>
+<pre class="json" id="jsonbox" style="display:none"></pre></div>
+<script>
+const FILES = [{"name": "فصل‌ اول - مقدمات.pdf", "size": "۴.۲ مگابایت", "pages": 212, "tables": 18, "formulas": 46, "images": 31, "status": "در انتظار", "badge": "b-wait", "acc": 98}, {"name": "کتاب مرجع (نسخه دوم).epub", "size": "۶.۸ مگابایت", "pages": 388, "tables": 27, "formulas": 112, "images": 54, "status": "در انتظار", "badge": "b-wait", "acc": 97}, {"name": "مجموعه مقالات - جلد ۳.pdf", "size": "۹.۱ مگابایت", "pages": 140, "tables": 9, "formulas": 63, "images": 22, "status": "در انتظار", "badge": "b-wait", "acc": 99}, {"name": "جزوه درسی - فصل ۵.pdf", "size": "۲.۴ مگابایت", "pages": 76, "tables": 6, "formulas": 21, "images": 12, "status": "در انتظار", "badge": "b-wait", "acc": 96}, {"name": "گزارش سالانه - پیوست‌ها.pdf", "size": "۱۲.۵ مگابایت", "pages": 264, "tables": 41, "formulas": 8, "images": 76, "status": "در انتظار", "badge": "b-wait", "acc": 97}];
+const zone = document.getElementById('zone');
+const list = document.getElementById('filelist');
+const runBtn = document.getElementById('run');
+const bar = document.querySelector('.progress i');
+const log = document.getElementById('log');
+const results = document.getElementById('results');
+const tbody = document.getElementById('tbody');
+const jsonBox = document.getElementById('jsonbox');
+let selected = FILES.slice(0,3);
+
+function renderList(){
+  list.innerHTML = FILES.map((f,i)=>`<tr>
+    <td><input type="checkbox" data-i="${i}" ${selected.includes(f)?'checked':''}></td>
+    <td>${f.name}</td><td>${f.size}</td><td>${f.pages} صفحه</td>
+    <td><span class="badge ${f.badge}">${f.status}</span></td></tr>`).join('');
+  list.querySelectorAll('input').forEach(cb=>cb.onchange=()=>{
+    const f = FILES[+cb.dataset.i];
+    selected = cb.checked ? [...selected, f] : selected.filter(x=>x!==f);
+  });
+}
+renderList();
+zone.onclick = ()=>{ const f = FILES[(Math.random()*FILES.length)|0]; if(!selected.includes(f)){selected.push(f);renderList();} };
+zone.ondragover = e=>{e.preventDefault();zone.classList.add('hover')};
+zone.ondragleave = ()=>zone.classList.remove('hover');
+zone.ondrop = e=>{e.preventDefault();zone.classList.remove('hover');
+  const f = FILES[(Math.random()*FILES.length)|0]; if(!selected.includes(f)){selected.push(f);} renderList();};
+
+function say(t){ log.innerHTML += '<div>› '+t+'</div>'; log.scrollTop = log.scrollHeight; }
+runBtn.onclick = ()=>{
+  if(!selected.length){ say('هیچ فایلی انتخاب نشده است.'); return; }
+  runBtn.disabled = true; results.style.display='none'; log.innerHTML=''; bar.style.width='0%';
+  let p = 0, i = 0;
+  say('شروع پردازش روی '+selected.length+' فایل…');
+  const steps = ['خواندن فایل و تشخیص ساختار','استخراج متن و حفظ ترتیب پاراگراف‌ها',
+    'استخراج جداول و تبدیل به JSON','شناسایی و ذخیره فرمول‌ها','خروجی تصاویر با کیفیت اصلی',
+    'کنترل کیفیت و تولید گزارش'];
+  const timer = setInterval(()=>{
+    p += 4 + Math.random()*7;
+    bar.style.width = Math.min(100,p)+'%';
+    if(p > (i+1)*(100/steps.length) && i < steps.length){ say(steps[i]); i++; }
+    if(p >= 100){
+      clearInterval(timer);
+      say('پردازش با موفقیت پایان یافت ✅');
+      tbody.innerHTML = selected.map(f=>`<tr>
+        <td>${f.name}</td><td>${f.pages}</td><td>${f.tables}</td><td>${f.formulas}</td><td>${f.images}</td>
+        <td><span class="badge b-ok">${f.acc}٪ دقت</span></td>
+        <td><button class="btn ghost" onclick="document.getElementById('jsonbox').style.display='block';document.getElementById('jsonbox').scrollIntoView({behavior:'smooth'})">JSON</button></td></tr>`).join('');
+      results.style.display='block'; runBtn.disabled=false;
+      window.__lastFiles = selected;
+      jsonBox.textContent = JSON.stringify({
+        source: selected.map(f=>f.name),
+        output_format: "json",
+        items: selected.map(f=>({
+          file: f.name, pages: f.pages,
+          chapters: [{title:"فصل اول", paragraphs: 42, tables: f.tables, formulas: f.formulas}],
+          assets: {images: f.images, extracted_at: new Date().toISOString()}
+        }))
+      }, null, 2);
+    }
+  }, 180);
+};
+</script>
+<div class="card"><h2>چه چیزی تحویل می‌دهید</h2><div class="grid"><div class="feat"><div class="t">اسکریپت پایتون با رابط خط فرمان (CLI)</div></div><div class="feat"><div class="t">خروجی ساختاریافته (JSON/CSV) شامل متن، جداول و تصاویر</div></div><div class="feat"><div class="t">اجرای نمونه روی یک فایل واقعی + گزارش دقت</div></div><div class="feat"><div class="t">مستندات کوتاهِ اجرا و نصب</div></div></div></div>
+<div class="card"><h2>برنامه‌ی تحویل و پرداخت</h2><div class="steps"></div></div>
+<footer class="foot">
+ساخته‌شده با «فریلنس‌یار آرنا» در تاریخ 2026/09/28 05:18 — داده‌های این صفحه نمونه و غیرواقعی هستند.<br>
+آگهی اصلی: <a href="https://ponisha.ir/project/760397/%D8%A7%D8%B3%D8%AA%D8%AE%D8%B1%D8%A7%D8%AC-%D8%B3%D8%A7%D8%AE%D8%AA%D8%A7%D8%B1%DB%8C%D8%A7%D9%81%D8%AA%D9%87-%D9%85%D8%AD%D8%AA%D9%88%D8%A7%DB%8C-%D8%AD%D8%AF%D9%88%D8%AF-%DB%B1%DB%B5%DB%B0-%DA%A9%D8%AA%D8%A7%D8%A8" target="_blank" rel="noopener">پونیشا</a>
+</footer></div></body></html>

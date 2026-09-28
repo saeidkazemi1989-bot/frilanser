@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}فعالیت‌ها{% endblock %}
+{% block body %}
+<div class="panel">
+  <h2>گزارش فعالیت‌ها</h2>
+  <table>
+    <thead><tr><th>زمان</th><th>عملیات</th><th>پروژه</th><th>توضیح</th></tr></thead>
+    <tbody>
+    {% for a in activity %}
+      <tr><td>{{ a.at }}</td><td>{{ a.action }}</td><td>{{ a.project }}</td><td>{{ a.detail }}</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

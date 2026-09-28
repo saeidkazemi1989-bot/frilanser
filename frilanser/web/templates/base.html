@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{% block title %}فریلنس‌یار آرنا{% endblock %}</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<header class="topbar">
+  <div class="inner">
+    <div class="brand">
+      <span class="dot"></span>
+      <div>
+        <div class="b1">فریلنس‌یار آرنا</div>
+        <div class="b2">اسکن سایت‌های فریلنسری ایرانی → انتخاب پروژه‌های قابل اجرا → دمو + قیمت</div>
+      </div>
+    </div>
+    <nav>
+      <a href="{{ url_for('index') }}">پروژه‌ها</a>
+      <a href="{{ url_for('needs_you') }}">نیاز به ورود شما{% if stats.open_tasks %}<span class="pill">{{ stats.open_tasks }}</span>{% endif %}</a>
+      <a href="{{ url_for('demos_index') }}">دموها</a>
+      <a href="{{ url_for('activity') }}">فعالیت‌ها</a>
+    </nav>
+  </div>
+</header>
+
+<main class="inner">
+{% block body %}{% endblock %}
+</main>
+
+<footer class="foot">
+  ثبت پیشنهاد در سایت‌های فریلنسری و تحویل نهایی پروژه توسط خود شما انجام می‌شود؛
+  این ابزار فقط «پیدا کردن، غربال کردن، ساخت دمو و قیمت‌گذاری» را خودکار کرده است.
+</footer>
+<script>
+document.querySelectorAll('[data-copy]').forEach(btn=>{
+  btn.onclick = ()=>{
+    const target = document.getElementById(btn.dataset.copy);
+    if(!target) return;
+    navigator.clipboard.writeText(target.innerText);
+    const old = btn.textContent; btn.textContent='کپی شد ✓';
+    setTimeout(()=>btn.textContent=old,1400);
+  };
+});
+</script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

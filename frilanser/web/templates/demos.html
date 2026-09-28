@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}دموها{% endblock %}
+{% block body %}
+<div class="panel">
+  <h2 style="margin-bottom:4px">دموهای ساخته‌شده</h2>
+  <div class="muted">هر دمو یک فایل HTML مستقل است که خروجیِ پروژه را پیش از عقد قرارداد نشان می‌دهد.</div>
+</div>
+{% if items %}
+<div class="cards">
+{% for p in items %}
+  <div class="card">
+    <h3>{{ p.title }}</h3>
+    <div class="kv">
+      <span>{{ p.source_label }}</span>
+      <span>نوع: {{ p.demo.kind }}</span>
+      {% if p.proposal %}<span>قیمت: {{ '{:,}'.format(p.proposal.price) }}</span>{% endif %}
+    </div>
+    <div class="actions">
+      <a class="go" href="{{ url_for('serve_demo', filename=p.demo.rel) }}" target="_blank">باز کردن دمو ↗</a>
+      <a href="{{ url_for('project_detail', pid=p.id) }}">جزئیات</a>
+    </div>
+  </div>
+{% endfor %}
+</div>
+{% else %}
+  <div class="empty">دمویی ساخته نشده است.</div>
+{% endif %}
+{% endblock %}

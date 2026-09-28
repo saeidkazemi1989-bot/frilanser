@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="fa" dir="rtl"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>طراحی و پیاده سازی وب سایت کلینیک تخصصی درمانی — دمو</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f5f6fb;color:#1d2130;font-family:"Vazirmatn","IRANSans","B Nazanin",Tahoma,"Segoe UI",sans-serif;direction:rtl;line-height:1.9;font-size:15px}
+a{color:#3b5bdb;text-decoration:none}
+.wrap{max-width:1080px;margin:0 auto;padding:0 18px 60px}
+header.hero{background:linear-gradient(120deg,#2b3a67 0%,#3b5bdb 55%,#22b8cf 100%);color:#fff;padding:34px 0 30px;box-shadow:0 8px 30px rgba(43,58,103,.25)}
+header.hero .wrap{padding-bottom:0}
+.eyebrow{font-size:12.5px;opacity:.85;letter-spacing:.3px}
+header.hero h1{margin:6px 0 10px;font-size:26px;line-height:1.5}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.chip{background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.25);padding:4px 12px;border-radius:999px;font-size:12.5px;backdrop-filter:blur(4px)}
+.meta{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:22px 0 8px}
+.meta .box{background:#fff;border:1px solid #e5e8f0;border-radius:14px;padding:12px 14px}
+.meta .box .k{font-size:12px;color:#6b7280}
+.meta .box .v{font-weight:700;font-size:17px;margin-top:2px}
+.notice{background:#fff8e6;border:1px solid #ffe08a;color:#7a5b00;border-radius:12px;padding:10px 14px;font-size:13px;margin:18px 0}
+.card{background:#fff;border:1px solid #e5e8f0;border-radius:16px;padding:18px;margin-bottom:16px;box-shadow:0 2px 10px rgba(20,30,60,.04)}
+.card h2{margin:0 0 12px;font-size:18px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px}
+.feat{background:#f8f9fe;border:1px solid #e6e9f5;border-radius:12px;padding:14px}
+.feat .t{font-weight:700;margin-bottom:4px}
+.feat .d{color:#5b6478;font-size:13.5px}
+.nav{display:flex;flex-wrap:wrap;gap:6px;margin:14px 0}
+.nav button{background:#fff;border:1px solid #d9deeb;border-radius:999px;padding:7px 16px;cursor:pointer;font:inherit;font-size:13.5px;color:#39405a}
+.nav button.active{background:#3b5bdb;border-color:#3b5bdb;color:#fff}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th,td{padding:9px 10px;border-bottom:1px solid #eceff7;text-align:right}
+th{background:#f3f5fb;color:#4a5578;font-size:12.5px;white-space:nowrap}
+tr:hover td{background:#fafbff}
+input,select,textarea{font:inherit;padding:9px 12px;border:1px solid #d9deeb;border-radius:10px;width:100%;background:#fff;color:#1d2130}
+.btn{background:#3b5bdb;color:#fff;border:0;border-radius:10px;padding:10px 18px;font:inherit;cursor:pointer}
+.btn:hover{filter:brightness(1.07)}
+.btn.ghost{background:#fff;color:#3b5bdb;border:1px solid #c9d2f0}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px}
+.kpi{background:linear-gradient(160deg,#fff,#f4f6fd);border:1px solid #e5e8f0;border-radius:14px;padding:14px}
+.kpi .k{font-size:12.5px;color:#6b7280}
+.kpi .v{font-size:24px;font-weight:800;margin-top:2px}
+.kpi .d{font-size:12px;color:#22a06b}
+.bar{fill:url(#g)}
+.rowflex{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.muted{color:#6b7280;font-size:13px}
+.badge{display:inline-block;padding:2px 9px;border-radius:999px;font-size:11.5px;border:1px solid}
+.b-ok{background:#e7f8ef;color:#1a7f4b;border-color:#b7e6cd}
+.b-wait{background:#fff4e0;color:#8a5a00;border-color:#ffe0a8}
+.b-run{background:#e8f0ff;color:#2b4cb8;border-color:#c5d5ff}
+.b-bad{background:#fdeaea;color:#a02626;border-color:#f6c9c9}
+.log{background:#111827;color:#c8f0d8;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;border-radius:12px;padding:12px;height:150px;overflow:auto;line-height:1.7}
+.progress{height:9px;background:#e9edf7;border-radius:999px;overflow:hidden;margin:10px 0}
+.progress i{display:block;height:100%;width:0;background:linear-gradient(90deg,#3b5bdb,#22b8cf);transition:width .25s}
+.drop{border:2px dashed #c9d2f0;border-radius:14px;padding:26px;text-align:center;background:#fbfcff;cursor:pointer}
+.drop.hover{background:#eef3ff;border-color:#3b5bdb}
+pre.json{background:#0f172a;color:#d7e3ff;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px;border-radius:12px;padding:14px;overflow:auto;max-height:260px;text-align:left;direction:ltr}
+.phone{max-width:420px;margin:0 auto;background:#fff;border:14px solid #1d2130;border-radius:34px;overflow:hidden}
+.chat{height:360px;overflow:auto;padding:12px;background:#eef1f8}
+.msg{margin:6px 0;padding:8px 12px;border-radius:14px;max-width:78%;font-size:13.5px;line-height:1.8}
+.me{background:#3b5bdb;color:#fff;margin-left:auto;border-bottom-left-radius:4px}
+.you{background:#fff;border:1px solid #e2e7f2;border-bottom-right-radius:4px}
+.steps{counter-reset:s}
+.step{position:relative;padding:0 34px 16px 0;border-right:2px solid #e3e8f5}
+.step:last-child{border-right-color:transparent}
+.step:before{counter-increment:s;content:counter(s);position:absolute;right:-13px;top:0;width:24px;height:24px;border-radius:50%;background:#3b5bdb;color:#fff;font-size:12px;display:flex;align-items:center;justify-content:center}
+footer.foot{border-top:1px solid #e5e8f0;margin-top:26px;padding-top:16px;color:#6b7280;font-size:12.5px}
+@media(max-width:640px){header.hero h1{font-size:20px}.wrap{padding:0 12px 40px}}
+</style></head>
+<body>
+<header class="hero"><div class="wrap">
+<div class="eyebrow">نسخه‌ی نمونه (دمو) — آماده‌شده برای آگهی فریلنسری</div>
+<h1>طراحی و پیاده سازی وب سایت کلینیک تخصصی درمانی</h1>
+<div style="opacity:.9">ما یک کلینیک تخصصی در حوزه علوم اعصاب (Neuroscience) هستیم که خدماتی نظیر نقشه مغزی (QEEG)، نوروفیدبک، تحریک مغزی (tDCS) و مشاوره های تخصصی مغز و اعصاب ارائه می دهیم.
+هدف اصلی سایت: تبدیل بازدیدکننده به بیمار؛ مسیر رسیدن…</div>
+<div class="chips"><span class="chip">منبع: کارلنسر (برنامه‌نویسی)</span><span class="chip">دسته: وب‌سایت / وب‌اپلیکیشن</span><span class="chip">امتیاز اجراپذیری: 95/۱۰۰</span><span class="chip">نوع دمو: webapp</span></div>
+</div></header>
+<div class="wrap">
+<div class="meta">
+<div class="box"><div class="k">دسته‌بندی</div><div class="v">وب‌سایت / وب‌اپلیکیشن</div></div>
+<div class="box"><div class="k">زمان اجرا (برآورد)</div><div class="v">17.6 ساعت</div></div>
+<div class="box"><div class="k">زمان تحویل</div><div class="v">3 روز کاری</div></div>
+<div class="box"><div class="k">قیمت پیشنهادی</div><div class="v">—</div></div>
+<div class="box"><div class="k">بودجه کارفرما</div><div class="v">25,000,000 تومان</div></div>
+</div>
+<div class="notice">⚠️ این صفحه یک <b>دموی تعاملی</b> است که با داده‌های نمونه ساخته شده تا خروجیِ نهایی پروژه
+را پیش از عقد قرارداد نشان دهد. متن آگهی: «طراحی و پیاده سازی وب سایت کلینیک تخصصی درمانی»</div>
+<div class="card"><h2>نیازمندی‌های استخراج‌شده از آگهی</h2>
+<div class="grid"><div class="feat"><div class="t">سیستم رزرو نوبت آنلاین: تقویم هوشمند که مراجع بتونه نوع خدمت رو انتخاب</div><div class="d">در نسخه‌ی نهایی پیاده‌سازی می‌شود</div></div><div class="feat"><div class="t">معرفی تخصصی خدمات: هر خدمت صفحه اختصاصی داشته باشه</div><div class="d">در نسخه‌ی نهایی پیاده‌سازی می‌شود</div></div><div class="feat"><div class="t">وبلاگ علمی / مقالات برای سئو و اعتبار سایت</div><div class="d">در نسخه‌ی نهایی پیاده‌سازی می‌شود</div></div><div class="feat"><div class="t">E-E-A-T: اعتبار پزشکان و متخصصان کلینیک به وضوح دیده بشه</div><div class="d">در نسخه‌ی نهایی پیاده‌سازی می‌شود</div></div><div class="feat"><div class="t">رابط کاربری آرام و بیمارمحور: حس اعتماد، آرامش و علم</div><div class="d">در نسخه‌ی نهایی پیاده‌سازی می‌شود</div></div><div class="feat"><div class="t">کاملاً واکنش گرا؛ اکثر بیماران با موبایل جستجو می کنند</div><div class="d">در نسخه‌ی نهایی پیاده‌سازی می‌شود</div></div></div></div>
+
+<div class="card"><h2>پیش‌نمایش صفحات و امکانات</h2>
+<div class="nav" id="chips"></div>
+<div class="grid" id="grid"></div></div>
+
+<div class="card"><h2>فرم درخواست / استعلام (نمونه‌ی واقعی)</h2>
+<form id="quote" class="grid" style="gap:10px">
+<div><label>نام و نام خانوادگی</label><input id="q-name" placeholder="مثال: علی محمدی"></div>
+<div><label>شماره موبایل</label><input id="q-phone" placeholder="09xxxxxxxxx"></div>
+<div><label>نوع درخواست</label><select><option>استعلام قیمت</option><option>درخواست مشاوره</option><option>رزرو نوبت</option></select></div>
+<div style="display:flex;align-items:end;gap:10px"><button class="btn" type="submit">ارسال درخواست</button>
+<span class="muted" id="q-msg"></span></div></form></div>
+<script>
+const ITEMS = [{"cat": "نیازمندی‌های شما", "name": "سیستم رزرو نوبت آنلاین: تقویم هوشمند که مراجع بتونه نوع خدمت", "desc": "پیاده‌سازی‌شده در نسخه‌ی نهایی — در این دمو با داده‌ی نمونه نمایش داده می‌شود", "tag": "از متن آگهی", "meta": "مورد 1"}, {"cat": "نیازمندی‌های شما", "name": "معرفی تخصصی خدمات: هر خدمت صفحه اختصاصی داشته باشه", "desc": "پیاده‌سازی‌شده در نسخه‌ی نهایی — در این دمو با داده‌ی نمونه نمایش داده می‌شود", "tag": "از متن آگهی", "meta": "مورد 2"}, {"cat": "نیازمندی‌های شما", "name": "وبلاگ علمی / مقالات برای سئو و اعتبار سایت", "desc": "پیاده‌سازی‌شده در نسخه‌ی نهایی — در این دمو با داده‌ی نمونه نمایش داده می‌شود", "tag": "از متن آگهی", "meta": "مورد 3"}, {"cat": "نیازمندی‌های شما", "name": "E-E-A-T: اعتبار پزشکان و متخصصان کلینیک به وضوح دیده بشه", "desc": "پیاده‌سازی‌شده در نسخه‌ی نهایی — در این دمو با داده‌ی نمونه نمایش داده می‌شود", "tag": "از متن آگهی", "meta": "مورد 4"}, {"cat": "نیازمندی‌های شما", "name": "رابط کاربری آرام و بیمارمحور: حس اعتماد، آرامش و علم", "desc": "پیاده‌سازی‌شده در نسخه‌ی نهایی — در این دمو با داده‌ی نمونه نمایش داده می‌شود", "tag": "از متن آگهی", "meta": "مورد 5"}, {"cat": "نیازمندی‌های شما", "name": "کاملاً واکنش گرا؛ اکثر بیماران با موبایل جستجو می کنند", "desc": "پیاده‌سازی‌شده در نسخه‌ی نهایی — در این دمو با داده‌ی نمونه نمایش داده می‌شود", "tag": "از متن آگهی", "meta": "مورد 6"}, {"cat": "خدمات", "name": "معرفی خدمات", "desc": "صفحه‌ی اختصاصی هر خدمت با توضیح، مزایا و مسیر اقدام", "tag": "صفحه", "meta": "لودینگ زیر ۱ ثانیه"}, {"cat": "خدمات", "name": "دسته‌بندی محصولات", "desc": "نمایش دسته‌بندی‌شده با فیلتر و جستجوی سریع", "tag": "دینامیک", "meta": "جستجوی زنده"}, {"cat": "محتوا", "name": "مقالات و اخبار", "desc": "بخش وبلاگ با امکان انتشار مطلب از پنل مدیریت", "tag": "CMS", "meta": "ویرایشگر ساده"}];
+const grid = document.getElementById('grid');
+const chips = document.getElementById('chips');
+const cats = ['همه', ...new Set(ITEMS.map(i=>i.cat))];
+chips.innerHTML = cats.map((c,i)=>`<button class="${i===0?'active':''}" data-c="${c}">${c}</button>`).join('');
+function render(cat){
+  const rows = ITEMS.filter(i=> cat==='همه' || i.cat===cat);
+  grid.innerHTML = rows.map(i=>`<div class="feat">
+    <div class="t">${i.name}</div><div class="d">${i.desc}</div>
+    <div class="rowflex" style="margin-top:10px"><span class="badge b-run">${i.tag}</span>
+    <span class="muted">${i.meta}</span></div></div>`).join('');
+}
+render('همه');
+chips.onclick = e=>{ if(e.target.tagName!=='BUTTON') return;
+  chips.querySelectorAll('button').forEach(b=>b.classList.remove('active'));
+  e.target.classList.add('active'); render(e.target.dataset.c); };
+document.getElementById('quote').onsubmit = e=>{
+  e.preventDefault();
+  const name = document.getElementById('q-name').value.trim();
+  const phone = document.getElementById('q-phone').value.trim();
+  const msg = document.getElementById('q-msg');
+  if(name.length<3){ msg.textContent='لطفاً نام کامل را وارد کنید.'; msg.style.color='#a02626'; return; }
+  if(!/^(\+98|0)?9\d{9}$/.test(phone.replace(/[\s-]/g,''))){ msg.textContent='شماره موبایل معتبر نیست.'; msg.style.color='#a02626'; return; }
+  msg.style.color='#1a7f4b';
+  msg.textContent='درخواست شما ثبت شد (نسخه نمونه) — همکاران ما با شما تماس می‌گیرند.';
+  e.target.reset();
+};
+document.querySelectorAll('a[href^="#"]').forEach(a=>a.onclick=e=>{
+  e.preventDefault(); const el=document.querySelector(a.getAttribute('href'));
+  el && el.scrollIntoView({behavior:'smooth'});
+});
+</script>
+<div class="card"><h2>چه چیزی تحویل می‌دهید</h2><div class="grid"><div class="feat"><div class="t">سورس کامل + فایل‌های آماده‌ی انتشار</div></div><div class="feat"><div class="t">نسخه دموی آنلاین برای بازدید کارفرما</div></div><div class="feat"><div class="t">راهنمای مدیریت محتوا</div></div><div class="feat"><div class="t">چک‌لیست سئو پایه</div></div></div></div>
+<div class="card"><h2>برنامه‌ی تحویل و پرداخت</h2><div class="steps"></div></div>
+<footer class="foot">
+ساخته‌شده با «فریلنس‌یار آرنا» در تاریخ 2026/09/28 05:18 — داده‌های این صفحه نمونه و غیرواقعی هستند.<br>
+آگهی اصلی: <a href="https://www.karlancer.com/projects/%D8%B7%D8%B1%D8%A7%D8%AD%DB%8C-%D9%88-%D9%BE%DB%8C%D8%A7%D8%AF%D9%87%E2%80%8C%D8%B3%D8%A7%D8%B2%DB%8C-%D9%88%D8%A8%D8%B3%D8%A7%DB%8C%D8%AA-%DA%A9%D9%84%DB%8C%D9%86%DB%8C%DA%A9-%D8%AA%D8%AE%D8%B5%D8%B5%DB%8C-%D8%AF%D8%B1%D9%85%D8%A7%D9%86%DB%8C-1e82rr2n583w" target="_blank" rel="noopener">کارلنسر (برنامه‌نویسی)</a>
+</footer></div></body></html>
