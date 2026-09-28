@@ -38,7 +38,7 @@ android.permissions = INTERNET,ACCESS_NETWORK_STATE,REQUEST_INSTALL_PACKAGES,\
     READ_EXTERNAL_STORAGE,WRITE_EXTERNAL_STORAGE
 
 # (int) نسخه‌ی API هدف و حداقل پشتیبانی
-android.api = 34
+android.api = 33
 android.minapi = 24
 
 # (str) معماری‌ها: ابتدا فقط ۶۴بیت (پوششِ اکثر گوشی‌های امروزی)
