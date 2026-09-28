@@ -66,40 +66,57 @@ jobs:
           ls -la dist
 
       - name: بسته‌ی پرتابل (ZIP)
-        shell: pwsh
+        continue-on-error: true
+        shell: bash
         run: |
-          New-Item -ItemType Directory -Force -Path portable | Out-Null
-          Copy-Item dist\frilanser.exe, dist\frilanser-gui.exe, config.toml, README.md, scripts\start-gui.bat portable\
-          New-Item -ItemType Directory -Force -Path portable\data | Out-Null
-          Copy-Item -Recurse data\raw portable\data\raw
-          Compress-Archive -Path portable\* -DestinationPath dist\frilanser-portable.zip
-          Get-Item dist\frilanser-portable.zip | Select-Object Name, Length
+          python - <<'EOF' > dist/zip.log 2>&1
+          import shutil, sys
+          from pathlib import Path
+          try:
+              port = Path("portable")
+              if port.exists():
+                  shutil.rmtree(port)
+              (port / "data").mkdir(parents=True)
+              for f in ["dist/frilanser.exe", "dist/frilanser-gui.exe", "config.toml",
+                        "README.md", "scripts/start-gui.bat"]:
+                  shutil.copy2(f, port / Path(f).name)
+              shutil.copytree("data/raw", port / "data" / "raw")
+              shutil.make_archive("dist/frilanser-portable", "zip", root_dir="portable")
+              print("ساخته شد:", Path("dist/frilanser-portable.zip").stat().st_size, "بایت")
+          except Exception as exc:
+              print("خطا:", exc)
+              sys.exit(1)
+          EOF
+          echo "zip_exit=$?" >> dist/zip.log
+          cat dist/zip.log
 
       - name: ساخت نصب‌کننده (Inno Setup)
         continue-on-error: true
-        shell: pwsh
+        shell: bash
         run: |
-          $log = "dist/installer.log"
-          "=== جستجوی Inno Setup ===" | Out-File -FilePath $log -Encoding utf8
-          $iscc = $null
-          $cmd = Get-Command iscc -ErrorAction SilentlyContinue
-          if ($cmd) { $iscc = $cmd.Source }
-          $candidates = @("C:\Program Files (x86)\Inno Setup 6\ISCC.exe",
-                          "C:\Program Files\Inno Setup 6\ISCC.exe")
-          foreach ($c in $candidates) { if (-not $iscc -and (Test-Path $c)) { $iscc = $c } }
-          if (-not $iscc) {
-            $found = Get-ChildItem "C:\Program Files*\Inno Setup*\ISCC.exe" -ErrorAction SilentlyContinue | Select-Object -First 1
-            if ($found) { $iscc = $found.FullName }
-          }
-          "iscc path: $iscc" | Out-File -FilePath $log -Append -Encoding utf8
-          if ($iscc) {
-            & $iscc "/Odist" scripts\installer.iss 2>&1 | Tee-Object -FilePath $log -Append
-            "exit=$LASTEXITCODE" | Out-File -FilePath $log -Append -Encoding utf8
-          } else {
-            "Inno Setup پیدا نشد" | Out-File -FilePath $log -Append -Encoding utf8
-          }
-          Get-ChildItem dist | Out-File -FilePath $log -Append -Encoding utf8
-          Get-Content $log
+          python - <<'EOF' > dist/installer.log 2>&1
+          import glob, subprocess
+          from pathlib import Path
+          cands = [
+              "C:/Program Files (x86)/Inno Setup 6/ISCC.exe",
+              "C:/Program Files/Inno Setup 6/ISCC.exe",
+          ]
+          cands += sorted(glob.glob("C:/Program Files*/Inno Setup*/ISCC.exe"))
+          iscc = next((c for c in cands if Path(c).exists()), None)
+          print("iscc:", iscc or "پیدا نشد")
+          if iscc:
+              r = subprocess.run([iscc, "/Odist", "scripts\\installer.iss"],
+                                 capture_output=True, text=True)
+              print("exit:", r.returncode)
+              print("--- stdout ---")
+              print(r.stdout)
+              print("--- stderr ---")
+              print(r.stderr)
+          print("--- محتوای dist ---")
+          for f in sorted(Path("dist").iterdir()):
+              print(f"{f.name}: {f.stat().st_size} بایت")
+          EOF
+          cat dist/installer.log
 
       - name: تست نسخه‌ی اجرایی (smoke test)
         continue-on-error: true
@@ -172,7 +189,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add -f dist/frilanser.exe
-          for f in frilanser-gui.exe frilanser-portable.zip Frilanser-Setup.exe installer.log; do
+          for f in frilanser-gui.exe frilanser-portable.zip Frilanser-Setup.exe installer.log zip.log; do
             if [ -f "dist/$f" ]; then git add -f "dist/$f"; fi
           done
           for f in ci-report.md; do
