@@ -42,6 +42,7 @@ jobs:
             --hidden-import=flask --hidden-import=jinja2 --hidden-import=werkzeug \
             --hidden-import=bs4 --hidden-import=requests \
             frilanser/__main__.py
+          ls -la dist
 
       - name: تست نسخه‌ی اجرایی (smoke test)
         continue-on-error: true
@@ -63,26 +64,47 @@ jobs:
           name: frilanser-windows-exe
           path: |
             dist/frilanser.exe
-            help.log
-            run.log
-            tree.log
-
-      - name: انتشار در Release (فقط برای تگ)
-        if: startsWith(github.ref, 'refs/tags/v')
-        uses: softprops/action-gh-release@v2
-        with:
-          files: dist/frilanser.exe
+            dist/help.log
+            dist/run.log
+            dist/tree.log
 
       - name: کامیت فایل اجرایی در شاخه‌ی جاری
-        if: github.event_name == 'push'
+        if: always()
         shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add -f dist/frilanser.exe dist/help.log dist/run.log dist/tree.log
-          if git diff --cached --quiet; then
-            echo "تغییری برای کامیت نیست"
-          else
-            git commit -m "ساخت خودکار: dist/frilanser.exe (ویندوز)"
-            git push origin "HEAD:${GITHUB_REF_NAME}"
-          fi
+          {
+            echo "== dist =="
+            ls -la dist 2>&1
+            echo "== add =="
+            git add -f dist/frilanser.exe 2>&1
+            for f in help.log run.log tree.log; do
+              [ -f "dist/$f" ] && git add -f "dist/$f" 2>&1
+            done
+            echo "== status =="
+            git status --short 2>&1 | head -20
+            echo "== commit =="
+            git commit -m "ساخت خودکار: dist/frilanser.exe (ویندوز)" 2>&1
+            echo "== push =="
+            git push origin "HEAD:${GITHUB_REF_NAME}" 2>&1
+            echo "push_exit=$?"
+          } > dist/ci-debug.log 2>&1
+          cat dist/ci-debug.log
+
+      - name: لاگ‌ها را از مسیر API هم می‌فرستیم (برای بررسی از راه دور)
+        if: always()
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          for f in ci-debug run help tree; do
+            src="dist/$f.log"
+            [ -f "$src" ] || continue
+            gh api -X PUT "repos/${GITHUB_REPOSITORY}/contents/dist/ci-$f.log" \
+              -f message="ci: لاگ $f" -f branch="${GITHUB_REF_NAME}" \
+              -f content="$(cat "$src")" > /dev/null 2>&1 \
+              && echo "ارسال شد: ci-$f.log" || echo "ارسال نشد: ci-$f.log"
+          done
