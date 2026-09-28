@@ -41,7 +41,7 @@ jobs:
             --add-data="README.md;." \
             --hidden-import=flask --hidden-import=jinja2 --hidden-import=werkzeug \
             --hidden-import=bs4 --hidden-import=requests \
-            frilanser/__main__.py
+            frilanser_app.py
           ls -la dist
 
       - name: تست نسخه‌ی اجرایی (smoke test)

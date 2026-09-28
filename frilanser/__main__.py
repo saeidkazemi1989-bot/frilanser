@@ -1,8 +1,9 @@
+"""اجرا با دستور python -m frilanser"""
+
 import sys
 
-from .cli import main
+from frilanser.cli import main
 
-# خطاهای پیش‌بینی‌نشده را با پیامی خوانا نشان می‌دهیم (در نسخه‌ی EXE پنجره سریع بسته می‌شود)
 if __name__ == "__main__":
     try:
         sys.exit(main())
