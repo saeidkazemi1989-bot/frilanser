@@ -127,3 +127,12 @@ kinds = [
     "provide_access",   # گرفتن دسترسی/اطلاعات از کارفرما
     "deliver",          # تحویل پروژه در سایت
 ]
+
+
+# ------------------------------------------------------------------ دموها
+[demo]
+# سبک طراحی پیش‌نمایش‌ها: auto (انتخاب خودکار از روی آگهی) یا یکی از:
+# soft_saas, glassmorphism, neumorphism, minimal, brutalist, dark_elegant,
+# luxury_gold, neon_tech, corporate, warm_editorial, playful,
+# medical_clean, ocean_trust, rose_shop
+style = "auto"

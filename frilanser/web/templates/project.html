@@ -99,6 +99,7 @@
       {% if p.demo %}
         <div class="muted" style="margin-bottom:8px">
           نوع پیش‌نمایش: {{ p.demo.get('archetype_label', p.demo.kind) }}
+          {% if p.demo.style_label %} · سبک طراحی: {{ p.demo.style_label }}{% endif %}
           {% if p.demo.bilingual %} · دو زبانه (فارسی/انگلیسی){% endif %}
         </div>
         <iframe class="demo" src="{{ url_for('serve_demo', filename=p.demo.rel) }}"></iframe>

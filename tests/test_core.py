@@ -488,3 +488,86 @@ def test_server_error_shows_persian_page_not_raw_500():
     body = resp.get_data(as_text=True)
     assert "خطا در نمایش این صفحه" in body
     assert "یک خطای عمدی برای تست" in body
+
+
+# ------------------------------------------------------- سیستم طراحی (Design System)
+def _demo_project(title: str, desc: str = "") -> Project:
+    return Project.from_scrape("karlancer", "ds-test", title, "https://www.karlancer.com/x",
+                               description=desc)
+
+
+@pytest.mark.parametrize("title,expected", [
+    ("طراحی سایت کلینیک دندانپزشکی", "medical_clean"),
+    ("طراحی وبسایت شرکت تجهیزات پزشکی", "corporate"),
+    ("طراحی دو سایت فروشگاهی طلا", "luxury_gold"),
+    ("فروشگاه اینترنتی پوشاک", "rose_shop"),
+    ("طراحی سایت رستوران سنتی", "warm_editorial"),
+    ("ساخت داشبورد هوش مصنوعی برای تحلیل داده", "neon_tech"),
+    ("وبسایت شرکتی برای کارخانه تولیدی", "corporate"),
+])
+def test_style_selected_by_keywords(title, expected):
+    from frilanser import design_system as ds
+
+    style = ds.pick_style(_demo_project(title), "corporate")
+    assert style.key == expected, f"{title} → {style.key}"
+
+
+def test_style_override_from_config(tmp_path):
+    from frilanser import design_system as ds
+
+    assert ds.pick_style(_demo_project("طراحی سایت کلینیک"), "clinic", "brutalist").key == "brutalist"
+    assert ds.pick_style(_demo_project("طراحی سایت کلینیک"), "clinic", "auto").key == "medical_clean"
+
+
+def test_every_style_builds_a_clean_demo(tmp_path):
+    """همه‌ی سبک‌ها باید بدون خطای طراحی (کنتراست/ریسپانسیو/دسترس‌پذیری) خروجی بدهند."""
+    import re
+
+    from frilanser import design_system as ds
+    from frilanser.demo_builder import build_demo
+
+    project = _demo_project("طراحی وبسایت فروشگاه اینترنتی", "فروشگاه آنلاین با سبد خرید")
+    screening = {"category": "web_app", "category_label": "وب‌سایت", "score": 88,
+                 "est_hours": 12, "schedule_days": 3, "deliverables": ["صفحه اصلی", "پنل مدیریت"]}
+    proposal = {"price": 8_000_000, "milestones": []}
+
+    cfg_path = Path("config.toml")
+    original = cfg_path.read_text(encoding="utf-8")
+    try:
+        for key in ds.STYLES:
+            cfg_path.write_text(original.replace('style = "auto"', f'style = "{key}"'),
+                                encoding="utf-8")
+            meta = build_demo(project, screening, proposal, tmp_path / key)
+            assert meta["style"] == key
+            assert meta["design_errors"] == [], f"{key}: {meta['design_errors']}"
+            html = Path(meta["client_path"]).read_text(encoding="utf-8")
+            assert "var(--grad)" in html and "--p:" in html      # توکن‌های طراحی تزریق شده
+            assert re.search(r"@media[^{]*\(", html)             # قانون رسپانسیو
+            assert 'id="wm"' in html and 'id="guard"' in html    # قفلِ استفاده
+    finally:
+        cfg_path.write_text(original, encoding="utf-8")
+
+
+def test_new_components_are_rendered(tmp_path):
+    """کتابخانه‌ی کامپوننت: قیمت، سؤالات متداول، گام‌ها و CTA باید در خروجی باشند."""
+    from frilanser.demo_builder import build_demo
+
+    project = _demo_project("طراحی وبسایت شرکت بازرگانی")
+    screening = {"category": "web_app", "category_label": "وب‌سایت", "score": 85,
+                 "est_hours": 10, "schedule_days": 3, "deliverables": ["۵ صفحه"]}
+    meta = build_demo(project, screening, {"price": 7_000_000, "milestones": []}, tmp_path)
+    html = Path(meta["client_path"]).read_text(encoding="utf-8")
+    for token in ("بسته‌های پیشنهادی", "سؤالات متداول", "مسیر همکاری", "آماده‌ی شروع هستید؟"):
+        assert token in html, f"کامپوننت «{token}» در خروجی نیست"
+
+
+def test_contrast_helpers():
+    from frilanser import design_system as ds
+
+    assert ds.contrast_ratio("#000000", "#ffffff") == 21.0
+    assert ds.contrast_ratio("#ffffff", "#ffffff") == 1.0
+    assert ds.contrast_ratio("#ffffff", "#767676") > 4.4      # مرز رایج AA
+    # روی هر رنگ اصلی، متن انتخاب‌شده باید خواناتر از سفیدِ همیشگی باشد
+    for pal in ds.PALETTES.values():
+        chosen = ds.contrast_ratio(ds.on_primary(pal.primary), pal.primary)
+        assert chosen >= 3.0, f"{pal.key}: {chosen}"

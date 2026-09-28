@@ -193,6 +193,18 @@ def cmd_decide(args):
     return 0
 
 
+def cmd_styles(args):
+    """فهرست سبک‌های طراحیِ قابل انتخاب برای پیش‌نمایش‌ها."""
+    from . import design_system as ds
+
+    print("سبک‌های طراحی موجود (در config.toml بخش [demo] مقدار style را تنظیم کنید):\n")
+    for key, label, desc, pal in ds.list_styles():
+        print(f"  {key:16} {label:22} — {desc}")
+        print(f"  {'':16} پالت: {pal}")
+    print("\nمثال: style = \"glassmorphism\"   (پیش‌فرض: auto یعنی انتخاب خودکار از روی آگهی)")
+    return 0
+
+
 def cmd_doctor(args):
     """گزارش عیب‌یابی: چرا داده نمی‌آید (و چه باید کرد)."""
     cfg, store = get_context(args)
@@ -315,6 +327,9 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("decision", choices=["approved", "rejected", "delivered"])
     p.add_argument("--note", default=None)
     p.set_defaults(func=cmd_decide)
+
+    p = sub.add_parser("styles", help="فهرست سبک‌های طراحی پیش‌نمایش‌ها")
+    p.set_defaults(func=cmd_styles)
 
     p = sub.add_parser("doctor", help="عیب‌یابی: چرا داده نمی‌آید و چه باید کرد")
     p.add_argument("--offline", action="store_true", help="بررسی نکردنِ اینترنت")

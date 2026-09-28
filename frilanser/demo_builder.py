@@ -23,6 +23,7 @@ from pathlib import Path
 
 from .models import Project
 from .normalize import clean_text, slugify, to_persian_digits
+from . import design_system as ds
 
 # ---------------------------------------------------------------------------
 # استایل‌ها
@@ -617,8 +618,109 @@ def _products_html(products: list[tuple], icon: str = "🛍️") -> str:
     return f'<div class="grid g3" style="grid-template-columns:repeat(auto-fit,minmax(210px,1fr))">{"".join(out)}</div>'
 
 
-def _mock_page(c: dict, archetype: str, palette: tuple, bilingual: bool) -> str:
-    primary, accent, gradient = palette
+# ---------------------------------------------------------------------------
+# کتابخانه‌ی کامپوننت (Hero، قیمت، سؤالات متداول، گام‌ها، CTA، نشان اعتماد)
+# ---------------------------------------------------------------------------
+def _hero_html(c: dict, style, palette) -> str:
+    """سه الگوی Hero بر اساس سبک انتخاب‌شده."""
+    art = _svg_hero(palette.primary, "طراحی پیشنهادی صفحه‌ی اصلی")
+    facts = "".join(
+        f"<span class=\"chip\" style=\"background:rgba(255,255,255,.18);border-color:rgba(255,255,255,.3);"
+        f"color:#fff\">{t}</span>" for t in ["✓ واکنش‌گرا", "✓ سریع", "✓ سئو پایه"])
+    tagline = f"<div class=\"chip\" style=\"background:rgba(255,255,255,.18);border-color:rgba(255,255,255,.3);color:#fff\">{c['tagline']}</div>"
+    ctas = (f"<div class=\"cta\"><span class=\"btn\">{c['cta1']}</span>"
+            f"<span class=\"btn ghost\">{c['cta2']}</span></div>")
+
+    if style.hero == "centered":
+        return f"""
+<div class="hero" style="background:{palette.gradient}"><div class="in" style="grid-template-columns:1fr;text-align:center">
+  <div>
+    {tagline}
+    <h1 style="margin-top:14px;font-size:34px">{c['hero_t']}</h1>
+    <p style="max-width:720px;margin:0 auto 20px">{c['hero_d']}</p>
+    <div class="cta" style="justify-content:center"><span class="btn">{c['cta1']}</span><span class="btn ghost">{c['cta2']}</span></div>
+    <div style="margin-top:14px">{facts}</div>
+  </div>
+</div></div>"""
+
+    if style.hero == "image-left":
+        return f"""
+<div class="hero" style="background:{palette.gradient}"><div class="in" style="grid-template-columns:.9fr 1.1fr">
+  <div>{art}</div>
+  <div>
+    {tagline}
+    <h1 style="margin-top:14px">{c['hero_t']}</h1>
+    <p>{c['hero_d']}</p>
+    {ctas}
+    <div style="margin-top:14px">{facts}</div>
+  </div>
+</div></div>"""
+
+    return f"""
+<div class="hero" style="background:{palette.gradient}"><div class="in">
+  <div>
+    {tagline}
+    <h1 style="margin-top:14px">{c['hero_t']}</h1>
+    <p>{c['hero_d']}</p>
+    {ctas}
+    <div style="margin-top:14px">{facts}</div>
+  </div>
+  <div>{art}</div>
+</div></div>"""
+
+
+def _process_html() -> str:
+    steps = ["نیازسنجی و جمع‌آوری نیازها", "تایید طرح گرافیکی", "اجرا و بارگذاری محتوا",
+             "آموزش، تست و تحویل"]
+    out = "".join(
+        f"<div class=\"card2\" style=\"text-align:center\"><div class=\"ic\" style=\"margin:0 auto 8px\">{i}</div>"
+        f"<div class=\"t\">{t}</div></div>" for i, t in enumerate(steps, 1))
+    return ("<div class=\"sect alt\"><div class=\"wrap\"><h2>مسیر همکاری</h2>"
+            "<div class=\"sub\">از امروز تا تحویل</div>"
+            f"<div class=\"grid g4\">{out}</div></div></div>")
+
+
+def _pricing_html(brand: str) -> str:
+    plans = [("پایه", "برای شروع", "صفحه‌ی اصلی + فرم تماس"),
+             ("حرفه‌ای", "پرفروش‌ترین", "چند صفحه + پنل مدیریت"),
+             ("سازمانی", "برای رشد", "صفحات بیشتر + سئو")]
+    out = []
+    for name, tag, desc in plans:
+        out.append(
+            "<div class=\"card2\" style=\"text-align:center\">"
+            f"<div class=\"muted\">{tag}</div><h3 style=\"margin:6px 0\">{name}</h3>"
+            "<div style=\"font-size:21px;font-weight:800;color:var(--p)\">توافقی</div>"
+            f"<div class=\"d muted\" style=\"margin:8px 0 12px\">{desc}</div>"
+            "<span class=\"btn ghost\">انتخاب بسته</span></div>")
+    return ("<div class=\"sect\"><div class=\"wrap\">"
+            f"<h2>بسته‌های پیشنهادی {brand}</h2>"
+            "<div class=\"sub\">قیمت نهایی همان مبلغی است که در پیشنهاد ارسالی می‌بینید</div>"
+            f"<div class=\"grid g3\">{''.join(out)}</div></div></div>")
+
+
+def _faq_html() -> str:
+    rows = [("چه مدت طول می‌کشد؟", "زمان تحویل دقیق در همین صفحه و در پیشنهاد ارسالی نوشته شده است."),
+            ("امکان تغییر بعد از تحویل دارم؟", "بله؛ یک دور بازنگری رایگان پس از تحویل در نظر گرفته می‌شود."),
+            ("روی موبایل هم درست کار می‌کند؟", "بله؛ طراحی کاملاً واکنش‌گرا است و روی موبایل تست می‌شود."),
+            ("پشتیبانی بعد از تحویل چطور است؟", "رفع اشکال و آموزش کار با پنل پس از تحویل ارائه می‌شود.")]
+    out = "".join(f"<div class=\"card2\" style=\"margin-bottom:10px\"><div class=\"t\">❓ {q}</div>"
+                  f"<div class=\"d\">{a}</div></div>" for q, a in rows)
+    return ("<div class=\"sect alt\"><div class=\"wrap\" style=\"max-width:820px\">"
+            f"<h2>سؤالات متداول</h2>{out}</div></div>")
+
+
+def _cta_band_html(c: dict) -> str:
+    return ("<div class=\"sect\" style=\"padding:30px 18px\"><div class=\"wrap\">"
+            "<div style=\"background:var(--grad);color:#fff;border-radius:22px;padding:30px 24px;text-align:center\">"
+            "<h2 style=\"color:#fff;margin-bottom:6px\">آماده‌ی شروع هستید؟</h2>"
+            f"<p style=\"opacity:.92;margin:0 0 16px\">{c['tagline']} — همین امروز پیام بدهید تا زمان‌بندی قطعی شود.</p>"
+            f"<span class=\"btn\" style=\"background:#fff;color:var(--ink)\">{c['cta1']}</span>"
+            "</div></div></div>")
+
+
+def _mock_page(c: dict, archetype: str, style, bilingual: bool) -> str:
+    palette = ds.palette_of(style)
+    primary, accent, gradient = palette.primary, palette.accent, palette.gradient
     nav = "".join(f"<span>{n}</span>" for n in c["nav"])
     en = c.get("en") or {}
     hero_en = ""
@@ -666,7 +768,7 @@ def _mock_page(c: dict, archetype: str, palette: tuple, bilingual: bool) -> str:
     return f"""
 <div class="mockwin">
   <div class="dots"><i></i><i></i><i></i><span class="muted" style="margin-right:8px;font-size:11.5px">
-  پیش‌نمایش ظاهری — {ARCHETYPE_LABELS[archetype]}</span></div>
+  پیش‌نمایش ظاهری — {ARCHETYPE_LABELS[archetype]} · سبک: {style.label}</span></div>
 
   <div class="mh"><div class="in">
     <div class="logo"><span class="m">{clean_text(c['brand'])[:1] or 'F'}</span>{c['brand']}</div>
@@ -674,16 +776,7 @@ def _mock_page(c: dict, archetype: str, palette: tuple, bilingual: bool) -> str:
     <div><span class="btn" style="padding:8px 16px;font-size:13px">{c['cta1']}</span></div>
   </div></div>
 
-  <div class="hero" style="background:{gradient}"><div class="in">
-    <div>
-      <div class="chip" style="background:rgba(255,255,255,.18);border-color:rgba(255,255,255,.3);color:#fff">{c['tagline']}</div>
-      <h1 style="margin-top:14px">{c['hero_t']}</h1>
-      <p>{c['hero_d']}</p>
-      <div class="cta"><span class="btn">{c['cta1']}</span><span class="btn ghost">{c['cta2']}</span></div>
-      <div style="margin-top:16px;font-size:12.5px;opacity:.85">✓ طراحی واکنش‌گرا  ✓ بارگذاری سریع  ✓ بهینه برای موبایل</div>
-    </div>
-    <div>{_svg_hero(primary, 'طراحی پیشنهادی صفحه‌ی اصلی')}</div>
-  </div></div>
+  {_hero_html(c, style, palette)}
 
   <div class="sect"><div class="wrap">
     <h2>امکاناتی که در این سایت پیاده‌سازی می‌شود</h2>
@@ -694,6 +787,9 @@ def _mock_page(c: dict, archetype: str, palette: tuple, bilingual: bool) -> str:
   <div class="sect alt"><div class="wrap">{_stats_html(c['stats'])}</div></div>
 
   {products_section}
+
+  {_process_html()}
+  {_pricing_html(c['brand'])}
 
   <div class="sect"><div class="wrap">
     <h2>درباره‌ی مجموعه</h2>
@@ -709,6 +805,8 @@ def _mock_page(c: dict, archetype: str, palette: tuple, bilingual: bool) -> str:
   </div></div>
 
   {hero_en}{services_en}
+
+  {_faq_html()}
 
   <div class="sect"><div class="wrap">
     <h2>تماس با ما</h2><div class="sub">فرم درخواست و اطلاعات تماس</div>
@@ -731,6 +829,8 @@ def _mock_page(c: dict, archetype: str, palette: tuple, bilingual: bool) -> str:
       </div>
     </div>
   </div></div>
+
+  {_cta_band_html(c)}
 
   <div class="mfoot"><div class="wrap"><div class="cols">
     <div><h4>{c['brand']}</h4><p>{c['tagline']}</p></div>
@@ -892,17 +992,19 @@ def _pipeline_rows(project: Project) -> list[dict]:
 # ---------------------------------------------------------------------------
 # خروجی نهایی
 # ---------------------------------------------------------------------------
-def _doc(title: str, subtitle: str, chips: list[str], palette: tuple, body: str,
+def _doc(title: str, subtitle: str, chips: list[str], style, body: str,
          watermark: str, ribbon_note: str = "") -> str:
-    primary, accent, _ = palette
+    palette = ds.palette_of(style)
+    primary, accent = palette.primary, palette.accent
     chip_html = "".join(f'<span class="chip">{c}</span>' for c in chips)
     wm = _watermark_svg(watermark)
+    design_css = ds.css_tokens(style) + "\n" + ds.css_style(style)
     return f"""<!doctype html>
 <html lang="fa" dir="rtl"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex,nofollow">
 <title>{title}</title>
-<style>:root{{--p:{primary};--a:{accent}}}{CSS}{CSS_MOCK}{CSS_LOCK}</style></head>
+<style>{design_css}{CSS}{CSS_MOCK}{CSS_LOCK}</style></head>
 <body>
 {LOCK_HTML.replace("{wm}", wm)}
 <div class="mockbar">👁 <b>پیش‌نمایش گرافیکیِ نمونه</b> — این طرح برای نمایشِ خروجی پروژه ساخته شده و
@@ -965,7 +1067,14 @@ def build_demo(project: Project, screening: dict, proposal: dict | None, out_dir
     kind = choose_kind(screening, project)
     archetype = detect_archetype(project, screening)
     brand = _brand_from_title(project.title, archetype)
-    palette = PALETTES.get(archetype, PALETTES["corporate"])
+    try:
+        from .config import load_config as _load
+
+        style_override = (str(_load().raw.get("demo", {}).get("style", "auto") or "auto").strip().lower())
+    except Exception:  # noqa: BLE001
+        style_override = "auto"
+    style = ds.pick_style(project, archetype, "" if style_override in ("auto", "", "خودکار") else style_override)
+    palette = ds.palette_of(style)
     bilingual = bool(re.search(r"انگلیسی|دو ?زبانه|چند ?زبانه|bilingual", project.title + project.description, re.I))
     c = _content(archetype, brand)
     c["brand"] = brand
@@ -976,7 +1085,7 @@ def build_demo(project: Project, screening: dict, proposal: dict | None, out_dir
 
     # --- بدنه‌ی اصلی (پیش‌نمایش گرافیکی) ---
     if kind == "site":
-        mock = _mock_page(c, archetype, palette, bilingual)
+        mock = _mock_page(c, archetype, style, bilingual)
     elif kind == "pipeline":
         mock = _pipeline_screens(project, screening)
     elif kind == "bot":
@@ -1019,7 +1128,7 @@ def build_demo(project: Project, screening: dict, proposal: dict | None, out_dir
             [f"منبع: {project.source_label}", f"دسته: {screening['category_label']}",
              f"امتیاز: {to_persian_digits(screening['score'])}/۱۰۰", f"نوع پیش‌نمایش: {kind}",
              "نسخه‌ی داخلی"],
-            palette, internal_body, f"نمونه دمو — {brand}",
+            style, internal_body, f"نمونه دمو — {brand}",
         ),
         encoding="utf-8",
     )
@@ -1053,16 +1162,27 @@ def build_demo(project: Project, screening: dict, proposal: dict | None, out_dir
             f"پیش‌نمایش طراحی — {brand}",
             "این یک پیش‌نمایش گرافیکیِ اختصاصی است؛ خروجی نهایی پس از تایید قرارداد تحویل می‌شود.",
             [ARCHETYPE_LABELS[archetype], "پیش‌نمایش اختصاصی", "غیرقابل استفاده (نمونه)"],
-            palette, client_body, f"پیش‌نمایش — نمونه غیرقابل استفاده",
+            style, client_body, f"پیش‌نمایش — نمونه غیرقابل استفاده",
         ),
         encoding="utf-8",
     )
+
+    errors, warnings = ds.check_design(client.read_text(encoding="utf-8"), style, client_version=True)
+    if errors:
+        print(f"  ! هشدار کیفیت طراحی ({len(errors)}): {errors[0]}")
+    for w in warnings[:2]:
+        print(f"  · نکته‌ی طراحی: {w}")
 
     meta = {
         "project_id": project.id,
         "title": project.title,
         "source": project.source,
         "kind": kind,
+        "style": style.key,
+        "style_label": style.label,
+        "palette": palette.key,
+        "design_errors": errors,
+        "design_warnings": warnings,
         "archetype": archetype,
         "archetype_label": ARCHETYPE_LABELS[archetype],
         "brand": brand,
