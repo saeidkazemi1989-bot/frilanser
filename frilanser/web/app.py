@@ -165,6 +165,40 @@ def create_app(cfg: Config, store: Store) -> Flask:
     def healthz():
         return jsonify({"ok": True, "projects": len(store.projects)})
 
+    # ------------------------------------------------ خطاها: هرگز بی‌توضیح نماند
+    @app.errorhandler(Exception)
+    def _handle_error(exc):  # pragma: no cover - فقط در زمان خطا اجرا می‌شود
+        import html as _html
+        import traceback
+        from datetime import datetime as _dt
+
+        tb = traceback.format_exc()
+        code = getattr(exc, "code", 500) or 500
+        if not isinstance(code, int):
+            code = 500
+        try:
+            log_dir = cfg.outbox_dir
+            log_dir.mkdir(parents=True, exist_ok=True)
+            with open(log_dir / "web-error.log", "a", encoding="utf-8") as fh:
+                fh.write(f"\n{'='*60}\n{_dt.now().isoformat(timespec='seconds')} — {request.path}\n{tb}")
+        except OSError:
+            pass
+        app.logger.error("خطا در مسیر %s: %s", request.path, exc, exc_info=True)
+
+        safe = _html.escape(f"{type(exc).__name__}: {exc}")
+        hint = ("قالب صفحه یا داده‌ی آن مشکل دارد. جزئیات کامل در فایل outbox/web-error.log ثبت شد."
+                if code == 500 else "این صفحه در دسترس نیست.")
+        return (
+            f"<html lang='fa' dir='rtl'><meta charset='utf-8'>"
+            f"<div style='max-width:760px;margin:40px auto;font-family:Tahoma,sans-serif;line-height:2'>"
+            f"<h2 style='color:#b91c1c'>خطا در نمایش این صفحه ({code})</h2>"
+            f"<p>{hint}</p>"
+            f"<pre dir='ltr' style='background:#0f172a;color:#d7e3ff;padding:12px;border-radius:12px;"
+            f"overflow:auto;font-size:12.5px'>{safe}</pre>"
+            f"<p><a href='/'>بازگشت به صفحه‌ی اصلی</a></p></div></html>",
+            code,
+        )
+
     return app
 
 

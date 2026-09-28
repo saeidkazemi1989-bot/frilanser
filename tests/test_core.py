@@ -432,3 +432,59 @@ def test_doctor_with_data_and_no_network(tmp_path):
     text = run_doctor(cfg, store, check_network=False)
     assert "تعداد پروژه‌ها : 0" not in text
     assert "اسنپ‌شات" in text
+
+
+# ----------------------------------------------------------- داشبورد و قالب‌ها
+def test_all_templates_compile():
+    """هیچ قالبی نباید خطای سینتکس جینجا داشته باشد (علت خطای ۵۰۰ صفحه‌ی اصلی)."""
+    from frilanser.config import load_config
+    from frilanser.store import Store
+    from frilanser.web.app import create_app
+
+    app = create_app(load_config(), Store(load_config().data_dir))
+    names = app.jinja_env.list_templates()
+    assert names, "هیچ قالبی پیدا نشد"
+    for name in names:
+        src = app.jinja_env.loader.get_source(app.jinja_env, name)[0]
+        app.jinja_env.parse(src, name, name)      # خطا در اینجا یعنی قالب خراب است
+
+
+def test_dashboard_pages_return_200():
+    from frilanser.config import load_config
+    from frilanser.store import Store
+    from frilanser.web.app import create_app
+
+    cfg = load_config()
+    store = Store(cfg.data_dir)
+    if not store.all():
+        from frilanser import pipeline
+        pipeline.collect(cfg, store, offline=True)
+    app = create_app(cfg, store).test_client()
+
+    for path in ("/", "/needs", "/demos", "/activity", "/healthz"):
+        resp = app.get(path)
+        assert resp.status_code == 200, f"{path} → {resp.status_code}"
+
+    first = store.all()[0]
+    resp = app.get(f"/p/{first.id}")
+    assert resp.status_code == 200, f"صفحه‌ی پروژه → {resp.status_code}"
+
+
+def test_server_error_shows_persian_page_not_raw_500():
+    """اگر خطایی پیش آمد، صفحه‌ی فارسی با توضیح نشان بده (نه پیام بی‌توضیح)."""
+    from frilanser.config import load_config
+    from frilanser.store import Store
+    from frilanser.web.app import create_app
+
+    cfg = load_config()
+    app = create_app(cfg, Store(cfg.data_dir))
+
+    @app.get("/boom")
+    def boom():
+        raise RuntimeError("یک خطای عمدی برای تست")
+
+    resp = app.test_client().get("/boom")
+    assert resp.status_code == 500
+    body = resp.get_data(as_text=True)
+    assert "خطا در نمایش این صفحه" in body
+    assert "یک خطای عمدی برای تست" in body
