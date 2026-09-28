@@ -1,558 +1,1076 @@
-"""ساخت دموی تعاملی (یک فایل HTML مستقل) برای هر پروژه‌ی کاندید.
+"""ساخت دموی گرافیکی (پیش‌نمایش ظاهری) برای هر پروژه‌ی کاندید.
 
-هر دمو:
-  - راست‌چین و فارسی است و با داده‌های نمونه کار می‌کند
-  - امکانات اصلیِ خروجی پروژه را به‌صورت واقعی و قابل کلیک نشان می‌دهد
-  - برآورد زمان، قیمت پیشنهادی و برنامه‌ی تحویل را هم نمایش می‌دهد
+هدف: کارفرما بتواند «دقیقاً ببیند چه چیزی ساخته خواهد شد»، اما نتواند از آن
+استفاده کند یا آن را به‌عنوان محصول نهایی بردارد. برای هر پروژه دو فایل ساخته
+می‌شود:
+
+  index.html    نسخه‌ی داخلی (با امتیاز، برآورد ساعت، لینک آگهی و …)
+  client.html   نسخه‌ی ارسال به کارفرما (بدون اطلاعات داخلی، با واترمارک)
+
+هر دو نسخه:
+  - یک طرح گرافیکی کامل و راست‌چین از خروجی پروژه هستند (هدر، قهرمان، خدمات،
+    محصولات، درباره، تماس، پاورقی) یا صفحاتِ واقعی اپ/داشبورد پروژه
+  - واترمارکِ موربِ سراسری دارند
+  - تعاملات‌شان قفل است (کلیک، فرم، انتخاب متن، راست‌کلیک، ذخیره)
 """
 
 from __future__ import annotations
 
 import json
+import re
 from datetime import datetime
 from pathlib import Path
 
 from .models import Project
-from .normalize import clean_text, slugify
+from .normalize import clean_text, slugify, to_persian_digits
 
+# ---------------------------------------------------------------------------
+# استایل‌ها
+# ---------------------------------------------------------------------------
 CSS = """
+:root{--p:#3b5bdb;--a:#22b8cf;--ink:#161a2b;--mut:#6b7280;--line:#e6e9f2;--bg:#f6f7fc}
 *{box-sizing:border-box}
-body{margin:0;background:#f5f6fb;color:#1d2130;font-family:"Vazirmatn","IRANSans","B Nazanin",Tahoma,"Segoe UI",sans-serif;direction:rtl;line-height:1.9;font-size:15px}
-a{color:#3b5bdb;text-decoration:none}
-.wrap{max-width:1080px;margin:0 auto;padding:0 18px 60px}
-header.hero{background:linear-gradient(120deg,#2b3a67 0%,#3b5bdb 55%,#22b8cf 100%);color:#fff;padding:34px 0 30px;box-shadow:0 8px 30px rgba(43,58,103,.25)}
-header.hero .wrap{padding-bottom:0}
-.eyebrow{font-size:12.5px;opacity:.85;letter-spacing:.3px}
-header.hero h1{margin:6px 0 10px;font-size:26px;line-height:1.5}
-.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
-.chip{background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.25);padding:4px 12px;border-radius:999px;font-size:12.5px;backdrop-filter:blur(4px)}
-.meta{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:22px 0 8px}
-.meta .box{background:#fff;border:1px solid #e5e8f0;border-radius:14px;padding:12px 14px}
-.meta .box .k{font-size:12px;color:#6b7280}
-.meta .box .v{font-weight:700;font-size:17px;margin-top:2px}
-.notice{background:#fff8e6;border:1px solid #ffe08a;color:#7a5b00;border-radius:12px;padding:10px 14px;font-size:13px;margin:18px 0}
-.card{background:#fff;border:1px solid #e5e8f0;border-radius:16px;padding:18px;margin-bottom:16px;box-shadow:0 2px 10px rgba(20,30,60,.04)}
-.card h2{margin:0 0 12px;font-size:18px}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px}
-.feat{background:#f8f9fe;border:1px solid #e6e9f5;border-radius:12px;padding:14px}
-.feat .t{font-weight:700;margin-bottom:4px}
-.feat .d{color:#5b6478;font-size:13.5px}
-.nav{display:flex;flex-wrap:wrap;gap:6px;margin:14px 0}
-.nav button{background:#fff;border:1px solid #d9deeb;border-radius:999px;padding:7px 16px;cursor:pointer;font:inherit;font-size:13.5px;color:#39405a}
-.nav button.active{background:#3b5bdb;border-color:#3b5bdb;color:#fff}
-table{width:100%;border-collapse:collapse;font-size:13.5px}
-th,td{padding:9px 10px;border-bottom:1px solid #eceff7;text-align:right}
-th{background:#f3f5fb;color:#4a5578;font-size:12.5px;white-space:nowrap}
-tr:hover td{background:#fafbff}
-input,select,textarea{font:inherit;padding:9px 12px;border:1px solid #d9deeb;border-radius:10px;width:100%;background:#fff;color:#1d2130}
-.btn{background:#3b5bdb;color:#fff;border:0;border-radius:10px;padding:10px 18px;font:inherit;cursor:pointer}
-.btn:hover{filter:brightness(1.07)}
-.btn.ghost{background:#fff;color:#3b5bdb;border:1px solid #c9d2f0}
-.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px}
-.kpi{background:linear-gradient(160deg,#fff,#f4f6fd);border:1px solid #e5e8f0;border-radius:14px;padding:14px}
-.kpi .k{font-size:12.5px;color:#6b7280}
-.kpi .v{font-size:24px;font-weight:800;margin-top:2px}
-.kpi .d{font-size:12px;color:#22a06b}
-.bar{fill:url(#g)}
-.rowflex{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-.muted{color:#6b7280;font-size:13px}
-.badge{display:inline-block;padding:2px 9px;border-radius:999px;font-size:11.5px;border:1px solid}
+body{margin:0;background:var(--bg);color:var(--ink);
+font-family:"Vazirmatn","IRANSans","B Nazanin","Segoe UI",Tahoma,sans-serif;
+direction:rtl;line-height:1.9;font-size:15px;-webkit-user-select:none;user-select:none}
+img,svg{max-width:100%;display:block}
+a{color:var(--p);text-decoration:none;cursor:default}
+.wrap{max-width:1120px;margin:0 auto;padding:0 18px}
+h1,h2,h3{margin:0 0 10px;line-height:1.6}
+.muted{color:var(--mut);font-size:13.5px}
+.card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:20px;margin-bottom:16px;
+box-shadow:0 6px 22px rgba(21,32,70,.05)}
+.grid{display:grid;gap:14px}
+.g3{grid-template-columns:repeat(auto-fit,minmax(230px,1fr))}
+.g4{grid-template-columns:repeat(auto-fit,minmax(170px,1fr))}
+.btn{display:inline-block;background:var(--p);color:#fff;border:0;border-radius:12px;padding:11px 22px;
+font:inherit;cursor:default}
+.btn.ghost{background:#fff;color:var(--p);border:1px solid #ccd6f8}
+.btn.alt{background:var(--a)}
+.chip{display:inline-block;background:#eef2ff;border:1px solid #d9e1fb;color:#2b3f8f;
+border-radius:999px;padding:3px 12px;font-size:12px;margin-left:6px}
+.badge{display:inline-block;padding:2px 10px;border-radius:999px;font-size:11.5px;border:1px solid}
 .b-ok{background:#e7f8ef;color:#1a7f4b;border-color:#b7e6cd}
 .b-wait{background:#fff4e0;color:#8a5a00;border-color:#ffe0a8}
 .b-run{background:#e8f0ff;color:#2b4cb8;border-color:#c5d5ff}
-.b-bad{background:#fdeaea;color:#a02626;border-color:#f6c9c9}
-.log{background:#111827;color:#c8f0d8;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;border-radius:12px;padding:12px;height:150px;overflow:auto;line-height:1.7}
-.progress{height:9px;background:#e9edf7;border-radius:999px;overflow:hidden;margin:10px 0}
-.progress i{display:block;height:100%;width:0;background:linear-gradient(90deg,#3b5bdb,#22b8cf);transition:width .25s}
-.drop{border:2px dashed #c9d2f0;border-radius:14px;padding:26px;text-align:center;background:#fbfcff;cursor:pointer}
-.drop.hover{background:#eef3ff;border-color:#3b5bdb}
-pre.json{background:#0f172a;color:#d7e3ff;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px;border-radius:12px;padding:14px;overflow:auto;max-height:260px;text-align:left;direction:ltr}
-.phone{max-width:420px;margin:0 auto;background:#fff;border:14px solid #1d2130;border-radius:34px;overflow:hidden}
-.chat{height:360px;overflow:auto;padding:12px;background:#eef1f8}
-.msg{margin:6px 0;padding:8px 12px;border-radius:14px;max-width:78%;font-size:13.5px;line-height:1.8}
-.me{background:#3b5bdb;color:#fff;margin-left:auto;border-bottom-left-radius:4px}
-.you{background:#fff;border:1px solid #e2e7f2;border-bottom-right-radius:4px}
-.steps{counter-reset:s}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th,td{padding:9px 10px;border-bottom:1px solid #eceff7;text-align:right}
+th{background:#f3f5fb;color:#4a5578;font-size:12.5px}
+input,select,textarea{font:inherit;padding:10px 12px;border:1px solid #dbe1ee;border-radius:11px;
+width:100%;background:#fbfcff;color:#8a91a6}
+input::placeholder,textarea::placeholder{color:#a9b0c3}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px}
+.kpi{background:linear-gradient(160deg,#fff,#f4f6fd);border:1px solid var(--line);border-radius:14px;padding:14px}
+.kpi .k{font-size:12.5px;color:var(--mut)}
+.kpi .v{font-size:23px;font-weight:800;margin-top:2px}
+.kpi .d{font-size:12px;color:#22a06b}
+.steps{counter-reset:s;margin-top:6px}
 .step{position:relative;padding:0 34px 16px 0;border-right:2px solid #e3e8f5}
 .step:last-child{border-right-color:transparent}
-.step:before{counter-increment:s;content:counter(s);position:absolute;right:-13px;top:0;width:24px;height:24px;border-radius:50%;background:#3b5bdb;color:#fff;font-size:12px;display:flex;align-items:center;justify-content:center}
-footer.foot{border-top:1px solid #e5e8f0;margin-top:26px;padding-top:16px;color:#6b7280;font-size:12.5px}
-@media(max-width:640px){header.hero h1{font-size:20px}.wrap{padding:0 12px 40px}}
+.step:before{counter-increment:s;content:counter(s);position:absolute;right:-13px;top:0;width:24px;height:24px;
+border-radius:50%;background:var(--p);color:#fff;font-size:12px;display:flex;align-items:center;justify-content:center}
+.steps .t{font-weight:700}
+pre.json{background:#0f172a;color:#d7e3ff;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px;
+border-radius:12px;padding:14px;overflow:auto;max-height:260px;text-align:left;direction:ltr}
+.bar{background:linear-gradient(90deg,var(--p),var(--a));border-radius:4px 4px 0 0}
+.log{background:#111827;color:#c8f0d8;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;
+border-radius:12px;padding:12px;height:150px;overflow:auto;line-height:1.7}
+.progress{height:9px;background:#e9edf7;border-radius:999px;overflow:hidden;margin:10px 0}
+.progress i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--p),var(--a));transition:width .25s}
+@media(max-width:640px){.wrap{padding:0 12px}}
 """
 
-# ---------------------------------------------------------------- JS snippets
-JS_PIPELINE = """
-const FILES = __DATA__;
-const zone = document.getElementById('zone');
-const list = document.getElementById('filelist');
-const runBtn = document.getElementById('run');
-const bar = document.querySelector('.progress i');
-const log = document.getElementById('log');
-const results = document.getElementById('results');
-const tbody = document.getElementById('tbody');
-const jsonBox = document.getElementById('jsonbox');
-let selected = FILES.slice(0,3);
+CSS_MOCK = """
+.mockbar{background:#0f1730;color:#c7d2fe;font-size:12px;padding:7px 14px;display:flex;gap:10px;
+align-items:center;justify-content:center;flex-wrap:wrap;border-radius:0 0 14px 14px}
+.mockbar b{color:#fff}
+.mockwin{border:1px solid #dfe4f2;border-radius:16px;overflow:hidden;background:#fff;
+box-shadow:0 18px 50px rgba(19,30,66,.10)}
+.dots{display:flex;gap:6px;padding:9px 12px;background:#f3f5fb;border-bottom:1px solid #e6e9f2}
+.dots i{width:10px;height:10px;border-radius:50%;background:#d7dceb;display:block}
+.mh{position:sticky;top:0;z-index:5;background:rgba(255,255,255,.94);backdrop-filter:blur(8px);
+border-bottom:1px solid #eceff7}
+.mh .in{display:flex;align-items:center;justify-content:space-between;padding:12px 18px;gap:14px}
+.logo{display:flex;align-items:center;gap:9px;font-weight:800;font-size:16px}
+.logo span.m{width:32px;height:32px;border-radius:10px;background:linear-gradient(135deg,var(--p),var(--a));
+display:grid;place-items:center;color:#fff;font-size:15px}
+.nav{display:flex;gap:18px;font-size:14px;color:#4b5570}
+.hero{padding:44px 18px 34px;color:#fff;position:relative;overflow:hidden}
+.hero:after{content:"";position:absolute;inset:auto -10% -60% 40%;height:220px;background:rgba(255,255,255,.10);
+border-radius:50%}
+.hero .in{position:relative;z-index:2;display:grid;grid-template-columns:1.15fr .85fr;gap:26px;align-items:center}
+.hero h1{font-size:31px;line-height:1.45;margin:0 0 12px}
+.hero p{margin:0 0 20px;opacity:.93;font-size:15.5px}
+.hero .cta{display:flex;gap:10px;flex-wrap:wrap}
+.sect{padding:34px 18px}
+.sect.alt{background:#f8f9fe}
+.sect h2{text-align:center;font-size:22px}
+.sect .sub{text-align:center;color:var(--mut);margin-bottom:20px;font-size:14px}
+.card2{background:#fff;border:1px solid var(--line);border-radius:16px;padding:18px}
+.card2 .ic{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;margin-bottom:10px;
+background:linear-gradient(135deg,#eef2ff,#e6fbfd);font-size:20px}
+.card2 .t{font-weight:800;margin-bottom:4px}
+.card2 .d{color:var(--mut);font-size:13.5px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;text-align:center}
+.stat .v{font-size:26px;font-weight:800;color:var(--p)}
+.stat .k{font-size:13px;color:var(--mut)}
+.prod{background:#fff;border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.prod .ph{height:150px;display:grid;place-items:center}
+.prod .bd{padding:12px}
+.prod .n{font-weight:700;font-size:14px}
+.prod .pr{color:#1a7f4b;font-weight:800;margin-top:4px;font-size:14px}
+.prod .old{text-decoration:line-through;color:#a6adbd;font-size:12px;margin-right:6px}
+.quote{border:1px solid var(--line);border-radius:16px;padding:16px;background:#fff}
+.quote .txt{color:#4b5570;font-size:14px}
+.quote .who{display:flex;align-items:center;gap:10px;margin-top:12px}
+.quote .av{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--p),var(--a))}
+.formrow{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.field{margin-bottom:10px}
+.field label{display:block;font-size:13px;margin-bottom:5px;color:#4b5570}
+.mfoot{background:#0f1730;color:#aab6d8;padding:26px 18px;font-size:13.5px}
+.mfoot .cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:18px}
+.mfoot h4{color:#fff;margin:0 0 8px;font-size:14px}
+.mfoot .bt{border-top:1px solid #25304f;margin-top:18px;padding-top:12px;text-align:center;color:#7f8db4;font-size:12px}
+.langbar{display:flex;gap:6px;justify-content:center;margin:14px 0 0}
+.langbar button{background:#fff;border:1px solid #d7deef;border-radius:999px;padding:6px 16px;font:inherit;
+font-size:13px;color:#39405a}
+.langbar button.on{background:var(--p);border-color:var(--p);color:#fff}
+@media(max-width:760px){.hero .in{grid-template-columns:1fr}.formrow{grid-template-columns:1fr}.nav{display:none}}
+"""
 
-function renderList(){
-  list.innerHTML = FILES.map((f,i)=>`<tr>
-    <td><input type="checkbox" data-i="${i}" ${selected.includes(f)?'checked':''}></td>
-    <td>${f.name}</td><td>${f.size}</td><td>${f.pages} صفحه</td>
-    <td><span class="badge ${f.badge}">${f.status}</span></td></tr>`).join('');
-  list.querySelectorAll('input').forEach(cb=>cb.onchange=()=>{
-    const f = FILES[+cb.dataset.i];
-    selected = cb.checked ? [...selected, f] : selected.filter(x=>x!==f);
+CSS_LOCK = """
+#wm{position:fixed;inset:0;z-index:9997;pointer-events:none;opacity:.13;
+background-repeat:repeat;background-size:340px 190px}
+#guard{position:fixed;inset:0;z-index:9998;cursor:not-allowed}
+#note{position:fixed;z-index:9999;left:50%;bottom:26px;transform:translateX(-50%);
+background:#111827;color:#fff;border-radius:14px;padding:12px 20px;font-size:14px;
+box-shadow:0 12px 40px rgba(0,0,0,.35);opacity:0;transition:opacity .2s;pointer-events:none;max-width:90vw}
+#note.on{opacity:1}
+#ribbon{position:fixed;top:0;left:0;right:0;z-index:9996;background:linear-gradient(90deg,#111827,#1f2b4d);
+color:#ffd9a8;font-size:12.5px;text-align:center;padding:5px 10px}
+body{padding-top:26px}
+"""
+
+LOCK_JS = """
+(function(){
+  var t, note=document.getElementById('note');
+  function show(msg){
+    note.textContent=msg; note.classList.add('on');
+    clearTimeout(t); t=setTimeout(function(){note.classList.remove('on')},2600);
+  }
+  document.getElementById('guard').addEventListener('click',function(e){
+    e.preventDefault(); e.stopPropagation();
+    show('این فقط یک پیش‌نمایش گرافیکی است؛ نسخه‌ی قابل استفاده پس از تایید قرارداد تحویل می‌شود.');
+  },true);
+  document.addEventListener('contextmenu',function(e){e.preventDefault();show('کپی/ذخیره در نسخه‌ی نمایشی غیرفعال است.')});
+  document.addEventListener('keydown',function(e){
+    var k=(e.key||'').toLowerCase();
+    if((e.ctrlKey||e.metaKey) && ['s','u','p','c','x','a'].indexOf(k)>=0){e.preventDefault();show('در نسخه‌ی نمایشی غیرفعال است.')}
   });
-}
-renderList();
-zone.onclick = ()=>{ const f = FILES[(Math.random()*FILES.length)|0]; if(!selected.includes(f)){selected.push(f);renderList();} };
-zone.ondragover = e=>{e.preventDefault();zone.classList.add('hover')};
-zone.ondragleave = ()=>zone.classList.remove('hover');
-zone.ondrop = e=>{e.preventDefault();zone.classList.remove('hover');
-  const f = FILES[(Math.random()*FILES.length)|0]; if(!selected.includes(f)){selected.push(f);} renderList();};
+  document.addEventListener('selectstart',function(e){e.preventDefault()});
+  document.addEventListener('dragstart',function(e){e.preventDefault()});
+  document.querySelectorAll('a').forEach(function(a){
+    a.setAttribute('href','#'); a.addEventListener('click',function(e){e.preventDefault()});
+  });
+  document.querySelectorAll('form').forEach(function(f){f.addEventListener('submit',function(e){e.preventDefault()})});
+  document.querySelectorAll('input,select,textarea,button').forEach(function(el){el.disabled=true});
+  window.addEventListener('beforeprint',function(e){e.preventDefault()});
+})();
+"""
 
-function say(t){ log.innerHTML += '<div>› '+t+'</div>'; log.scrollTop = log.scrollHeight; }
-runBtn.onclick = ()=>{
-  if(!selected.length){ say('هیچ فایلی انتخاب نشده است.'); return; }
-  runBtn.disabled = true; results.style.display='none'; log.innerHTML=''; bar.style.width='0%';
-  let p = 0, i = 0;
-  say('شروع پردازش روی '+selected.length+' فایل…');
-  const steps = ['خواندن فایل و تشخیص ساختار','استخراج متن و حفظ ترتیب پاراگراف‌ها',
-    'استخراج جداول و تبدیل به JSON','شناسایی و ذخیره فرمول‌ها','خروجی تصاویر با کیفیت اصلی',
-    'کنترل کیفیت و تولید گزارش'];
-  const timer = setInterval(()=>{
-    p += 4 + Math.random()*7;
-    bar.style.width = Math.min(100,p)+'%';
-    if(p > (i+1)*(100/steps.length) && i < steps.length){ say(steps[i]); i++; }
-    if(p >= 100){
-      clearInterval(timer);
-      say('پردازش با موفقیت پایان یافت ✅');
-      tbody.innerHTML = selected.map(f=>`<tr>
-        <td>${f.name}</td><td>${f.pages}</td><td>${f.tables}</td><td>${f.formulas}</td><td>${f.images}</td>
-        <td><span class="badge b-ok">${f.acc}٪ دقت</span></td>
-        <td><button class="btn ghost" onclick="document.getElementById('jsonbox').style.display='block';document.getElementById('jsonbox').scrollIntoView({behavior:'smooth'})">JSON</button></td></tr>`).join('');
-      results.style.display='block'; runBtn.disabled=false;
-      window.__lastFiles = selected;
-      jsonBox.textContent = JSON.stringify({
-        source: selected.map(f=>f.name),
-        output_format: "json",
-        items: selected.map(f=>({
-          file: f.name, pages: f.pages,
-          chapters: [{title:"فصل اول", paragraphs: 42, tables: f.tables, formulas: f.formulas}],
-          assets: {images: f.images, extracted_at: new Date().toISOString()}
-        }))
-      }, null, 2);
+# واترمارکِ موربِ سراسری (SVG داخلی، بدون نیاز به اینترنت)
+def _watermark_svg(text: str) -> str:
+    svg = (
+        '<svg xmlns="http://www.w3.org/2000/svg" width="340" height="190">'
+        '<text x="0" y="120" transform="rotate(-28 0 120)" font-size="26" font-family="Tahoma,sans-serif" '
+        f'fill="#111827" opacity="0.55">{text}</text></svg>'
+    )
+    from urllib.parse import quote
+    return "url('data:image/svg+xml;utf8," + quote(svg) + "')"
+
+
+LOCK_HTML = """
+<div id="wm" style="background-image:{wm}"></div>
+<div id="guard"></div>
+<div id="ribbon">پیش‌نمایش گرافیکیِ نمونه — فقط برای مشاهده؛ در این نسخه هیچ چیز قابل استفاده نیست</div>
+<div id="note"></div>
+"""
+
+# ---------------------------------------------------------------------------
+# تشخیص نوع پروژه و شخصی‌سازی محتوا
+# ---------------------------------------------------------------------------
+ARCHETYPE_RULES = [
+    ("gold_shop", [r"طلا", r"جواهر", r"زرگر"]),
+    ("med_equipment", [r"تجهیزات پزشکی", r"تجهیزات آزمایشگاه", r"تجهیزات دندانپزشکی"]),
+    ("clinic", [r"کلینیک", r"درمان", r"دندانپزشک", r"دندان", r"مطب", r"بیمارستان",
+                r"زیبایی", r"فیزیوتراپ", r"روانشناس", r"ویزیت", r"بیمار"]),
+    ("industrial", [r"لیفتراک", r"تولیدی", r"صنعت", r"کارخانه", r"ماشین آلات", r"مکانیک"]),
+    ("restaurant", [r"رستوران", r"کافه", r"فست فود", r"منو"]),
+    ("realestate", [r"املاک", r"ملک", r"مسکن", r"آپارتمان"]),
+    ("education", [r"آموزش", r"دوره", r"مدرسه", r"آموزشگاه", r"دانشجو"]),
+    ("shop", [r"فروشگاه", r"ecommerce", r"محصول", r"دیتا اینتری", r"دیجی ?کالا"]),
+    ("corporate", [r"شرکت", r"سازمان", r"شرکتی", r"سایت شرکتی", r"معرفی شرکت"]),
+]
+
+ARCHETYPE_LABELS = {
+    "clinic": "وب‌سایت کلینیک/درمانی",
+    "gold_shop": "فروشگاه اینترنتی طلا و جواهر",
+    "med_equipment": "وب‌سایت شرکت تجهیزات پزشکی",
+    "industrial": "وب‌سایت شرکتی/صنعتی",
+    "restaurant": "وب‌سایت رستوران/کافه",
+    "realestate": "وب‌سایت املاک",
+    "education": "وب‌سایت آموزشی",
+    "shop": "فروشگاه اینترنتی",
+    "corporate": "وب‌سایت شرکتی",
+}
+
+PALETTES = {
+    "clinic": ("#0e9f6e", "#22b8cf", "linear-gradient(135deg,#0b6b4f 0%,#0e9f6e 55%,#22b8cf 100%)"),
+    "gold_shop": ("#a16207", "#d97706", "linear-gradient(135deg,#7c4a03 0%,#a16207 55%,#e0a53a 100%)"),
+    "med_equipment": ("#1d4ed8", "#0ea5e9", "linear-gradient(135deg,#12306b 0%,#1d4ed8 55%,#0ea5e9 100%)"),
+    "industrial": ("#b45309", "#64748b", "linear-gradient(135deg,#7c2d12 0%,#b45309 55%,#94a3b8 100%)"),
+    "restaurant": ("#b91c1c", "#f59e0b", "linear-gradient(135deg,#7f1d1d 0%,#b91c1c 55%,#f59e0b 100%)"),
+    "realestate": ("#1e40af", "#0891b2", "linear-gradient(135deg,#172554 0%,#1e40af 55%,#0891b2 100%)"),
+    "education": ("#6d28d9", "#0ea5e9", "linear-gradient(135deg,#4c1d95 0%,#6d28d9 55%,#0ea5e9 100%)"),
+    "shop": ("#db2777", "#f59e0b", "linear-gradient(135deg,#9d174d 0%,#db2777 55%,#f59e0b 100%)"),
+    "corporate": ("#1e3a8a", "#0ea5e9", "linear-gradient(135deg,#0f2350 0%,#1e3a8a 55%,#0ea5e9 100%)"),
+}
+
+STOPWORDS = [
+    "طراحی و پیاده سازی", "طراحی و پیاده‌سازی", "پیاده سازی", "پیاده‌سازی", "طراحی", "بازطراحی",
+    "ساخت", "ایجاد", "افزودن", "اضافه کردن", "ارتقای", "ارتقا", "تکمیل", "آماده سازی", "آماده‌سازی",
+    "وب سایت", "وبسایت", "وب‌سایت", "سایت", "وب اپلیکیشن", "اپلیکیشن", "وردپرسی", "وردپرس",
+    "فروشگاهی", "فروشگاه اینترنتی", "نسخه بتا", "نسخه", "موجود", "جدید", "یک", "دو", "برای", "به",
+    "با", "و", "یا", "کمک", "هوش مصنوعی", "پروژه", "اسکریپت", "افزونه", "زبان انگلیسی", "زبان",
+    "انگلیسی", "قرار دادن", "در سایت", "در", "برنامه نویسی", "انجام", "سفارش", "افزودن محصول",
+]
+
+FALLBACK_BRAND = {
+    "clinic": "کلینیک تخصصی سلامت",
+    "gold_shop": "گالری طلا و جواهر درخشان",
+    "med_equipment": "شرکت تجهیزات پزشکی پارسیان",
+    "industrial": "گروه صنعتی آریا",
+    "restaurant": "رستوران سنتی نارنج",
+    "realestate": "املاک آسمان",
+    "education": "آکادمی آموزشی فرانگرش",
+    "shop": "فروشگاه اینترنتی شما",
+    "corporate": "شرکت شما",
+}
+
+
+def _brand_from_title(title: str, archetype: str) -> str:
+    t = clean_text(title)
+    for w in STOPWORDS:
+        t = re.sub(rf"\b{re.escape(w)}\b", " ", t)
+    t = re.sub(r"[()\[\]/،,.:؛;؟?\-–—]+", " ", t)
+    t = re.sub(r"\s+", " ", t).strip()
+    t = t[:46].strip()
+    if len(t) < 4:
+        return FALLBACK_BRAND[archetype]
+    return t
+
+
+def detect_archetype(project: Project, screening: dict) -> str:
+    hay = f"{project.title} {project.description}".lower()
+    for name, patterns in ARCHETYPE_RULES:
+        for p in patterns:
+            if re.search(p, hay):
+                return name
+    return "corporate"
+
+
+# ---------------------------------------------------------------------------
+# محتوای هر نوع پروژه
+# ---------------------------------------------------------------------------
+def _content(archetype: str, brand: str) -> dict:
+    """محتوای نمونه‌ی متناسب با پروژه (فارسی و در صورت نیاز انگلیسی)."""
+    fa: dict = {
+        "clinic": {
+            "tagline": "مراقبت تخصصی، با آرامش خاطر",
+            "nav": ["خانه", "خدمات", "پزشکان", "نوبت‌دهی", "درباره ما", "تماس"],
+            "hero_t": f"{brand}؛ جایی که درمان با آرامش همراه می‌شود",
+            "hero_d": "نوبت‌دهی آنلاین، پرونده‌ی الکترونیک بیمار و پیگیری درمان — همه در یک سایت سبک و سریع که روی موبایل هم عالی کار می‌کند.",
+            "cta1": "رزرو نوبت آنلاین", "cta2": "مشاهده‌ی خدمات",
+            "services": [
+                ("🩺", "ویزیت تخصصی", "رزرو نوبت بر اساس تخصص و زمان آزاد هر پزشک"),
+                ("🦷", "خدمات تخصصی", "معرفی کامل خدمات با توضیح، تعرفه و مدت‌زمان هر خدمت"),
+                ("📋", "پرونده‌ی الکترونیک", "تاریخچه‌ی مراجعات، نسخه‌ها و پیگیری‌های درمانی بیمار"),
+                ("🔔", "یادآوری نوبت", "پیامک خودکار ۲۴ ساعت پیش از نوبت به بیمار"),
+                ("💳", "پرداخت آنلاین", "پرداخت بیعانه و هزینه‌ی ویزیت از درون سایت"),
+                ("📞", "پشتیبانی", "پاسخ‌گویی آنلاین و ثبت درخواست مشاوره"),
+            ],
+            "stats": [("۲۴+", "پزشک متخصص"), ("۱۸هزار", "بیمار فعال"), ("۹۸٪", "رضایت مراجعان"), ("۱۵ ثانیه", "زمان رزرو نوبت")],
+            "products": [],
+            "about": f"{brand} با تیمی از پزشکان متخصص و تجهیزات به‌روز، خدمات درمانی را در محیطی آرام ارائه می‌دهد. هدف این سایت، کوتاه‌تر کردن مسیر بیمار تا نوبت و پیگیری درمان است.",
+            "testimonials": [
+                "نوبت‌گیری آنلاین کار را خیلی راحت کرده؛ بدون تماس تلفنی وقت گرفتم.", "سارا م.",
+                "طراحی سایت تمیز و قابل اعتماد است؛ بیمارها راحت پیدایش می‌کنند.", "دکتر احمدی",
+            ],
+            "quote_items": ["دریافت نوبت آنلاین", "مشاهده‌ی سوابق", "پرداخت اینترنتی", "پشتیبانی آنلاین"],
+        },
+        "gold_shop": {
+            "tagline": "درخشش اصالت در هر خرید",
+            "nav": ["خانه", "محصولات", "قیمت روز طلا", "درباره ما", "تماس"],
+            "hero_t": f"{brand}؛ خرید آنلاین طلا با قیمت روز و فاکتور رسمی",
+            "hero_d": "قیمت‌ها هر ۵ دقیقه به‌روز می‌شود، اجرت و سود به‌صورت شفاف جداگانه نمایش داده می‌شود و هر سفارش با بیمه ارسال می‌گردد.",
+            "cta1": "مشاهده‌ی محصولات", "cta2": "قیمت لحظه‌ای طلا",
+            "services": [
+                ("💰", "قیمت لحظه‌ای", "نمایش خودکار قیمت طلا، اجرت و سود روی هر محصول"),
+                ("🔎", "فیلتر هوشمند", "جستجو بر اساس عیار، وزن، رنگ و بازه‌ی قیمت"),
+                ("🧾", "فاکتور رسمی", "صدور فاکتور با جزئیات اجرت و مالیات"),
+                ("🚚", "ارسال بیمه‌شده", "ارسال رایگان بالای سقف خرید، با بیمه‌ی کامل"),
+                ("↩️", "۷ روز ضمانت بازگشت", "امکان بازگشت کالا طبق شرایط"),
+                ("📦", "پیگیری سفارش", "پنل پیگیری مراحل سفارش برای مشتری"),
+            ],
+            "stats": [("۱,۲۰۰+", "محصول فعال"), ("هر ۵ دقیقه", "به‌روزرسانی قیمت"), ("۴.۹/۵", "رضایت مشتریان"), ("۴۸ ساعت", "زمان ارسال")],
+            "products": [
+                ("انگشتر طلا زنانه", "۱۲,۴۵۰,۰۰۰", "۱۳,۲۰۰,۰۰۰", "#f5e7c1"),
+                ("گوشواره آویز نگین‌دار", "۸,۹۰۰,۰۰۰", "۹,۴۰۰,۰۰۰", "#f7e3c8"),
+                ("سرویس نیم‌ست طلا", "۳۴,۵۰۰,۰۰۰", "۳۶,۰۰۰,۰۰۰", "#f3dcae"),
+                ("النگو طلا تراش‌خورده", "۲۱,۷۰۰,۰۰۰", "۲۳,۱۰۰,۰۰۰", "#f6e9cf"),
+                ("پلاک اسم طلا", "۶,۳۰۰,۰۰۰", "۶,۹۰۰,۰۰۰", "#f8ecd6"),
+                ("سکه و تمام‌بهار", "۷۲,۰۰۰,۰۰۰", "۷۳,۵۰۰,۰۰۰", "#f1dca9"),
+            ],
+            "about": f"{brand} با سابقه‌ی درخشان در طراحی و فروش طلا و جواهر، خریدی شفاف و مطمئن را تجربه می‌کند: قیمت بر اساس نرخ روز، فاکتور رسمی و ارسال بیمه‌شده.",
+            "testimonials": [
+                "قیمت‌ها شفاف و دقیق بود؛ با خیال راحت خرید کردم.", "مریم ح.",
+                "ارسال سریع و بسته‌بندی شیک؛ حتماً دوباره می‌خرم.", "علی ر.",
+            ],
+            "quote_items": ["قیمت لحظه‌ای", "فاکتور رسمی", "ارسال بیمه‌شده", "پنل پیگیری سفارش"],
+        },
+        "med_equipment": {
+            "tagline": "تأمین تجهیزات پزشکی با استاندارد جهانی",
+            "nav": ["خانه", "دسته‌بندی تجهیزات", "پروژه‌ها", "گواهی‌نامه‌ها", "درباره ما", "تماس"],
+            "hero_t": f"{brand}؛ مرجع تأمین و پشتیبانی تجهیزات پزشکی",
+            "hero_d": "کاتالوگ کامل تجهیزات با مشخصات فنی، گواهی‌نامه‌ها و امکان درخواست پیش‌فاکتور آنلاین برای بیمارستان‌ها و کلینیک‌ها.",
+            "cta1": "دریافت کاتالوگ", "cta2": "درخواست پیش‌فاکتور",
+            "services": [
+                ("🏥", "تجهیزات بیمارستانی", "تخت، ونتیلاتور، مانیتور و تجهیزات بخش ویژه"),
+                ("🔬", "تجهیزات آزمایشگاهی", "سانتریفیوژ، انکوباتور و دستگاه‌های تشخیصی"),
+                ("🛠️", "خدمات پس از فروش", "نصب، راه‌اندازی، کالیبراسیون و گارانتی"),
+                ("📑", "گواهی‌نامه‌ها", "ISO، استاندارد ملی و تأییدیه‌ی وزارت بهداشت"),
+                ("🚚", "ارسال سراسری", "ارسال به کل کشور با بسته‌بندی ایمن"),
+                ("🧑‍🔧", "تعمیر و نگهداری", "قرارداد سرویس دوره‌ای برای مراکز درمانی"),
+            ],
+            "stats": [("۸۵۰+", "قلم کالا"), ("۳۲", "استان تحت پوشش"), ("۲۴ ماه", "گارانتی"), ("۴۸ ساعت", "پاسخ به استعلام")],
+            "products": [
+                ("مانیتور علائم حیاتی مدل M7", "استعلامی", "", "#dbe7f8"),
+                ("دستگاه سونوگرافی پرتابل", "استعلامی", "", "#d8e6f5"),
+                ("تخت بیمارستانی برقی ۳ شکن", "استعلامی", "", "#e2ecf9"),
+                ("سانتریفیوژ آزمایشگاهی ۱۲ شاخه", "استعلامی", "", "#dfe9f7"),
+                ("ونتیلاتور ICU مدل V5", "استعلامی", "", "#d9e4f4"),
+                ("اتوکلاو ۲۳ لیتری", "استعلامی", "", "#e4eefb"),
+            ],
+            "about": f"{brand} تأمین‌کننده‌ی تخصصی تجهیزات پزشکی و آزمایشگاهی است؛ از مشاوره‌ی انتخاب دستگاه تا نصب، آموزش و نگهداری در کنار مراکز درمانی.",
+            "testimonials": [
+                "پاسخ‌گویی سریع و تجهیزات باکیفیت؛ روند خرید کاملاً شفاف بود.", "مدیر تدارکات بیمارستان",
+                "نصب و آموزش دستگاه‌ها به‌موقع انجام شد.", "سرپرست آزمایشگاه",
+            ],
+            "quote_items": ["کاتالوگ فنی", "درخواست پیش‌فاکتور", "مقایسه‌ی محصولات", "فرم استعلام"],
+        },
+        "industrial": {
+            "tagline": "تولید قدرتمند، تحویل به‌موقع",
+            "nav": ["خانه", "محصولات", "خطوط تولید", "گواهی‌ها", "درباره ما", "تماس"],
+            "hero_t": f"{brand}؛ تولیدکننده‌ی معتبر با استاندارد صنعتی",
+            "hero_d": "معرفی خطوط تولید، ظرفیت ساخت، مشخصات فنی محصولات و امکان ثبت درخواست همکاری برای نمایندگان و مشتریان صنعتی.",
+            "cta1": "مشاهده‌ی محصولات", "cta2": "درخواست همکاری",
+            "services": [
+                ("🏭", "ظرفیت تولید", "نمایش ظرفیت ماهانه و زمان تحویل هر خط تولید"),
+                ("⚙️", "مشخصات فنی", "جدول مشخصات، نقشه‌ها و فایل‌های PDF قابل دانلود"),
+                ("🛡️", "کنترل کیفیت", "گواهی‌های بازرسی و استانداردهای تولید"),
+                ("🤝", "شبکه نمایندگان", "جستجوی نماینده بر اساس استان"),
+                ("📞", "پشتیبانی فنی", "ثبت تیکت و پیگیری خدمات پس از فروش"),
+                ("📄", "مناقصات", "اطلاع‌رسانی فراخوان‌ها و همکاری‌ها"),
+            ],
+            "stats": [("۴۰ سال", "تجربه"), ("۱۲۰", "نیروی متخصص"), ("۹۵٪", "تحویل به‌موقع"), ("۲۶", "نماینده فعال")],
+            "products": [
+                ("لیفتراک دیزلی ۳ تن", "استعلامی", "", "#dfe3ee"),
+                ("لیفتراک برقی ۱.۵ تن", "استعلامی", "", "#e6e9f3"),
+                ("استacker دستی ۲ تن", "استعلامی", "", "#dde1ec"),
+                ("ریچتراک ۱.۵ تن", "استعلامی", "", "#e8ebf5"),
+                ("جک پالت ۲.۵ تن", "استعلامی", "", "#dce0eb"),
+                ("قطعات یدکی و سرویس", "استعلامی", "", "#e9ecf6"),
+            ],
+            "about": f"{brand} با اتکا به نیروی متخصص و خطوط تولید مدرن، محصولات صنعتی با کیفیت پایدار عرضه می‌کند و شبکه‌ی خدمات پس از فروش گسترده‌ای دارد.",
+            "testimonials": [
+                "کیفیت ساخت و زمان تحویل دقیق بود.", "مدیر خرید کارخانه",
+                "پشتیبانی فنی سریع پاسخ داد.", "مدیر انبار",
+            ],
+            "quote_items": ["کاتالوگ محصولات", "جدول مشخصات فنی", "درخواست نمایندگی", "فرم تماس"],
+        },
+        "shop": {
+            "tagline": "خریدی آسان‌تر از همیشه",
+            "nav": ["خانه", "دسته‌بندی‌ها", "پیشنهاد ویژه", "پیگیری سفارش", "درباره ما", "تماس"],
+            "hero_t": f"{brand}؛ فروشگاه اینترنتی با تجربه‌ی خرید سریع",
+            "hero_d": "جستجوی سریع، فیلتر دقیق، مقایسه‌ی کالا، سبد خرید و پرداخت آنلاین — طراحی‌شده برای افزایش فروش و راحتی مشتری.",
+            "cta1": "شروع خرید", "cta2": "پیگیری سفارش",
+            "services": [
+                ("🔍", "جستجوی سریع", "جستجوی لحظه‌ای در نام، برند و ویژگی‌ها"),
+                ("🎯", "فیلتر هوشمند", "فیلتر بر اساس قیمت، برند، رنگ و موجودی"),
+                ("🛒", "سبد خرید پیشرفته", "ذخیره‌ی سبد، کد تخفیف و محاسبه‌ی ارسال"),
+                ("💳", "پرداخت آنلاین", "اتصال به درگاه پرداخت و پرداخت اقساطی"),
+                ("📦", "پیگیری سفارش", "پنل پیگیری مراحل سفارش برای مشتری"),
+                ("⭐", "امتیاز و نظر", "ثبت نظر و امتیاز برای هر محصول"),
+            ],
+            "stats": [("۳,۴۰۰+", "کالای فعال"), ("۱۸ ثانیه", "میانگین جستجو"), ("۹۶٪", "سفارش‌های موفق"), ("۲۴/۷", "دسترسی")],
+            "products": [
+                ("کوله‌پشتی لپ‌تاپ ضدآب", "۱,۲۹۰,۰۰۰", "۱,۵۴۰,۰۰۰", "#eef2ff"),
+                ("هدفون بلوتوثی ANC", "۲,۴۵۰,۰۰۰", "۲,۸۰۰,۰۰۰", "#eaf6ff"),
+                ("ساعت هوشمند اسپرت", "۳,۱۰۰,۰۰۰", "۳,۵۰۰,۰۰۰", "#f1ecff"),
+                ("ماوس بی‌سیم ارگونومیک", "۶۵۰,۰۰۰", "۷۹۰,۰۰۰", "#eafaf3"),
+                ("پاوربانک ۲۰۰۰۰ میلی‌آمپر", "۱,۱۰۰,۰۰۰", "۱,۳۵۰,۰۰۰", "#fff3e8"),
+                ("پایه نگهدارنده موبایل", "۳۲۰,۰۰۰", "۳۹۰,۰۰۰", "#f6f7fc"),
+            ],
+            "about": f"{brand} با هدف تجربه‌ی خرید آسان شکل گرفته است: دسته‌بندی روشن، فیلتر دقیق و فرایند پرداخت کوتاه.",
+            "testimonials": [
+                "فرایند خرید خیلی سریع و راحت بود.", "نازنین ک.",
+                "پیگیری سفارش عالی کار می‌کند.", "حسین م.",
+            ],
+            "quote_items": ["جستجو و فیلتر", "سبد خرید", "پرداخت آنلاین", "پنل پیگیری سفارش"],
+        },
+        "corporate": {
+            "tagline": "اعتماد، تخصص، رشد",
+            "nav": ["خانه", "خدمات", "پروژه‌ها", "درباره ما", "مقالات", "تماس"],
+            "hero_t": f"{brand}؛ وب‌سایت رسمی و مدرن برای معرفی خدمات شما",
+            "hero_d": "معرفی خدمات، نمونه‌کارها، تیم و راه‌های ارتباطی در قالبی حرفه‌ای که اعتماد مخاطب را جلب می‌کند.",
+            "cta1": "درخواست مشاوره", "cta2": "مشاهده‌ی خدمات",
+            "services": [
+                ("🎯", "معرفی خدمات", "شرح دقیق خدمات با مزایا و نمونه‌کار"),
+                ("🏆", "نمونه‌کارها", "گالری پروژه‌ها با فیلتر دسته‌بندی"),
+                ("👥", "تیم ما", "معرفی اعضا، تخصص‌ها و سوابق"),
+                ("📈", "دستاوردها", "آمار و شاخص‌های کلیدی عملکرد"),
+                ("📝", "وبلاگ", "انتشار مقاله و خبر با مدیریت محتوا"),
+                ("📨", "فرم درخواست", "ثبت درخواست مشاوره با اطلاع‌رسانی ایمیلی"),
+            ],
+            "stats": [("۱۲ سال", "سابقه"), ("۳۵۰+", "پروژه انجام‌شده"), ("۹۸٪", "رضایت مشتریان"), ("۲۴ ساعت", "پاسخ‌گویی")],
+            "products": [],
+            "about": f"{brand} با تکیه بر تخصص و تجربه، راهکارهایی ارائه می‌کند که کسب‌وکار مشتریان را رشد می‌دهد.",
+            "testimonials": [
+                "همکاری حرفه‌ای و تحویل به‌موقع.", "مدیرعامل",
+                "کیفیت کار فراتر از انتظار بود.", "مدیر پروژه",
+            ],
+            "quote_items": ["معرفی خدمات", "نمونه‌کارها", "وبلاگ", "فرم درخواست مشاوره"],
+        },
+        "restaurant": {
+            "tagline": "طعمی که می‌ماند",
+            "nav": ["خانه", "منو", "رزرو میز", "گالری", "درباره ما", "تماس"],
+            "hero_t": f"{brand}؛ رزرو آنلاین میز و مشاهده‌ی منو",
+            "hero_d": "منوی کامل با قیمت و ترکیبات، رزرو میز بر اساس ساعت و ظرفیت، و سفارش آنلاین غذا برای بیرون‌بر.",
+            "cta1": "رزرو میز", "cta2": "مشاهده‌ی منو",
+            "services": [
+                ("🍽️", "منوی آنلاین", "دسته‌بندی غذاها با قیمت، تصویر و ترکیبات"),
+                ("🪑", "رزرو میز", "انتخاب تاریخ، ساعت و تعداد نفرات"),
+                ("🛵", "سفارش بیرون‌بر", "سبد خرید و پرداخت آنلاین"),
+                ("📍", "مسیریابی", "آدرس، نقشه و ساعات کاری"),
+                ("🎉", "رویدادها", "پذیرایی مراسم و سفارش‌های سازمانی"),
+                ("⭐", "نظرات", "ثبت امتیاز و نظر مشتریان"),
+            ],
+            "stats": [("۱۴۰", "صندلی"), ("۵۰+", "آیتم منو"), ("۴.۸/۵", "امتیاز مشتریان"), ("۳۰ دقیقه", "زمان آماده‌سازی")],
+            "products": [
+                ("چلوکباب کوبیده مخصوص", "۲۸۵,۰۰۰", "", "#fde9e7"),
+                ("قورمه‌سبزی با گوشت قلعه‌نویی", "۲۴۰,۰۰۰", "", "#e9f7ec"),
+                ("پاستا آلفردو با مرغ", "۲۲۰,۰۰۰", "", "#fdf3e3"),
+                ("سالاد سزار", "۱۴۵,۰۰۰", "", "#eef7ee"),
+                ("پیتزا مخصوص رستوران", "۳۱۰,۰۰۰", "", "#fdeceb"),
+                ("دسر و نوشیدنی", "۹۵,۰۰۰", "", "#f3f0fb"),
+            ],
+            "about": f"{brand} با مواد اولیه‌ی تازه و فضای دلنشین، تجربه‌ای متفاوت از غذا خوردن می‌سازد.",
+            "testimonials": [
+                "کیفیت غذا عالی و رزرو آنلاین خیلی راحت بود.", "سپهر ع.",
+                "برخورد پرسنل و فضای رستوران فوق‌العاده است.", "نرگس ک.",
+            ],
+            "quote_items": ["منوی آنلاین", "رزرو میز", "سفارش آنلاین", "نقشه و مسیریابی"],
+        },
+        "realestate": {
+            "tagline": "خانه‌ی بعدی شما اینجاست",
+            "nav": ["خانه", "املاک", "فروش", "اجاره", "مشاوران", "تماس"],
+            "hero_t": f"{brand}؛ جستجوی هوشمند ملک با فیلتر دقیق",
+            "hero_d": "جستجو بر اساس محله، متراژ، بودجه و سن بنا؛ ثبت آگهی و ارتباط مستقیم با مشاور.",
+            "cta1": "جستجوی ملک", "cta2": "ثبت آگهی",
+            "services": [
+                ("🏠", "جستجوی پیشرفته", "فیلتر بر اساس قیمت، متراژ، محله و امکانات"),
+                ("📷", "گالری تصاویر", "تصاویر باکیفیت و تور مجازی"),
+                ("📝", "ثبت آگهی", "ثبت و مدیریت آگهی توسط مالک"),
+                ("🧑‍💼", "مشاوران", "معرفی مشاور و شماره تماس مستقیم"),
+                ("📊", "قیمت منطقه", "نمایش میانگین قیمت هر محله"),
+                ("🔔", "هشدار ملک", "اطلاع‌رسانی ملک‌های جدید مطابق جستجو"),
+            ],
+            "stats": [("۴,۲۰۰+", "ملک فعال"), ("۱۸۰", "مشاور"), ("۲۴ ساعت", "تایید آگهی"), ("۹۴٪", "رضایت")],
+            "products": [
+                ("آپارتمان ۱۲۰ متری، نوساز، ۲ خواب", "۸,۴۰۰,۰۰۰,۰۰۰", "", "#e8f1ff"),
+                ("ویلا ۳۵۰ متری با استخر", "۲۷,۵۰۰,۰۰۰,۰۰۰", "", "#e7f6ef"),
+                ("دفتر اداری ۹۰ متری", "۱۲,۰۰۰,۰۰۰,۰۰۰", "", "#f4efff"),
+                ("زمین ۵۰۰ متری مسکونی", "۱۹,۰۰۰,۰۰۰,۰۰۰", "", "#fdf0e7"),
+                ("آپارتمان ۷۵ متری، اجاره", "۲۷,۰۰۰,۰۰۰", "", "#eef7fb"),
+                ("مغازه ۴۰ متری تجاری", "۶,۳۰۰,۰۰۰,۰۰۰", "", "#f7f2ff"),
+            ],
+            "about": f"{brand} با شبکه‌ای از مشاوران حرفه‌ای، خرید و فروش و اجاره‌ی ملک را شفاف و سریع انجام می‌دهد.",
+            "testimonials": [
+                "ملک مناسب را خیلی سریع پیدا کردم.", "فرهاد م.",
+                "فرایند ثبت آگهی ساده و دقیق بود.", "مینا ص.",
+            ],
+            "quote_items": ["جستجوی پیشرفته", "گالری و تور مجازی", "ثبت آگهی", "هشدار ملک جدید"],
+        },
+        "education": {
+            "tagline": "یادگیری، مسیر رشد",
+            "nav": ["خانه", "دوره‌ها", "اساتید", "وبلاگ", "درباره ما", "تماس"],
+            "hero_t": f"{brand}؛ سامانه‌ی آموزش آنلاین با پنل دانشجو",
+            "hero_d": "معرفی دوره‌ها، ثبت‌نام آنلاین، پنل دانشجو برای مشاهده‌ی ویدئوها و آزمون، و صدور گواهی پایان دوره.",
+            "cta1": "مشاهده‌ی دوره‌ها", "cta2": "ثبت‌نام آنلاین",
+            "services": [
+                ("🎓", "دوره‌ها", "دسته‌بندی موضوعی با سطح‌بندی مقدماتی تا پیشرفته"),
+                ("🎥", "پخش ویدئو", "پخش درس‌ها با پیشرفت‌یادگیری"),
+                ("📝", "آزمون آنلاین", "آزمون با نمره‌دهی خودکار"),
+                ("🏅", "گواهی پایان دوره", "صدور گواهی با شناسه‌ی یکتا"),
+                ("👨‍🏫", "اساتید", "معرفی مدرسان و سوابق"),
+                ("💬", "پشتیبانی", "گفتگو و رفع اشکال آنلاین"),
+            ],
+            "stats": [("۱۲۰+", "دوره"), ("۱۵,۰۰۰", "دانشجو"), ("۴.۷/۵", "رضایت"), ("۹۸٪", "نرخ تکمیل")],
+            "products": [
+                ("دوره‌ی جامع پایتون", "۲,۴۰۰,۰۰۰", "۲,۹۰۰,۰۰۰", "#eef2ff"),
+                ("آموزش طراحی رابط کاربری", "۳,۲۰۰,۰۰۰", "۳,۸۰۰,۰۰۰", "#f3ecff"),
+                ("دوره‌ی تحلیل داده", "۲,۸۰۰,۰۰۰", "۳,۳۰۰,۰۰۰", "#e9f7f2"),
+                ("آموزش هوش مصنوعی کاربردی", "۴,۵۰۰,۰۰۰", "۵,۲۰۰,۰۰۰", "#fff3e8"),
+                ("دوره‌ی بازاریابی دیجیتال", "۱,۹۰۰,۰۰۰", "۲,۳۰۰,۰۰۰", "#fdf0f5"),
+                ("کارگاه مهارت‌های نرم", "۹۵۰,۰۰۰", "۱,۲۰۰,۰۰۰", "#f4f7fc"),
+            ],
+            "about": f"{brand} با بهره‌گیری از مدرسان باتجربه، مسیر یادگیری را کوتاه و لذت‌بخش می‌کند.",
+            "testimonials": [
+                "کیفیت آموزش عالی و پشتیبانی پاسخ‌گو.", "دانشجو",
+                "گواهی دوره خیلی زود صادر شد.", "فراگیر",
+            ],
+            "quote_items": ["معرفی دوره‌ها", "ثبت‌نام آنلاین", "پنل دانشجو", "صدور گواهی"],
+        },
     }
-  }, 180);
-};
+    en = {
+        "tagline": "Professional, fast, reliable",
+        "nav": ["Home", "Services", "Projects", "About", "Contact"],
+        "hero_t": f"{brand} — a modern website built for growth",
+        "hero_d": "This bilingual preview shows the English version of your website: same design, translated content, and a language switcher in the header.",
+        "cta1": "Get in touch", "cta2": "View services",
+    }
+    data = dict(fa[archetype])
+    data["en"] = en
+    return data
+
+
+# ---------------------------------------------------------------------------
+# ابزارهای رندر
+# ---------------------------------------------------------------------------
+def _svg_hero(gradient: str, label: str) -> str:
+    return f"""
+<svg viewBox="0 0 520 360" style="width:100%;height:auto">
+  <defs><linearGradient id="hg" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#ffffff" stop-opacity=".28"/>
+    <stop offset="1" stop-color="#ffffff" stop-opacity="0"/></linearGradient></defs>
+  <rect x="10" y="14" width="500" height="330" rx="22" fill="url(#hg)"/>
+  <rect x="48" y="52" width="424" height="150" rx="16" fill="#ffffff" opacity=".92"/>
+  <rect x="70" y="76" width="120" height="12" rx="6" fill="{gradient}" opacity=".5"/>
+  <rect x="70" y="100" width="220" height="10" rx="5" fill="#c7d0e6"/>
+  <rect x="70" y="122" width="170" height="10" rx="5" fill="#dbe1ee"/>
+  <rect x="330" y="86" width="112" height="82" rx="12" fill="{gradient}" opacity=".22"/>
+  <rect x="48" y="222" width="130" height="104" rx="14" fill="#ffffff" opacity=".9"/>
+  <rect x="192" y="222" width="130" height="104" rx="14" fill="#ffffff" opacity=".75"/>
+  <rect x="336" y="222" width="130" height="104" rx="14" fill="#ffffff" opacity=".6"/>
+  <text x="260" y="352" text-anchor="middle" font-size="13" fill="#ffffff" opacity=".85"
+        font-family="Tahoma,sans-serif">{label}</text>
+</svg>"""
+
+
+def _svg_thumb(color: str, icon: str) -> str:
+    return f"""
+<svg viewBox="0 0 200 150" style="width:100%;height:150px">
+  <rect width="200" height="150" fill="{color}"/>
+  <circle cx="100" cy="66" r="34" fill="#ffffff" opacity=".55"/>
+  <text x="100" y="80" text-anchor="middle" font-size="30">{icon}</text>
+  <rect x="34" y="112" width="132" height="10" rx="5" fill="#ffffff" opacity=".7"/>
+</svg>"""
+
+
+def _services_html(items: list[tuple], lang: str = "fa") -> str:
+    out = []
+    for icon, title, desc in items:
+        out.append(
+            f'<div class="card2"><div class="ic">{icon}</div>'
+            f'<div class="t">{title}</div><div class="d">{desc}</div></div>'
+        )
+    return f'<div class="grid g3">{"".join(out)}</div>'
+
+
+def _stats_html(stats: list[tuple]) -> str:
+    out = "".join(f'<div class="stat"><div class="v">{v}</div><div class="k">{k}</div></div>' for v, k in stats)
+    return f'<div class="stats">{out}</div>'
+
+
+def _products_html(products: list[tuple], icon: str = "🛍️") -> str:
+    if not products:
+        return ""
+    out = []
+    for item in products:
+        name, price, old, color = item
+        old_html = f'<span class="old">{old}</span>' if old else ""
+        out.append(
+            f'<div class="prod"><div class="ph">{_svg_thumb(color, icon)}</div>'
+            f'<div class="bd"><div class="n">{name}</div>'
+            f'<div class="pr">{old_html}{price} <span style="font-size:11px;font-weight:400">تومان</span></div></div></div>'
+        )
+    return f'<div class="grid g3" style="grid-template-columns:repeat(auto-fit,minmax(210px,1fr))">{"".join(out)}</div>'
+
+
+def _mock_page(c: dict, archetype: str, palette: tuple, bilingual: bool) -> str:
+    primary, accent, gradient = palette
+    nav = "".join(f"<span>{n}</span>" for n in c["nav"])
+    en = c.get("en") or {}
+    hero_en = ""
+    if bilingual:
+        hero_en = f"""
+<div class="sect alt" style="padding:22px 18px" id="en-block">
+  <div style="max-width:760px;margin:0 auto;text-align:center">
+    <div class="chip">English version — همان طراحی با محتوای انگلیسی</div>
+    <h2 style="margin-top:12px">{en.get('hero_t','')}</h2>
+    <p class="muted">{en.get('hero_d','')}</p>
+    <div class="hero" style="margin-top:14px;border-radius:16px;padding:26px 18px">
+      <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+        <span class="btn alt">{en.get('cta1','')}</span><span class="btn ghost">{en.get('cta2','')}</span>
+      </div>
+    </div>
+  </div>
+</div>"""
+    services_en = ""
+    if bilingual:
+        services_en = f"""
+<div class="sect" style="padding-top:0">
+  <div style="max-width:760px;margin:0 auto" dir="ltr">
+    <h2 style="text-align:center">Services</h2>
+    <div class="grid g3">
+      <div class="card2"><div class="t">Search &amp; filter</div><div class="d">Fast product discovery</div></div>
+      <div class="card2"><div class="t">Cart &amp; checkout</div><div class="d">Smooth payment flow</div></div>
+      <div class="card2"><div class="t">Order tracking</div><div class="d">Live status for customers</div></div>
+    </div>
+  </div>
+</div>"""
+    products_block = _products_html(c.get("products") or [], "🛍️")
+    products_section = (
+        f'<div class="sect alt"><div class="wrap"><h2>نمونه محصولات / خروجی‌های قابل ارائه</h2>'
+        f'<div class="sub">طراحی کارت محصول با تصویر، قیمت و دکمه‌ی افزودن به سبد</div>'
+        f'{products_block}</div></div>'
+        if products_block else ""
+    )
+    t = c["testimonials"]
+    quotes = []
+    for i in range(0, len(t), 2):
+        quotes.append(
+            f'<div class="quote"><div class="txt">«{t[i]}»</div>'
+            f'<div class="who"><div class="av"></div><div><b>{t[i+1]}</b><div class="muted">مشتری نمونه</div></div></div></div>'
+        )
+    return f"""
+<div class="mockwin">
+  <div class="dots"><i></i><i></i><i></i><span class="muted" style="margin-right:8px;font-size:11.5px">
+  پیش‌نمایش ظاهری — {ARCHETYPE_LABELS[archetype]}</span></div>
+
+  <div class="mh"><div class="in">
+    <div class="logo"><span class="m">{clean_text(c['brand'])[:1] or 'F'}</span>{c['brand']}</div>
+    <div class="nav">{nav}</div>
+    <div><span class="btn" style="padding:8px 16px;font-size:13px">{c['cta1']}</span></div>
+  </div></div>
+
+  <div class="hero" style="background:{gradient}"><div class="in">
+    <div>
+      <div class="chip" style="background:rgba(255,255,255,.18);border-color:rgba(255,255,255,.3);color:#fff">{c['tagline']}</div>
+      <h1 style="margin-top:14px">{c['hero_t']}</h1>
+      <p>{c['hero_d']}</p>
+      <div class="cta"><span class="btn">{c['cta1']}</span><span class="btn ghost">{c['cta2']}</span></div>
+      <div style="margin-top:16px;font-size:12.5px;opacity:.85">✓ طراحی واکنش‌گرا  ✓ بارگذاری سریع  ✓ بهینه برای موبایل</div>
+    </div>
+    <div>{_svg_hero(primary, 'طراحی پیشنهادی صفحه‌ی اصلی')}</div>
+  </div></div>
+
+  <div class="sect"><div class="wrap">
+    <h2>امکاناتی که در این سایت پیاده‌سازی می‌شود</h2>
+    <div class="sub">هر بخش در نسخه‌ی نهایی به‌طور کامل و قابل استفاده تحویل می‌گردد</div>
+    {_services_html(c['services'])}
+  </div></div>
+
+  <div class="sect alt"><div class="wrap">{_stats_html(c['stats'])}</div></div>
+
+  {products_section}
+
+  <div class="sect"><div class="wrap">
+    <h2>درباره‌ی مجموعه</h2>
+    <div class="sub" style="text-align:right;max-width:820px;margin:0 auto 18px">{c['about']}</div>
+    <div class="grid g3" style="grid-template-columns:repeat(auto-fit,minmax(200px,1fr))">
+      {''.join(f'<div class="card2" style="text-align:center"><div class="ic" style="margin:0 auto 8px">✓</div><div class="t">{q}</div></div>' for q in c['quote_items'])}
+    </div>
+  </div></div>
+
+  <div class="sect alt"><div class="wrap">
+    <h2>نظر کاربران</h2><div class="sub">نمونه بازخورد پس از راه‌اندازی</div>
+    <div class="grid g3" style="grid-template-columns:repeat(auto-fit,minmax(280px,1fr))">{''.join(quotes)}</div>
+  </div></div>
+
+  {hero_en}{services_en}
+
+  <div class="sect"><div class="wrap">
+    <h2>تماس با ما</h2><div class="sub">فرم درخواست و اطلاعات تماس</div>
+    <div class="grid" style="grid-template-columns:1.2fr .8fr">
+      <div class="quote">
+        <div class="formrow">
+          <div class="field"><label>نام و نام خانوادگی</label><input placeholder="مثال: علی محمدی"></div>
+          <div class="field"><label>شماره تماس</label><input placeholder="09xxxxxxxxx"></div>
+        </div>
+        <div class="field"><label>موضوع درخواست</label>
+          <select><option>درخواست مشاوره</option><option>استعلام قیمت</option><option>همکاری</option></select></div>
+        <div class="field"><label>توضیحات</label><textarea rows="4" placeholder="متن پیام شما…"></textarea></div>
+        <span class="btn">ارسال درخواست</span>
+      </div>
+      <div>
+        <div class="card2"><div class="t">📞 تلفن</div><div class="d">۰۲۱-۱۲۳۴۵۶۷۸</div></div>
+        <div class="card2" style="margin-top:12px"><div class="t">✉️ ایمیل</div><div class="d">info@example.com</div></div>
+        <div class="card2" style="margin-top:12px"><div class="t">📍 آدرس</div><div class="d">تهران، خیابان نمونه، پلاک ۱۲</div></div>
+        <div class="card2" style="margin-top:12px"><div class="t">🕘 ساعات کاری</div><div class="d">شنبه تا چهارشنبه ۹ تا ۱۸</div></div>
+      </div>
+    </div>
+  </div></div>
+
+  <div class="mfoot"><div class="wrap"><div class="cols">
+    <div><h4>{c['brand']}</h4><p>{c['tagline']}</p></div>
+    <div><h4>دسترسی سریع</h4>{''.join(f'<div>{n}</div>' for n in c['nav'])}</div>
+    <div><h4>خدمات</h4>{''.join(f'<div>{s[1]}</div>' for s in c['services'][:4])}</div>
+    <div><h4>تماس</h4><div>info@example.com</div><div>۰۲۱-۱۲۳۴۵۶۷۸</div></div>
+  </div>
+  <div class="bt">طرح پیشنهادی — نمونه‌ی گرافیکی؛ نسخه‌ی نهایی پس از تایید قرارداد تحویل می‌شود</div>
+  </div></div>
+</div>"""
+
+
+# ---------------------------------------------------------------------------
+# رندرِ صفحات اپلیکیشن / داشبورد / pipeline / ربات
+# ---------------------------------------------------------------------------
+def _screen_shell(title: str, sidebar: list[str], body: str, extra: str = "") -> str:
+    return f"""
+<div class="mockwin">
+  <div class="dots"><i></i><i></i><i></i><span class="muted" style="margin-right:8px;font-size:11.5px">
+  پیش‌نمایش صفحات — {title}</span></div>
+  <div style="display:grid;grid-template-columns:210px 1fr;min-height:430px">
+    <div style="background:#0f1730;color:#aab6d8;padding:16px 14px;font-size:13.5px">
+      <div style="color:#fff;font-weight:800;margin-bottom:14px">📊 پنل مدیریت</div>
+      {''.join(f'<div style="padding:7px 10px;border-radius:9px;margin-bottom:4px{";background:#1c2947;color:#fff" if i == 0 else ""}">{s}</div>' for i, s in enumerate(sidebar))}
+    </div>
+    <div style="padding:16px">{body}</div>
+  </div>
+</div>
+{extra}"""
+
+
+def _bars(values: list[int], labels: list[str]) -> str:
+    mx = max(values) or 1
+    out = []
+    for v, lab in zip(values, labels):
+        h = int(150 * v / mx)
+        out.append(
+            f'<div style="text-align:center"><div style="height:{h}px" class="bar"></div>'
+            f'<div class="muted" style="font-size:11px;margin-top:6px">{lab}</div></div>'
+        )
+    return f'<div style="display:flex;align-items:end;gap:10px;height:180px;padding:10px 6px;border-bottom:1px solid #eceff7">{"".join(out)}</div>'
+
+
+def _app_screens(project: Project, screening: dict) -> str:
+    """صفحات واقعی یک اپ/داشبورد را به‌صورت گرافیکی نشان می‌دهد."""
+    features = screening.get("features") or []
+    rows = "".join(
+        f"<tr><td>{i+1:02d}</td><td>{(f or 'نیازمندی پروژه')[:64]}</td>"
+        f"<td><span class='badge b-run'>در حال اجرا</span></td><td>{80 + (i * 3) % 18}٪</td></tr>"
+        for i, f in enumerate(features[:8])
+    ) or "<tr><td>۱</td><td>نیازمندی‌های پروژه از متن آگهی استخراج می‌شود</td><td><span class='badge b-run'>در حال اجرا</span></td><td>۰٪</td></tr>"
+    kpis = "".join(
+        f'<div class="kpi"><div class="k">{k}</div><div class="v">{v}</div><div class="d">{d}</div></div>'
+        for k, v, d in [("کاربران فعال", "۱,۲۴۸", "↑ ۱۲٪ این هفته"),
+                        ("درخواست‌های امروز", "۳۴۲", "↑ ۸٪"),
+                        ("زمان پاسخ", "۱.۲ ثانیه", "↓ بهتر شده"),
+                        ("نرخ موفقیت", "۹۶٪", "پایدار")]
+    )
+    body = f"""
+<div class="grid g4" style="grid-template-columns:repeat(auto-fit,minmax(150px,1fr));margin-bottom:14px">{kpis}</div>
+<div class="card2" style="margin-bottom:14px"><div class="t" style="margin-bottom:8px">روند عملکرد ۳۰ روز اخیر</div>
+{_bars([12, 18, 9, 24, 30, 22, 35, 28, 41, 38, 46, 52], ['۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹', '۱۰', '۱۱', '۱۲'])}
+</div>
+<div class="card2"><div class="t" style="margin-bottom:8px">آخرین فعالیت‌ها</div>
+<table><thead><tr><th>#</th><th>مورد</th><th>وضعیت</th><th>پیشرفت</th></tr></thead><tbody>{rows}</tbody></table></div>
 """
+    return _screen_shell("داشبورد و صفحات مدیریت",
+                         ["داشبورد", "پروژه‌ها", "درخواست‌ها", "کاربران", "گزارش‌ها", "تنظیمات"],
+                         body)
 
-JS_WEBAPP = """
-const ITEMS = __DATA__;
-const grid = document.getElementById('grid');
-const chips = document.getElementById('chips');
-const cats = ['همه', ...new Set(ITEMS.map(i=>i.cat))];
-chips.innerHTML = cats.map((c,i)=>`<button class="${i===0?'active':''}" data-c="${c}">${c}</button>`).join('');
-function render(cat){
-  const rows = ITEMS.filter(i=> cat==='همه' || i.cat===cat);
-  grid.innerHTML = rows.map(i=>`<div class="feat">
-    <div class="t">${i.name}</div><div class="d">${i.desc}</div>
-    <div class="rowflex" style="margin-top:10px"><span class="badge b-run">${i.tag}</span>
-    <span class="muted">${i.meta}</span></div></div>`).join('');
-}
-render('همه');
-chips.onclick = e=>{ if(e.target.tagName!=='BUTTON') return;
-  chips.querySelectorAll('button').forEach(b=>b.classList.remove('active'));
-  e.target.classList.add('active'); render(e.target.dataset.c); };
-document.getElementById('quote').onsubmit = e=>{
-  e.preventDefault();
-  const name = document.getElementById('q-name').value.trim();
-  const phone = document.getElementById('q-phone').value.trim();
-  const msg = document.getElementById('q-msg');
-  if(name.length<3){ msg.textContent='لطفاً نام کامل را وارد کنید.'; msg.style.color='#a02626'; return; }
-  if(!/^(\\+98|0)?9\\d{9}$/.test(phone.replace(/[\\s-]/g,''))){ msg.textContent='شماره موبایل معتبر نیست.'; msg.style.color='#a02626'; return; }
-  msg.style.color='#1a7f4b';
-  msg.textContent='درخواست شما ثبت شد (نسخه نمونه) — همکاران ما با شما تماس می‌گیرند.';
-  e.target.reset();
-};
-document.querySelectorAll('a[href^="#"]').forEach(a=>a.onclick=e=>{
-  e.preventDefault(); const el=document.querySelector(a.getAttribute('href'));
-  el && el.scrollIntoView({behavior:'smooth'});
-});
+
+def _pipeline_screens(project: Project, screening: dict) -> str:
+    files = _pipeline_rows(project)
+    rows = "".join(
+        f"<tr><td>{f['name']}</td><td>{f['pages']}</td><td>{f['tables']}</td><td>{f['formulas']}</td>"
+        f"<td>{f['images']}</td><td><span class='badge b-ok'>{f['acc']}٪ دقت</span></td></tr>"
+        for f in files[:6]
+    )
+    sample = json.dumps({
+        "file": files[0]["name"] if files else "book-01.pdf",
+        "pages": files[0]["pages"] if files else 320,
+        "chapters": [{"title": "فصل اول", "paragraphs": 42, "tables": 3, "formulas": 7}],
+        "output_format": "json",
+        "assets": {"images": 24, "extracted_at": "2026-09-28T09:00:00Z"},
+    }, ensure_ascii=False, indent=2)
+    body = f"""
+<div class="grid g4" style="grid-template-columns:repeat(auto-fit,minmax(150px,1fr));margin-bottom:14px">
+  <div class="kpi"><div class="k">فایل‌های پردازش‌شده</div><div class="v">۱۵۰</div><div class="d">از ۱۵۰ کتاب</div></div>
+  <div class="kpi"><div class="k">دقت استخراج</div><div class="v">۹۷٪</div><div class="d">کنترل کیفیت خودکار</div></div>
+  <div class="kpi"><div class="k">زمان هر کتاب</div><div class="v">۴۵ ثانیه</div><div class="d">بدون دخالت دستی</div></div>
+  <div class="kpi"><div class="k">خروجی</div><div class="v">JSON</div><div class="d">ساختاریافته و قابل جستجو</div></div>
+</div>
+<div class="card2" style="margin-bottom:14px">
+  <div class="rowflex" style="justify-content:space-between;margin-bottom:10px">
+    <div class="t">صف پردازش</div><span class="btn" style="padding:7px 14px;font-size:13px">شروع استخراج</span></div>
+  <div class="progress"><i style="width:72%"></i></div>
+  <div class="log">› خواندن فایل و تشخیص ساختار
+› استخراج متن و حفظ ترتیب پاراگراف‌ها
+› استخراج جداول و تبدیل به JSON
+› شناسایی و ذخیره فرمول‌ها
+› کنترل کیفیت و تولید گزارش</div>
+</div>
+<div class="card2" style="margin-bottom:14px"><div class="t" style="margin-bottom:8px">نتایج پردازش</div>
+<table><thead><tr><th>فایل</th><th>صفحات</th><th>جداول</th><th>فرمول‌ها</th><th>تصاویر</th><th>کیفیت</th></tr></thead>
+<tbody>{rows}</tbody></table></div>
+<div class="card2"><div class="t" style="margin-bottom:8px">نمونه خروجی JSON</div><pre class="json" style="margin:0">{sample}</pre></div>
 """
+    return _screen_shell("پنل پردازش و خروجی ساختاریافته",
+                         ["داشبورد", "بارگذاری فایل", "صف پردازش", "خروجی‌ها", "گزارش کیفیت", "تنظیمات"],
+                         body)
 
-JS_DASHBOARD = """
-const DATA = __DATA__;
-const state = {period: 30};
-function fmt(n){ return n.toLocaleString('fa-IR'); }
-function render(){
-  const d = DATA[state.period];
-  document.getElementById('kpis').innerHTML = d.kpis.map(k=>
-    `<div class="kpi"><div class="k">${k.k}</div><div class="v">${fmt(k.v)}</div><div class="d">${k.d}</div></div>`).join('');
-  const max = Math.max(...d.chart.map(c=>c.v));
-  document.getElementById('bars').innerHTML = d.chart.map(c=>`
-    <g><text x="0" y="${0}" style="font-size:11px"></text>
-    <rect x="0" y="0" width="100%" height="0"></rect></g>`).join('') +
-    d.chart.map((c,i)=>`
-    <g transform="translate(${i*62+14},0)">
-      <rect class="bar" x="0" y="${150 - (c.v/max)*130}" width="42" height="${(c.v/max)*130}" rx="6"><title>${c.l}: ${fmt(c.v)}</title></rect>
-      <text x="21" y="168" text-anchor="middle" style="font-size:11px;fill:#6b7280">${c.l}</text>
-      <text x="21" y="${150 - (c.v/max)*130 - 6}" text-anchor="middle" style="font-size:10.5px;fill:#3b5bdb">${fmt(c.v)}</text>
-    </g>`).join('');
-  document.getElementById('tbody').innerHTML = d.rows.map(r=>
-    `<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td><td><span class="badge ${r[3]}">${r[4]}</span></td></tr>`).join('');
-  document.getElementById('nrows').textContent = d.rows.length;
-}
-document.getElementById('periods').onclick = e=>{
-  if(e.target.tagName!=='BUTTON') return;
-  document.querySelectorAll('#periods button').forEach(b=>b.classList.remove('active'));
-  e.target.classList.add('active');
-  state.period = +e.target.dataset.p; render();
-};
-document.getElementById('search').oninput = e=>{
-  const q = e.target.value.trim();
-  document.querySelectorAll('#tbody tr').forEach(tr=>
-    tr.style.display = (tr.innerText.includes(q) || !q) ? '' : 'none');
-};
-render();
+
+def _bot_screens(project: Project, screening: dict) -> str:
+    chat = "".join(
+        f'<div class="msg {"me" if i % 2 else "you"}" style="background:{"#3b5bdb;color:#fff;margin-left:auto" if i % 2 else "#fff;border:1px solid #e2e7f2"};'
+        f'padding:8px 12px;border-radius:14px;margin:6px 0;max-width:78%;font-size:13.5px">{m}</div>'
+        for i, m in enumerate([
+            "سلام! من دستیار هوشمند شما هستم 👋",
+            "چطور می‌توانم کمک کنم؟",
+            "قیمت محصول X چند است؟",
+            "قیمت محصول X برابر ۱۲۵,۰۰۰ تومان است. موجودی: ۱۴ عدد",
+        ])
+    )
+    body = f"""
+<div class="grid" style="grid-template-columns:1fr 1fr;gap:14px">
+  <div class="card2"><div class="t" style="margin-bottom:10px">گفتگو با ربات</div>
+    <div style="background:#eef1f8;border-radius:12px;padding:10px">{chat}</div>
+    <div class="rowflex" style="margin-top:10px"><input placeholder="پیام خود را بنویسید…"><span class="btn">ارسال</span></div>
+  </div>
+  <div class="card2"><div class="t" style="margin-bottom:10px">پنل مدیریت ربات</div>
+    <div class="grid g4" style="grid-template-columns:1fr 1fr">
+      <div class="kpi"><div class="k">کاربران فعال</div><div class="v">۱,۲۴۸</div><div class="d">↑ ۱۲٪</div></div>
+      <div class="kpi"><div class="k">پیام امروز</div><div class="v">۳۴۲</div><div class="d">پاسخ ۱.۲ ثانیه</div></div>
+      <div class="kpi"><div class="k">دستورات</div><div class="v">۱۸</div><div class="d">قابل افزودن</div></div>
+      <div class="kpi"><div class="k">رضایت</div><div class="v">۴.۸/۵</div><div class="d">از نظرسنجی</div></div>
+    </div>
+    <table style="margin-top:12px"><thead><tr><th>دستور</th><th>پاسخ</th><th>تعداد استفاده</th></tr></thead>
+      <tbody><tr><td>قیمت</td><td>ارسال لیست قیمت</td><td>۱,۲۰۴</td></tr>
+      <tr><td>پیگیری</td><td>وضعیت سفارش</td><td>۸۷۰</td></tr>
+      <tr><td>پشتیبانی</td><td>اتصال به اپراتور</td><td>۳۱۵</td></tr></tbody></table>
+  </div>
+</div>
 """
-
-JS_BOT = """
-const REPLIES = __DATA__;
-const chat = document.getElementById('chat');
-const input = document.getElementById('msg');
-function add(text, who){
-  const d = document.createElement('div');
-  d.className = 'msg ' + who; d.textContent = text; chat.appendChild(d);
-  chat.scrollTop = chat.scrollHeight;
-}
-function respond(text){
-  const t = text.toLowerCase();
-  let reply = REPLIES.default;
-  for(const item of REPLIES.rules){ if(item.k.some(k=>t.includes(k))){ reply = item.r; break; } }
-  const typing = document.createElement('div');
-  typing.className='msg you'; typing.textContent='…';
-  chat.appendChild(typing); chat.scrollTop = chat.scrollHeight;
-  setTimeout(()=>{ typing.remove(); add(reply,'you'); }, 700);
-}
-document.getElementById('send').onclick = ()=>{
-  const v = input.value.trim(); if(!v) return;
-  add(v,'me'); input.value=''; respond(v);
-};
-input.onkeydown = e=>{ if(e.key==='Enter'){ document.getElementById('send').click(); } };
-document.getElementById('cmds').onclick = e=>{
-  if(e.target.tagName!=='BUTTON') return;
-  const v = e.target.textContent; add(v,'me'); respond(v);
-};
-"""
+    return _screen_shell("ربات و پنل مدیریت", ["داشبورد", "گفتگوها", "کاربران", "دستورات", "گزارش‌ها", "تنظیمات"], body)
 
 
-# ---------------------------------------------------------------- sample data
 def _pipeline_rows(project: Project) -> list[dict]:
-    return [
-        {"name": "فصل‌ اول - مقدمات.pdf", "size": "۴.۲ مگابایت", "pages": 212, "tables": 18,
-         "formulas": 46, "images": 31, "status": "در انتظار", "badge": "b-wait", "acc": 98},
-        {"name": "کتاب مرجع (نسخه دوم).epub", "size": "۶.۸ مگابایت", "pages": 388, "tables": 27,
-         "formulas": 112, "images": 54, "status": "در انتظار", "badge": "b-wait", "acc": 97},
-        {"name": "مجموعه مقالات - جلد ۳.pdf", "size": "۹.۱ مگابایت", "pages": 140, "tables": 9,
-         "formulas": 63, "images": 22, "status": "در انتظار", "badge": "b-wait", "acc": 99},
-        {"name": "جزوه درسی - فصل ۵.pdf", "size": "۲.۴ مگابایت", "pages": 76, "tables": 6,
-         "formulas": 21, "images": 12, "status": "در انتظار", "badge": "b-wait", "acc": 96},
-        {"name": "گزارش سالانه - پیوست‌ها.pdf", "size": "۱۲.۵ مگابایت", "pages": 264, "tables": 41,
-         "formulas": 8, "images": 76, "status": "در انتظار", "badge": "b-wait", "acc": 97},
-    ]
-
-
-def _webapp_items(project: Project, features: list[str]) -> list[dict]:
-    generic = [
-        {"cat": "خدمات", "name": "معرفی خدمات", "desc": "صفحه‌ی اختصاصی هر خدمت با توضیح، مزایا و مسیر اقدام", "tag": "صفحه", "meta": "لودینگ زیر ۱ ثانیه"},
-        {"cat": "خدمات", "name": "دسته‌بندی محصولات", "desc": "نمایش دسته‌بندی‌شده با فیلتر و جستجوی سریع", "tag": "دینامیک", "meta": "جستجوی زنده"},
-        {"cat": "محتوا", "name": "مقالات و اخبار", "desc": "بخش وبلاگ با امکان انتشار مطلب از پنل مدیریت", "tag": "CMS", "meta": "ویرایشگر ساده"},
-        {"cat": "محتوا", "name": "درباره‌ی ما", "desc": "معرفی مجموعه، سوابق و تیم", "tag": "صفحه", "meta": "اعتمادساز"},
-        {"cat": "ارتباط", "name": "فرم درخواست/استعلام", "desc": "ثبت درخواست با اعتبارسنجی و ارسال به پنل", "tag": "فرم", "meta": "اعلان فوری"},
-        {"cat": "ارتباط", "name": "تماس با ما", "desc": "نقشه، شماره‌ها، واتساپ و فرم تماس", "tag": "صفحه", "meta": "واکنش‌گرا"},
-    ]
-    items: list[dict] = []
-    for i, feat in enumerate(features[:6]):
-        items.append({
-            "cat": "نیازمندی‌های شما",
-            "name": feat[:60],
-            "desc": "پیاده‌سازی‌شده در نسخه‌ی نهایی — در این دمو با داده‌ی نمونه نمایش داده می‌شود",
-            "tag": "از متن آگهی",
-            "meta": f"مورد {i + 1}",
+    names = ["کتاب-جلد-اول.pdf", "کتاب-جلد-دوم.pdf", "کتاب-جلد-سوم.pdf", "مرجع-تخصصی.pdf", "مجموعه-مقالات.pdf"]
+    out = []
+    for i, n in enumerate(names):
+        out.append({
+            "name": n, "size": f"{2 + i * 3}.{i + 2} MB", "pages": 180 + i * 40,
+            "tables": 6 + i * 3, "formulas": 12 + i * 7, "images": 20 + i * 9,
+            "status": "آماده", "badge": "b-ok", "acc": 96 - i,
         })
-    return (items + generic)[:9]
+    return out
 
 
-def _dashboard_data(project: Project) -> dict:
-    def kpis(v1, v2, v3, v4):
-        return [
-            {"k": "بازدید امروز", "v": v1, "d": "↑ رشد نسبت به دوره قبل"},
-            {"k": "درخواست جدید", "v": v2, "d": "↑ ثبت‌شده در همین بازه"},
-            {"k": "نرخ تبدیل", "v": v3, "d": "درصد بازدیدکننده به مشتری"},
-            {"k": "درآمد (تومان)", "v": v4, "d": "مجموع سفارش‌های تکمیل‌شده"},
-        ]
-
-    labels = ["فروردین", "اردیبهشت", "خرداد", "تیر", "مرداد", "شهریور", "مهر"]
-    return {
-        "30": {
-            "kpis": kpis(1240, 86, "۶.۹٪", "۴۸,۵۰۰,۰۰۰"),
-            "chart": [{"l": l, "v": v} for l, v in zip(labels, [120, 165, 148, 210, 260, 305, 342])],
-            "rows": [
-                ["سارا احمدی", "درخواست مشاوره", "۱۴۰۴/۰۶/۲۲", "b-ok", "تکمیل‌شده"],
-                ["شرکت پارس", "درخواست پیش‌فاکتور", "۱۴۰۴/۰۶/۲۱", "b-wait", "در انتظار"],
-                ["مهدی رضایی", "رزرو نوبت", "۱۴۰۴/۰۶/۲۰", "b-ok", "تایید‌شده"],
-                ["کلینیک نور", "سفارش عمده", "۱۴۰۴/۰۶/۱۹", "b-run", "در حال انجام"],
-                ["زهرا کاظمی", "پیگیری سفارش", "۱۴۰۴/۰۶/۱۸", "b-ok", "پاسخ داده شد"],
-            ],
-        },
-        "90": {
-            "kpis": kpis(3890, 264, "۷.۴٪", "۱۶۲,۳۰۰,۰۰۰"),
-            "chart": [{"l": l, "v": v} for l, v in zip(labels, [420, 505, 610, 700, 690, 810, 902])],
-            "rows": [
-                ["شرکت آریا", "قرارداد خدمات", "۱۴۰۴/۰۴/۱۱", "b-ok", "تکمیل‌شده"],
-                ["مجموعه مهر", "سفارش عمده", "۱۴۰۴/۰۴/۰۸", "b-ok", "تکمیل‌شده"],
-                ["نیما فرهاد", "درخواست مشاوره", "۱۴۰۴/۰۴/۰۲", "b-wait", "در انتظار"],
-                ["سازمان نمونه", "درخواست همکاری", "۱۴۰۴/۰۳/۲۸", "b-run", "در حال انجام"],
-                ["پژمان نوری", "شکایت/پیگیری", "۱۴۰۴/۰۳/۲۴", "b-bad", "نیاز به رسیدگی"],
-            ],
-        },
-    }
-
-
-def _bot_data(project: Project) -> dict:
-    return {
-        "default": "متوجه شدم. این قابلیت در نسخه‌ی نهایی ربات به‌صورت کامل پیاده‌سازی می‌شود. "
-                   "برای اجرای دقیق‌تر، دستور مورد نظر را از دکمه‌های بالا انتخاب کنید.",
-        "rules": [
-            {"k": ["سلام", "درود", "hi", "hello"], "r": "سلام! 👋 من دستیار هوشمند شما هستم. چطور می‌توانم کمک کنم؟"},
-            {"k": ["قیمت", "هزینه", "تعرفه"], "r": "لیست قیمت‌ها اینجا نمایش داده می‌شود. برای استعلام دقیق، نوع خدمت را انتخاب کنید."},
-            {"k": ["نوبت", "رزرو", "وقت"], "r": "نزدیک‌ترین زمان‌های آزاد: یکشنبه ۱۰:۰۰، دوشنبه ۱۶:۳۰، سه‌شنبه ۱۱:۱۵. کدام را می‌خواهید؟"},
-            {"k": ["سفارش", "خرید", "پیگیری"], "r": "سفارش شما با کد ۱۲۰۴ ثبت شد و در صف بررسی است. وضعیت را اینجا پیگیری کنید."},
-            {"k": ["پشتیبانی", "مشکل", "خطا"], "r": "درخواست شما به واحد پشتیبانی ارجاع شد. همکاران ما حداکثر تا ۲ ساعت پاسخ می‌دهند."},
-            {"k": ["آدرس", "نشانی", "کجاست"], "r": "آدرس روی نقشه نمایش داده می‌شود. همچنین از طریق دکمه‌ی زیر می‌توانید مسیریابی کنید."},
-        ],
-    }
-
-
-# ---------------------------------------------------------------- HTML blocks
-def _head(title: str, subtitle: str, chips: list[str]) -> str:
+# ---------------------------------------------------------------------------
+# خروجی نهایی
+# ---------------------------------------------------------------------------
+def _doc(title: str, subtitle: str, chips: list[str], palette: tuple, body: str,
+         watermark: str, ribbon_note: str = "") -> str:
+    primary, accent, _ = palette
     chip_html = "".join(f'<span class="chip">{c}</span>' for c in chips)
+    wm = _watermark_svg(watermark)
     return f"""<!doctype html>
 <html lang="fa" dir="rtl"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>{title} — دمو</title>
-<style>{CSS}</style></head>
+<meta name="robots" content="noindex,nofollow">
+<title>{title}</title>
+<style>:root{{--p:{primary};--a:{accent}}}{CSS}{CSS_MOCK}{CSS_LOCK}</style></head>
 <body>
-<header class="hero"><div class="wrap">
-<div class="eyebrow">نسخه‌ی نمونه (دمو) — آماده‌شده برای آگهی فریلنسری</div>
-<h1>{title}</h1>
-<div style="opacity:.9">{subtitle}</div>
-<div class="chips">{chip_html}</div>
-</div></header>
-<div class="wrap">
-"""
-
-
-def _meta(project: Project, screening: dict, proposal: dict | None) -> str:
-    price = f'{proposal["price"]:,} تومان' if proposal else "—"
-    budget = f'{project.budget_toman:,} تومان' if project.budget_toman else "اعلام نشده"
-    hours = screening.get("est_hours", "—")
-    days = screening.get("schedule_days", "—")
-    return f"""<div class="meta">
-<div class="box"><div class="k">دسته‌بندی</div><div class="v">{screening['category_label']}</div></div>
-<div class="box"><div class="k">زمان اجرا (برآورد)</div><div class="v">{hours} ساعت</div></div>
-<div class="box"><div class="k">زمان تحویل</div><div class="v">{days} روز کاری</div></div>
-<div class="box"><div class="k">قیمت پیشنهادی</div><div class="v">{price}</div></div>
-<div class="box"><div class="k">بودجه کارفرما</div><div class="v">{budget}</div></div>
+{LOCK_HTML.replace("{wm}", wm)}
+<div class="mockbar">👁 <b>پیش‌نمایش گرافیکیِ نمونه</b> — این طرح برای نمایشِ خروجی پروژه ساخته شده و
+هیچ بخش آن قابل استفاده نیست{ribbon_note}</div>
+<div style="padding:16px 0 40px">
+<div class="wrap" style="max-width:1160px">
+  <div style="margin-bottom:14px">
+    <h1 style="font-size:22px;margin:0 0 6px">{title}</h1>
+    <div class="muted">{subtitle}</div>
+    <div style="margin-top:8px">{chip_html}</div>
+  </div>
+  {body}
 </div>
-<div class="notice">⚠️ این صفحه یک <b>دموی تعاملی</b> است که با داده‌های نمونه ساخته شده تا خروجیِ نهایی پروژه
-را پیش از عقد قرارداد نشان دهد. متن آگهی: «{project.title}»</div>
-"""
+</div>
+<script>{LOCK_JS}</script>
+</body></html>"""
 
 
-def _deliverables(deliverables: list[str], milestones: list[dict]) -> str:
-    if not deliverables:
-        return ""
-    items = "".join(f'<div class="feat"><div class="t">{d}</div></div>' for d in deliverables)
-    steps = "".join(
-        f'<div class="step"><b>{m["title"]}</b> — {int(m["share"] * 100)}٪<br>'
-        f'<span class="muted">{m["when"]}</span></div>' for m in (milestones or [])
+def _spec_block(screening: dict, proposal: dict | None) -> str:
+    deliverables = screening.get("deliverables") or []
+    milestones = (proposal or {}).get("milestones") or []
+    d_html = "".join(f'<div class="card2"><div class="t">✓ {d}</div></div>' for d in deliverables) or \
+             '<div class="muted">موارد تحویل از متن آگهی استخراج می‌شود.</div>'
+    m_html = "".join(
+        f'<div class="step"><span class="t">{m["title"]}</span> — {int(m["share"] * 100)}٪'
+        f'<div class="muted">{m["when"]}</div></div>' for m in milestones
     )
-    return f"""<div class="card"><h2>چه چیزی تحویل می‌دهید</h2><div class="grid">{items}</div></div>
-<div class="card"><h2>برنامه‌ی تحویل و پرداخت</h2><div class="steps">{steps}</div></div>
-"""
+    return f"""
+<div class="card" style="margin-top:16px"><h2>چه چیزی تحویل می‌گیرید</h2>
+<div class="grid g3">{d_html}</div>
+{'<h2 style="margin-top:18px">برنامه‌ی تحویل و پرداخت</h2><div class="steps">' + m_html + '</div>' if m_html else ''}
+</div>"""
 
 
-def _footer(project: Project) -> str:
-    now = datetime.now().strftime("%Y/%m/%d %H:%M")
-    return f"""<footer class="foot">
-ساخته‌شده با «فریلنس‌یار آرنا» در تاریخ {now} — داده‌های این صفحه نمونه و غیرواقعی هستند.<br>
-آگهی اصلی: <a href="{project.url}" target="_blank" rel="noopener">{project.source_label}</a>
-</footer></div></body></html>
-"""
-
-
-def _body_pipeline(project: Project, screening: dict, proposal: dict | None) -> str:
-    files = _pipeline_rows(project)
-    return f"""<div class="card"><h2>۱. انتخاب ورودی</h2>
-<div class="drop" id="zone">فایل‌های خود را اینجا بکشید یا کلیک کنید (در این دمو از فایل‌های نمونه استفاده می‌شود)</div>
-<table style="margin-top:14px"><thead><tr><th></th><th>نام فایل</th><th>حجم</th><th>تعداد صفحه</th><th>وضعیت</th></tr></thead>
-<tbody id="filelist"></tbody></table></div>
-
-<div class="card"><h2>۲. اجرای pipeline</h2>
-<div class="rowflex"><button class="btn" id="run">شروع استخراج</button>
-<button class="btn ghost" onclick="document.querySelectorAll('#filelist input').forEach(c=>c.checked=true)">انتخاب همه</button></div>
-<div class="progress"><i></i></div>
-<div class="log" id="log">› منتظر شروع…</div></div>
-
-<div class="card" id="results" style="display:none"><h2>۳. خروجی ساختاریافته</h2>
-<table><thead><tr><th>فایل</th><th>صفحات</th><th>جداول</th><th>فرمول‌ها</th><th>تصاویر</th><th>کیفیت</th><th>خروجی</th></tr></thead>
-<tbody id="tbody"></tbody></table>
-<div class="notice" style="margin-top:14px">نمونه‌ی خروجی JSON (همان چیزی که تحویل می‌شود):</div>
-<pre class="json" id="jsonbox" style="display:none"></pre></div>
-<script>{JS_PIPELINE.replace("__DATA__", json.dumps(files, ensure_ascii=False))}</script>
-"""
-
-
-def _body_webapp(project: Project, screening: dict, proposal: dict | None) -> str:
-    features = screening.get("features") or []
-    items = _webapp_items(project, features)
-    feat_cards = "".join(
-        f'<div class="feat"><div class="t">{f[:70]}</div>'
-        f'<div class="d">در نسخه‌ی نهایی پیاده‌سازی می‌شود</div></div>' for f in features[:6]
-    ) or '<div class="muted">نیازمندی‌های پروژه از متن آگهی استخراج و در نسخه نهایی پیاده می‌شود.</div>'
-    return f"""<div class="card"><h2>نیازمندی‌های استخراج‌شده از آگهی</h2>
-<div class="grid">{feat_cards}</div></div>
-
-<div class="card"><h2>پیش‌نمایش صفحات و امکانات</h2>
-<div class="nav" id="chips"></div>
-<div class="grid" id="grid"></div></div>
-
-<div class="card"><h2>فرم درخواست / استعلام (نمونه‌ی واقعی)</h2>
-<form id="quote" class="grid" style="gap:10px">
-<div><label>نام و نام خانوادگی</label><input id="q-name" placeholder="مثال: علی محمدی"></div>
-<div><label>شماره موبایل</label><input id="q-phone" placeholder="09xxxxxxxxx"></div>
-<div><label>نوع درخواست</label><select><option>استعلام قیمت</option><option>درخواست مشاوره</option><option>رزرو نوبت</option></select></div>
-<div style="display:flex;align-items:end;gap:10px"><button class="btn" type="submit">ارسال درخواست</button>
-<span class="muted" id="q-msg"></span></div></form></div>
-<script>{JS_WEBAPP.replace("__DATA__", json.dumps(items, ensure_ascii=False))}</script>
-"""
-
-
-def _body_dashboard(project: Project, screening: dict, proposal: dict | None) -> str:
-    data = _dashboard_data(project)
-    return f"""<div class="card"><h2>شاخص‌های کلیدی</h2>
-<div class="rowflex" style="margin-bottom:12px">
-<div class="nav" id="periods" style="margin:0">
-<button class="active" data-p="30">۳۰ روز اخیر</button><button data-p="90">۹۰ روز اخیر</button></div>
-<input id="search" placeholder="جستجو در جدول…" style="max-width:250px"></div>
-<div class="kpis" id="kpis"></div></div>
-
-<div class="card"><h2>روند عملکرد</h2>
-<svg viewBox="0 0 460 180" style="width:100%;height:210px">
-<defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1">
-<stop offset="0" stop-color="#3b5bdb"/><stop offset="1" stop-color="#22b8cf"/></linearGradient></defs>
-<g id="bars"></g></svg></div>
-
-<div class="card"><h2>آخرین درخواست‌ها <span class="muted">(<span id="nrows">0</span> مورد)</span></h2>
-<table><thead><tr><th>نام</th><th>نوع درخواست</th><th>تاریخ</th><th>وضعیت</th></tr></thead>
-<tbody id="tbody"></tbody></table></div>
-<script>{JS_DASHBOARD.replace("__DATA__", json.dumps(data, ensure_ascii=False))}</script>
-"""
-
-
-def _body_bot(project: Project, screening: dict, proposal: dict | None) -> str:
-    data = _bot_data(project)
-    cmds = "".join(f"<button>{r['k'][0].capitalize()}</button>" for r in data["rules"])
-    return f"""<div class="grid">
-<div class="card"><h2>گفتگو با ربات (نسخه نمونه)</h2>
-<div class="phone"><div class="chat" id="chat">
-<div class="msg you">سلام! من دستیار هوشمند شما هستم 👋 چطور می‌توانم کمک کنم؟</div>
-</div>
-<div class="rowflex" style="padding:10px;border-top:1px solid #eceff7">
-<input id="msg" placeholder="پیام خود را بنویسید…"><button class="btn" id="send">ارسال</button></div></div>
-<div class="nav" id="cmds">{cmds}</div></div>
-
-<div class="card"><h2>امکانات پنل مدیریت</h2>
-<div class="kpis">
-<div class="kpi"><div class="k">کاربران فعال</div><div class="v">۱,۲۴۸</div><div class="d">↑ ۱۲٪ این هفته</div></div>
-<div class="kpi"><div class="k">پیام‌های امروز</div><div class="v">۳۴۲</div><div class="d">میانگین پاسخ ۱.۲ ثانیه</div></div>
-<div class="kpi"><div class="k">دستورات تعریف‌شده</div><div class="v">۱۸</div><div class="d">قابل افزودن از پنل</div></div>
-</div>
-<div class="grid" style="margin-top:14px">
-<div class="feat"><div class="t">پاسخ‌گویی خودکار</div><div class="d">بر اساس کلمات کلیدی و قوانین تعریف‌شده</div></div>
-<div class="feat"><div class="t">اتصال به پایگاه داده</div><div class="d">ذخیره‌ی کاربران و گفتگوها</div></div>
-<div class="feat"><div class="t">گزارش‌گیری</div><div class="d">نمایش آمار استفاده و رضایت</div></div>
-<div class="feat"><div class="t">اجرا روی سرور شما</div><div class="d">تحویل همراه فایل راه‌اندازی</div></div>
-</div></div></div>
-<script>{JS_BOT.replace("__DATA__", json.dumps(data, ensure_ascii=False))}</script>
-"""
-
-
-KIND_BY_CATEGORY = {
-    "data_pipeline": "pipeline",
-    "automation": "pipeline",
-    "dashboard": "dashboard",
-    "bot": "bot",
-    "ai_app": "webapp",
-    "web_app": "webapp",
-    "landing": "webapp",
-    "plugin_cms": "webapp",
-    "mobile_app": "webapp",
-    "chrome_extension": "webapp",
-    "content": "dashboard",
-    "data_entry": "pipeline",
-    "other": "webapp",
-}
-
-
-def choose_kind(screening: dict) -> str:
-    return KIND_BY_CATEGORY.get(screening.get("category", "other"), "webapp")
+def choose_kind(screening: dict, project: Project) -> str:
+    cat = screening.get("category", "other")
+    hay = f"{project.title} {project.description}".lower()
+    # نرم‌افزار/سامانه/اپلیکیشن → صفحات اپلیکیشن
+    if re.search(r"اپلیکیشن|اپ موبایل|نرم ?افزار|سامانه|پورتال|پنل کاربر", hay):
+        return "app"
+    # ERP / یکپارچه‌سازی / داشبورد → صفحات داشبورد
+    if re.search(r"odoo|erp|یک ?پارچه ?سازی|انبار|حسابداری|داشبورد|رهگیری سفارش", hay):
+        return "dashboard"
+    if cat in ("data_pipeline", "automation", "data_entry"):
+        return "pipeline"
+    if cat == "bot":
+        return "bot"
+    if cat == "dashboard":
+        return "dashboard"
+    if cat in ("landing", "web_app", "plugin_cms", "mobile_app", "chrome_extension", "content"):
+        return "site"
+    if re.search(r"odoo|erp|یکپارچه ?سازی|انبار|حسابداری", hay):
+        return "dashboard"
+    return "site"
 
 
 def build_demo(project: Project, screening: dict, proposal: dict | None, out_dir: Path,
                base_url: str = "") -> dict:
-    """یک فایل HTML مستقل می‌سازد و مشخصات آن را برمی‌گرداند."""
-    kind = choose_kind(screening)
+    """دو فایل می‌سازد: index.html (داخلی) و client.html (ارسال به کارفرما)."""
+    kind = choose_kind(screening, project)
+    archetype = detect_archetype(project, screening)
+    brand = _brand_from_title(project.title, archetype)
+    palette = PALETTES.get(archetype, PALETTES["corporate"])
+    bilingual = bool(re.search(r"انگلیسی|دو ?زبانه|چند ?زبانه|bilingual", project.title + project.description, re.I))
+    c = _content(archetype, brand)
+    c["brand"] = brand
+
     slug = slugify(f"{project.source}-{project.external_id}-{project.title}")
     folder = Path(out_dir) / slug
     folder.mkdir(parents=True, exist_ok=True)
 
-    subtitle = (project.description or "")[:220].strip()
-    if len((project.description or "")) > 220:
-        subtitle += "…"
-    chips = [
-        f"منبع: {project.source_label}",
-        f"دسته: {screening['category_label']}",
-        f"امتیاز اجراپذیری: {screening['score']}/۱۰۰",
-        f"نوع دمو: {kind}",
-    ]
+    # --- بدنه‌ی اصلی (پیش‌نمایش گرافیکی) ---
+    if kind == "site":
+        mock = _mock_page(c, archetype, palette, bilingual)
+    elif kind == "pipeline":
+        mock = _pipeline_screens(project, screening)
+    elif kind == "bot":
+        mock = _bot_screens(project, screening)
+    else:
+        mock = _app_screens(project, screening)
 
-    body = {
-        "pipeline": _body_pipeline,
-        "webapp": _body_webapp,
-        "dashboard": _body_dashboard,
-        "bot": _body_bot,
-    }[kind](project, screening, proposal)
+    # --- نسخه‌ی داخلی ---
+    price = to_persian_digits(f'{proposal["price"]:,}') + " تومان" if proposal else "—"
+    budget = to_persian_digits(f'{project.budget_toman:,}') + " تومان" if project.budget_toman else "اعلام نشده"
+    internal_body = f"""
+<div class="card"><h2>اطلاعات پروژه</h2>
+<div class="grid g4">
+  <div class="kpi"><div class="k">منبع</div><div class="v" style="font-size:16px">{project.source_label}</div></div>
+  <div class="kpi"><div class="k">امتیاز اجراپذیری</div><div class="v">{to_persian_digits(screening['score'])}/۱۰۰</div></div>
+  <div class="kpi"><div class="k">برآورد زمان</div><div class="v">{to_persian_digits(screening.get('est_hours', '—'))} ساعت</div></div>
+  <div class="kpi"><div class="k">زمان تحویل</div><div class="v">{to_persian_digits(screening.get('schedule_days', '—'))} روز</div></div>
+  <div class="kpi"><div class="k">قیمت پیشنهادی ما</div><div class="v" style="font-size:19px">{price}</div></div>
+  <div class="kpi"><div class="k">بودجه کارفرما</div><div class="v" style="font-size:17px">{budget}</div></div>
+</div>
+<div class="muted" style="margin-top:12px">نوع پروژه شناسایی‌شده: <b>{ARCHETYPE_LABELS[archetype]}</b>
+ · قالب دمو: <b>{kind}</b>{' · دو زبانه (فارسی/انگلیسی)' if bilingual else ''}</div>
+<div class="muted">آگهی: <a href="{project.url}" target="_blank" rel="noopener">{clean_text(project.title)}</a></div>
+</div>
 
-    html = (
-        _head(clean_text(project.title), subtitle or "بدون توضیح", chips)
-        + _meta(project, screening, proposal)
-        + body
-        + _deliverables(screening.get("deliverables", []),
-                        (proposal or {}).get("milestones", []))
-        + _footer(project)
-    )
+{mock}
+{_spec_block(screening, proposal)}
+
+<div class="card"><h2>نسخه‌ی ارسال به کارفرما</h2>
+<div class="muted">فایل <b>client.html</b> در همین پوشه، نسخه‌ای است که مستقیماً برای کارفرما ارسال می‌شود:
+بدون امتیاز/برآورد داخلی، با واترمارک و قفلِ استفاده.</div>
+<div style="margin-top:10px"><a class="go" href="client.html" target="_blank">باز کردن client.html ↗</a></div>
+</div>
+"""
     index = folder / "index.html"
-    index.write_text(html, encoding="utf-8")
+    index.write_text(
+        _doc(
+            clean_text(project.title),
+            f"پیش‌نمایش گرافیکی برای آگهی «{clean_text(project.title)}» — {ARCHETYPE_LABELS[archetype]}",
+            [f"منبع: {project.source_label}", f"دسته: {screening['category_label']}",
+             f"امتیاز: {to_persian_digits(screening['score'])}/۱۰۰", f"نوع پیش‌نمایش: {kind}",
+             "نسخه‌ی داخلی"],
+            palette, internal_body, f"نمونه دمو — {brand}",
+        ),
+        encoding="utf-8",
+    )
+
+    # --- نسخه‌ی کارفرما (بدون اطلاعات داخلی) ---
+    client_body = f"""
+<div class="card"><h2>پیش‌نمایش اختصاصیِ طراحیِ پروژه‌ی شما</h2>
+<div class="muted">این پیش‌نمایش بر اساس توضیحات آگهی شما طراحی شده تا پیش از شروع همکاری،
+ظاهر و امکاناتِ خروجی نهایی را ببینید. نسخه‌ی کامل و قابل استفاده بلافاصله پس از تایید،
+طبق زمان‌بندی زیر تحویل می‌شود.</div>
+<div class="grid g4" style="margin-top:14px">
+  <div class="kpi"><div class="k">مبلغ پیشنهادی</div><div class="v" style="font-size:19px">{price}</div></div>
+  <div class="kpi"><div class="k">زمان تحویل</div><div class="v">{screening.get('schedule_days', '—')} روز کاری</div></div>
+  <div class="kpi"><div class="k">تعداد صفحات</div><div class="v">{len(c['nav'])} بخش اصلی</div></div>
+  <div class="kpi"><div class="k">طراحی</div><div class="v" style="font-size:17px">واکنش‌گرا (موبایل و دسکتاپ)</div></div>
+</div>
+</div>
+
+{mock}
+{_spec_block(screening, proposal)}
+
+<div class="card"><h2>مرحله‌ی بعد</h2>
+<div class="muted">برای شروع اجرا و دریافت نسخه‌ی قابل استفاده، کافی است از طریق همین آگهی پیام بدهید؛
+پس از تایید، طراحی نهایی، پیاده‌سازی، بارگذاری روی هاست و آموزش کار با سایت را انجام می‌دهم.</div>
+<div style="margin-top:12px"><span class="btn">درخواست شروع اجرا</span></div>
+</div>
+"""
+    client = folder / "client.html"
+    client.write_text(
+        _doc(
+            f"پیش‌نمایش طراحی — {brand}",
+            "این یک پیش‌نمایش گرافیکیِ اختصاصی است؛ خروجی نهایی پس از تایید قرارداد تحویل می‌شود.",
+            [ARCHETYPE_LABELS[archetype], "پیش‌نمایش اختصاصی", "غیرقابل استفاده (نمونه)"],
+            palette, client_body, f"پیش‌نمایش — نمونه غیرقابل استفاده",
+        ),
+        encoding="utf-8",
+    )
 
     meta = {
         "project_id": project.id,
         "title": project.title,
         "source": project.source,
         "kind": kind,
+        "archetype": archetype,
+        "archetype_label": ARCHETYPE_LABELS[archetype],
+        "brand": brand,
+        "bilingual": bilingual,
         "path": str(index),
         "rel": f"{slug}/index.html",
+        "client_path": str(client),
+        "client_rel": f"{slug}/client.html",
         "url": f"{base_url}/demos/{slug}/" if base_url else f"file://{index}",
         "built_at": datetime.now().isoformat(timespec="seconds"),
     }

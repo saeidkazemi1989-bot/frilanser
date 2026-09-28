@@ -259,22 +259,26 @@ def test_quick_price_matches_full_price_for_good_budget():
 
 
 # --------------------------------------------------------------- demo
-@pytest.mark.parametrize("kind", ["pipeline", "webapp", "dashboard", "bot"])
-def test_demo_builds_for_all_kinds(kind, tmp_path):
+@pytest.mark.parametrize("category,expected_kind", [
+    ("data_pipeline", "pipeline"),
+    ("web_app", "site"),
+    ("dashboard", "dashboard"),
+    ("bot", "bot"),
+])
+def test_demo_builds_for_all_kinds(category, expected_kind, tmp_path):
     cfg = load_config()
     p = make_project("پروژه نمونه", "یک پروژه تستی برای ساخت دمو با چند نیازمندی مشخص و داده نمونه",
                      budget_toman=12_000_000)
     screening = screen(p, cfg)
-    screening["category"] = {"pipeline": "data_pipeline", "webapp": "web_app",
-                             "dashboard": "dashboard", "bot": "bot"}[kind]
+    screening["category"] = category
     proposal = propose(p, screening, cfg)
     meta = build_demo(p, screening, proposal, tmp_path, base_url="http://localhost:5000")
     html = Path(meta["path"]).read_text(encoding="utf-8")
     assert "__DATA__" not in html
     assert "پروژه نمونه" in html
-    assert meta["kind"] == kind
+    assert meta["kind"] == expected_kind
     assert meta["rel"].endswith("index.html")
-    assert json.loads((Path(meta["path"]).parent / "meta.json").read_text(encoding="utf-8"))["kind"] == kind
+    assert json.loads((Path(meta["path"]).parent / "meta.json").read_text(encoding="utf-8"))["kind"] == expected_kind
 
 
 # --------------------------------------------------------------- pipeline
@@ -305,3 +309,81 @@ def test_full_pipeline_offline(tmp_path):
     assert not any(set(p.flags) & pipeline.CLOSED_FLAGS for p in store.all())
     # همه‌ی کاندیداها قیمت دارند
     assert all(p.proposal for p in store.all() if p.verdict == "candidate")
+
+
+# ------------------------------------------------------- دموی گرافیکی و قفل
+def test_demo_is_visual_mockup_and_locked(tmp_path):
+    from frilanser.demo_builder import build_demo, detect_archetype, _brand_from_title
+
+    project = Project.from_scrape(
+        "karlancer_programming", "1e82rr2n583w",
+        "طراحی و پیاده سازی وب سایت کلینیک تخصصی درمانی",
+        "https://www.karlancer.com/project/x",
+        description="طراحی سایت برای یک کلینیک تخصصی با نوبت‌دهی آنلاین",
+    )
+    screening = {
+        "category": "web_app", "category_label": "وب‌سایت/اپلیکیشن",
+        "score": 95, "est_hours": 17.6, "schedule_days": 4,
+        "deliverables": ["صفحه‌ی اصلی", "نوبت‌دهی آنلاین", "پنل مدیریت"],
+    }
+    proposal = {"price": 17_500_000, "milestones": [{"title": "پیش‌پرداخت", "share": 0.3, "when": "همین امروز"}]}
+
+    meta = build_demo(project, screening, proposal, tmp_path)
+
+    # آرکتایپ و نام برند از عنوان پروژه استخراج می‌شود
+    assert detect_archetype(project, screening) == "clinic"
+    assert _brand_from_title(project.title, "clinic") == "کلینیک تخصصی درمانی"
+    assert meta["archetype"] == "clinic" and meta["kind"] == "site"
+
+    html = Path(meta["path"]).read_text(encoding="utf-8")
+    client = Path(meta["client_path"]).read_text(encoding="utf-8")
+
+    for doc in (html, client):
+        # یک پیش‌نمایش گرافیکی واقعی است (نه فقط متن)
+        assert '<div class="mockwin">' in doc
+        assert "hero" in doc and "<svg" in doc
+        # قفلِ استفاده
+        assert 'id="guard"' in doc and 'id="wm"' in doc and 'id="ribbon"' in doc
+        assert "contextmenu" in doc and "selectstart" in doc
+        assert 'name="robots" content="noindex' in doc
+
+    # نسخه‌ی داخلی اطلاعات ما را دارد …
+    assert "امتیاز اجراپذیری" in html and "قیمت پیشنهادی ما" in html
+    # … و نسخه‌ی کارفرما ندارد
+    assert "امتیاز اجراپذیری" not in client
+    assert "قیمت پیشنهادی ما" not in client
+    assert "karlancer.com" not in client
+    # اما مبلغ و زمان تحویل را نشان می‌دهد
+    assert "۱۷,۵۰۰,۰۰۰" in client
+
+
+def test_demo_kinds_for_non_site_projects(tmp_path):
+    from frilanser.demo_builder import build_demo
+
+    cases = [
+        ("استخراج ساختاریافته محتوای حدود ۱۵۰ کتاب", "data_pipeline", "pipeline"),
+        ("یکپارچه سازی Odoo", "automation", "dashboard"),
+        ("تکمیل و آماده سازی یک وب اپلیکیشن پژوهشی برای نسخه بتا", "web_app", "app"),
+    ]
+    for title, category, expected in cases:
+        project = Project.from_scrape("ponisha", "x1", title, "https://ponisha.ir/project/x1")
+        screening = {"category": category, "category_label": "x", "score": 80,
+                     "est_hours": 10, "schedule_days": 3, "deliverables": []}
+        meta = build_demo(project, screening, {"price": 6_000_000, "milestones": []}, tmp_path)
+        assert meta["kind"] == expected, f"{title} → {meta['kind']} (انتظار: {expected})"
+        assert Path(meta["client_path"]).exists()
+
+
+def test_demo_bilingual_shop(tmp_path):
+    from frilanser.demo_builder import build_demo
+
+    project = Project.from_scrape("ponisha", "760389",
+                                  "افزودن زبان انگلیسی به سایت فروشگاهی موجود",
+                                  "https://ponisha.ir/project/760389")
+    screening = {"category": "plugin_cms", "category_label": "افزونه/قالب", "score": 85,
+                 "est_hours": 16.5, "schedule_days": 4, "deliverables": ["نسخه انگلیسی"]}
+    meta = build_demo(project, screening, {"price": 11_500_000, "milestones": []}, tmp_path)
+    assert meta["bilingual"] is True
+    assert meta["archetype"] == "shop"
+    html = Path(meta["path"]).read_text(encoding="utf-8")
+    assert "English version" in html

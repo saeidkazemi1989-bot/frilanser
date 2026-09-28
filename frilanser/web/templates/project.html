@@ -97,11 +97,17 @@
     <div class="panel">
       <h2>دموی ساخته‌شده</h2>
       {% if p.demo %}
-        <div class="muted" style="margin-bottom:8px">نوع دمو: {{ p.demo.kind }} — با داده‌های نمونه</div>
+        <div class="muted" style="margin-bottom:8px">
+          نوع پیش‌نمایش: {{ p.demo.get('archetype_label', p.demo.kind) }}
+          {% if p.demo.bilingual %} · دو زبانه (فارسی/انگلیسی){% endif %}
+        </div>
         <iframe class="demo" src="{{ url_for('serve_demo', filename=p.demo.rel) }}"></iframe>
         <div class="actions" style="margin-top:10px">
-          <a class="go" href="{{ url_for('serve_demo', filename=p.demo.rel) }}" target="_blank">باز کردن در تب جدید ↗</a>
+          <a class="go" href="{{ url_for('serve_demo', filename=p.demo.rel) }}" target="_blank">نسخه‌ی داخلی ↗</a>
+          <a class="go" href="{{ url_for('serve_demo', filename=p.demo.client_rel) }}" target="_blank">نسخه‌ی ارسال به کارفرما ↗</a>
         </div>
+        <div class="muted" style="margin-top:8px">هر دو نسخه واترمارک دارند و تعاملات‌شان قفل است؛
+          نسخه‌ی کارفرما اطلاعات داخلی (امتیاز، برآورد ساعت، لینک آگهی) را نشان نمی‌دهد.</div>
       {% else %}
         <div class="muted">دمویی ساخته نشده است (فقط برای پروژه‌های کاندید ساخته می‌شود).</div>
       {% endif %}

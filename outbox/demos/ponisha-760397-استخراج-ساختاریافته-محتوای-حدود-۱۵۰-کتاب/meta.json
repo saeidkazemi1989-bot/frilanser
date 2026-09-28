@@ -3,8 +3,14 @@
   "title": "استخراج ساختاریافته محتوای حدود ۱۵۰ کتاب",
   "source": "ponisha",
   "kind": "pipeline",
+  "archetype": "corporate",
+  "archetype_label": "وب‌سایت شرکتی",
+  "brand": "استخراج ساختاریافته محتوای حدود ۱۵۰ کتاب",
+  "bilingual": false,
   "path": "/home/user/frilanser/outbox/demos/ponisha-760397-استخراج-ساختاریافته-محتوای-حدود-۱۵۰-کتاب/index.html",
   "rel": "ponisha-760397-استخراج-ساختاریافته-محتوای-حدود-۱۵۰-کتاب/index.html",
+  "client_path": "/home/user/frilanser/outbox/demos/ponisha-760397-استخراج-ساختاریافته-محتوای-حدود-۱۵۰-کتاب/client.html",
+  "client_rel": "ponisha-760397-استخراج-ساختاریافته-محتوای-حدود-۱۵۰-کتاب/client.html",
   "url": "file:///home/user/frilanser/outbox/demos/ponisha-760397-استخراج-ساختاریافته-محتوای-حدود-۱۵۰-کتاب/index.html",
-  "built_at": "2026-09-28T06:48:59"
+  "built_at": "2026-09-28T07:21:40"
 }

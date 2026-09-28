@@ -51,6 +51,43 @@ jobs:
             frilanser_app.py
           ls -la dist
 
+      - name: ساخت نسخه‌ی گرافیکی (GUI)
+        shell: bash
+        run: |
+          pyinstaller --noconfirm --onefile --windowed --name frilanser-gui \
+            --add-data="config.toml;." \
+            --add-data="frilanser/web/templates;frilanser/web/templates" \
+            --add-data="frilanser/web/static;frilanser/web/static" \
+            --add-data="data/raw;data/raw" \
+            --add-data="README.md;." \
+            --hidden-import=flask --hidden-import=jinja2 --hidden-import=werkzeug \
+            --hidden-import=bs4 --hidden-import=requests \
+            frilanser_gui.py
+          ls -la dist
+
+      - name: بسته‌ی پرتابل (ZIP)
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path portable | Out-Null
+          Copy-Item dist\frilanser.exe, dist\frilanser-gui.exe, config.toml, README.md, scripts\start-gui.bat portable\
+          New-Item -ItemType Directory -Force -Path portable\data | Out-Null
+          Copy-Item -Recurse data\raw portable\data\raw
+          Compress-Archive -Path portable\* -DestinationPath dist\frilanser-portable.zip
+          Get-Item dist\frilanser-portable.zip | Select-Object Name, Length
+
+      - name: ساخت نصب‌کننده (Inno Setup)
+        shell: pwsh
+        run: |
+          $iscc = "C:\Program Files (x86)\Inno Setup 6\ISCC.exe"
+          if (Get-Command iscc -ErrorAction SilentlyContinue) {
+            iscc scripts\installer.iss
+          } elseif (Test-Path $iscc) {
+            & $iscc scripts\installer.iss
+          } else {
+            Write-Host "Inno Setup در این ماشین نیست؛ نصب‌کننده ساخته نمی‌شود"
+          }
+          Get-ChildItem dist
+
       - name: تست نسخه‌ی اجرایی (smoke test)
         continue-on-error: true
         shell: bash
@@ -103,6 +140,9 @@ jobs:
           name: frilanser-windows-exe
           path: |
             dist/frilanser.exe
+            dist/frilanser-gui.exe
+            dist/frilanser-portable.zip
+            dist/Frilanser-Setup.exe
             dist/ci-report.md
             dist/ci-env.txt
             dist/help.log
@@ -118,6 +158,9 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add -f dist/frilanser.exe
+          for f in frilanser-gui.exe frilanser-portable.zip Frilanser-Setup.exe; do
+            if [ -f "dist/$f" ]; then git add -f "dist/$f"; fi
+          done
           for f in ci-report.md; do
             if [ -f "dist/$f" ]; then
               git add -f "dist/$f"
