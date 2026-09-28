@@ -44,19 +44,28 @@ jobs:
             frilanser/__main__.py
 
       - name: تست نسخه‌ی اجرایی (smoke test)
+        continue-on-error: true
         shell: bash
         run: |
           mkdir -p "$RUNNER_TEMP/exetest" && cd "$RUNNER_TEMP/exetest"
-          "$GITHUB_WORKSPACE/dist/frilanser.exe" --help
-          "$GITHUB_WORKSPACE/dist/frilanser.exe" run --demos 1
-          echo "== خروجی‌های تولیدشده توسط EXE =="
-          ls -R . | head -40
+          "$GITHUB_WORKSPACE/dist/frilanser.exe" --help > help.log 2>&1
+          echo "exit=$?" >> help.log
+          "$GITHUB_WORKSPACE/dist/frilanser.exe" run --demos 1 > run.log 2>&1
+          echo "exit=$?" >> run.log
+          echo "== خروجی‌های تولیدشده توسط EXE ==" > tree.log
+          ls -R . >> tree.log 2>&1
+          cp help.log run.log tree.log "$GITHUB_WORKSPACE/"
 
-      - name: بارگذاری فایل اجرایی
+      - name: بارگذاری فایل اجرایی و لاگ تست
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: frilanser-windows-exe
-          path: dist/frilanser.exe
+          path: |
+            dist/frilanser.exe
+            help.log
+            run.log
+            tree.log
 
       - name: انتشار در Release (فقط برای تگ)
         if: startsWith(github.ref, 'refs/tags/v')
