@@ -4,6 +4,7 @@
 # ============================================================
 
 [app]
+react_dir = "outbox/react"
 name = "فریلنس‌یار آرنا"
 owner = "شما"
 timezone = "Asia/Tehran"
@@ -131,6 +132,8 @@ kinds = [
 
 # ------------------------------------------------------------------ دموها
 [demo]
+# خروجی پیش‌فرض: html (پیش‌نمایش قفل‌شده) | react (پروژه‌ی واقعی) | both (هردو)
+stack = "html"
 # سبک طراحی پیش‌نمایش‌ها: auto (انتخاب خودکار از روی آگهی) یا یکی از:
 # soft_saas, glassmorphism, neumorphism, minimal, brutalist, dark_elegant,
 # luxury_gold, neon_tech, corporate, warm_editorial, playful,

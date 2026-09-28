@@ -195,6 +195,33 @@ def cmd_decide(args):
     return 0
 
 
+def cmd_react(args):
+    """ساخت پروژه‌ی واقعی React + Vite + Tailwind برای یک پروژه."""
+    cfg, store = get_context(args)
+    from .react_builder import build_react_project
+
+    needle = args.project or ""
+    targets = [p for p in store.all() if needle in p.id or needle in p.title] if needle \
+        else [p for p in store.all() if p.verdict == "candidate"]
+
+    if args.limit:
+        targets = targets[: args.limit]
+    if not targets:
+        print("پروژه‌ای پیدا نشد؛ شناسه یا بخشی از عنوان را بدهید: --project کلینیک")
+        return 1
+
+    out_dir = Path(args.out) if args.out else Path(cfg.raw.get("app", {}).get("react_dir", "outbox/react"))
+    out_dir.mkdir(parents=True, exist_ok=True)
+
+    for project in targets:
+        meta = build_react_project(project, project.screening or {}, project.proposal,
+                                   out_dir, style_override=args.style or "")
+        print(f"✓ پروژه‌ی React ساخته شد ({meta['files']} فایل): {project.title[:46]}")
+        print(f"    مسیر: {meta['path']}")
+        print(f"    سبک: {meta['style_label']} · برای اجرا: npm install && npm run dev")
+    return 0
+
+
 def cmd_styles(args):
     """فهرست سبک‌های طراحیِ قابل انتخاب برای پیش‌نمایش‌ها."""
     from . import design_system as ds
@@ -247,6 +274,7 @@ def cmd_paths(args):
     print(f"پوشه‌ی داده‌ها       : {info(cfg.data_dir)}")
     print(f"پوشه‌ی اسنپ‌شات‌ها   : {info(cfg.raw_dir)}")
     print(f"پوشه‌ی خروجی         : {info(cfg.outbox_dir)}")
+    print(f"پوشه‌ی پروژه‌های React: {info(cfg.react_dir)}")
     print(f"قالب‌های وب          : {info(Path(__file__).parent / 'web' / 'templates')}")
     bundle_raw = Path(BUNDLE) / "data" / "raw"
     print(f"اسنپ‌شات‌های باندل   : {info(bundle_raw)}")
@@ -331,6 +359,13 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("decision", choices=["approved", "rejected", "delivered"])
     p.add_argument("--note", default=None)
     p.set_defaults(func=cmd_decide)
+
+    p = sub.add_parser("react", help="ساخت پروژه‌ی واقعی React + Vite + Tailwind")
+    p.add_argument("--project", default="", help="شناسه یا بخشی از عنوان پروژه")
+    p.add_argument("--style", default="", help="سبک طراحی (مثل glassmorphism)")
+    p.add_argument("--out", default="", help="پوشه‌ی خروجی (پیش‌فرض outbox/react)")
+    p.add_argument("--limit", type=int, default=0, help="حداکثر تعداد پروژه")
+    p.set_defaults(func=cmd_react)
 
     p = sub.add_parser("styles", help="فهرست سبک‌های طراحی پیش‌نمایش‌ها")
     p.set_defaults(func=cmd_styles)

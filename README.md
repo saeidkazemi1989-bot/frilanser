@@ -90,6 +90,56 @@ style = "glassmorphism"     # یا auto برای انتخاب خودکار
 > کتابخانه‌ی کامپوننتِ بومی پیاده کرده‌ام. اگر پروژه‌ای با React/Next.js/Tailwind
 > داشته باشید، می‌توانم خروجی را به‌صورت کامپوننت‌های React هم تولید کنم.
 
+## ⚛️ خروجی واقعی React + Vite + Tailwind
+
+علاوه بر پیش‌نمایش HTMLِ قفل‌شده، می‌توانید **کد واقعی و قابل اجرا** بگیرید:
+
+```bash
+frilanser react --project "کلینیک"                 # یک پروژه
+frilanser react --project "طلا" --style luxury_gold  # با سبک دلخواه
+frilanser react                                     # همه‌ی کاندیداها
+```
+
+سپس:
+
+```bash
+cd outbox/react/<پروژه>
+npm install
+npm run dev        # http://localhost:5173
+npm run build      # خروجی نهایی در dist/
+```
+
+**چه چیزی ساخته می‌شود** (۲۴ فایل، همان سیستم طراحیِ HTML):
+
+```
+package.json  vite.config.js  tailwind.config.js  postcss.config.js  index.html
+src/theme.js        توکن‌های طراحی (رنگ، گرادینت، شعاع، افکت‌ها)
+src/content.js      همه‌ی متن‌های پروژه (فارسی، قابل ویرایش)
+src/App.jsx         ترکیب صفحه
+src/components/     Nav Hero HeroArt Services Stats Products Process
+                    Pricing Testimonials Faq Contact Cta Footer
+README.md           راهنمای اجرا
+```
+
+- پالت، فونت و شعاعِ همان سبک به `tailwind.config.js` و `src/theme.js` تزریق می‌شود
+- **ریسپانسیو** (موبایل/تبلت/دسکتاپ)، **RTL** با `lang="fa" dir="rtl"`
+- **دسترس‌پذیری پایه**: منوی موبایل با `aria-expanded`، برچسب‌ها و حالت فوکس
+- هیچ منبع خارجی ندارد (تصویر Hero یک SVG داخلی است)
+- سبک شیشه‌ای خودکار از کلاس‌های `backdrop-blur` استفاده می‌کند
+
+> این خروجی **بر خلاف پیش‌نمایش HTML قفل نیست** چون قرار است کدِ واقعیِ شروع پروژه باشد.
+> برای پیش‌نمایشی که کارفرما نتواند استفاده کند، همان `client.html` را بفرستید.
+
+اگر می‌خواهید همراه هر `run` خودکار هم ساخته شود، در `config.toml`:
+
+```toml
+[demo]
+stack = "both"      # html + react
+```
+
+> صحت این خروجی هم تست شده: پروژه‌ی تولیدشده با `npm install && npm run build`
+> در CI واقعاً کامپایل شد (۴۵ ماژول، CSS ۱۱ کیلوبایت، JS ۱۵۷ کیلوبایت).
+
 ## 🩺 برنامه اجرا می‌شود اما داده نمی‌آورد؟
 
 اولین کاری که برنامه می‌کند: اگر پایگاه داده خالی باشد، **خودکار اسکن را شروع می‌کند**

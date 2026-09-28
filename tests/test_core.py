@@ -571,3 +571,52 @@ def test_contrast_helpers():
     for pal in ds.PALETTES.values():
         chosen = ds.contrast_ratio(ds.on_primary(pal.primary), pal.primary)
         assert chosen >= 3.0, f"{pal.key}: {chosen}"
+
+
+# ------------------------------------------- خروجی واقعی React + Vite + Tailwind
+def test_react_project_is_generated(tmp_path):
+    from frilanser import design_system as ds
+    from frilanser.react_builder import build_react_project
+
+    project = Project.from_scrape("karlancer", "react-1", "طراحی وبسایت فروشگاه اینترنتی",
+                                  "https://www.karlancer.com/x", description="فروشگاه آنلاین")
+    screening = {"category": "web_app", "category_label": "وب‌سایت", "score": 90,
+                 "est_hours": 12, "schedule_days": 3, "deliverables": ["صفحه اصلی", "پنل"]}
+    meta = build_react_project(project, screening, {"price": 9_000_000}, tmp_path,
+                               style_override="glassmorphism")
+
+    root = Path(meta["path"])
+    assert meta["style"] == "glassmorphism"
+    for rel in ("package.json", "vite.config.js", "tailwind.config.js", "index.html",
+                "src/main.jsx", "src/App.jsx", "src/theme.js", "src/content.js",
+                "src/components/Hero.jsx", "src/components/Faq.jsx"):
+        assert (root / rel).exists(), f"{rel} ساخته نشد"
+        assert (root / rel).stat().st_size > 0
+
+    # توکن‌های طراحی در تنظیمات تیلویند تزریق شده‌اند
+    tw = (root / "tailwind.config.js").read_text(encoding="utf-8")
+    pal = ds.PALETTES["violet"]
+    assert pal.primary in tw and pal.gradient in tw
+    # محتوای فارسی وارد شده
+    content = (root / "src" / "content.js").read_text(encoding="utf-8")
+    assert "فروشگاه" in content or "اینترنتی" in content
+    # هیچ منبع خارجی (عکس/فونت اینترنتی) ندارد
+    for f in root.rglob("*.jsx"):
+        assert "http://" not in f.read_text(encoding="utf-8")
+        assert "https://" not in f.read_text(encoding="utf-8")
+    # سبک شیشه‌ای اعمال شده
+    assert "backdrop-blur" in (root / "src" / "components" / "Services.jsx").read_text(encoding="utf-8")
+
+
+def test_react_project_respects_style(tmp_path):
+    from frilanser import design_system as ds
+    from frilanser.react_builder import build_react_project
+
+    project = Project.from_scrape("ponisha", "react-2", "طراحی سایت کلینیک دندانپزشکی",
+                                  "https://ponisha.ir/x")
+    screening = {"category": "web_app", "category_label": "وب", "score": 90,
+                 "est_hours": 8, "schedule_days": 2, "deliverables": []}
+    meta = build_react_project(project, screening, None, tmp_path)
+    assert meta["style"] == "medical_clean"          # انتخاب خودکار از روی آگهی
+    css = Path(meta["path"], "tailwind.config.js").read_text(encoding="utf-8")
+    assert ds.PALETTES["emerald"].primary in css

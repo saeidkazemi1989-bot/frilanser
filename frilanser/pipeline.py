@@ -96,11 +96,20 @@ def build_demos(cfg: Config, store: Store, verdicts: Iterable[str] = ("candidate
     if limit:
         targets = targets[:limit]
 
+    stack = str(cfg.raw.get("demo", {}).get("stack", "html") or "html").strip().lower()
+
     built = []
     for project in targets:
         meta = build_demo(project, project.screening or {}, project.proposal,
                           cfg.demo_dir, base_url=base_url, style_override=style)
         project.demo = meta
+        if stack in ("react", "both"):
+            from .react_builder import build_react_project
+
+            rmeta = build_react_project(project, project.screening or {}, project.proposal,
+                                        cfg.react_dir, style_override=style)
+            meta["react"] = rmeta
+            print(f"  ✓ پروژه‌ی React ساخته شد → {rmeta['path']}")
         if project.status in ("new", STATUS_SCREENED):
             project.status = STATUS_AWAITING if project.verdict == "candidate" else STATUS_SCREENED
         built.append(meta)

@@ -1,0 +1,21 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --p: #a16207;
+  --a: #d97706;
+  --grad: linear-gradient(135deg,#7c4a03 0%,#a16207 55%,#e0a53a 100%);
+  --radius: 6px;
+}
+
+html, body, #root { height: 100%; }
+body {
+  margin: 0;
+  background: theme('colors.bg');
+  color: theme('colors.ink');
+  font-family: theme('fontFamily.body');
+  -webkit-font-smoothing: antialiased;
+}
+h1, h2, h3 { font-family: theme('fontFamily.heading'); }
+

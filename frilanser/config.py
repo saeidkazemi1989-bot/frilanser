@@ -143,6 +143,10 @@ class Config:
         return self.subpath(_dig(self.raw, "app", "demo_dir", default="outbox/demos"))
 
     @property
+    def react_dir(self) -> Path:
+        return self.subpath(_dig(self.raw, "app", "react_dir", default="outbox/react"))
+
+    @property
     def report_dir(self) -> Path:
         return self.subpath(_dig(self.raw, "app", "report_dir", default="outbox/reports"))
 

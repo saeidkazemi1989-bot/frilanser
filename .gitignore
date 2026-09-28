@@ -8,3 +8,8 @@ venv/
 data/cache/
 *.log
 .DS_Store
+
+# خروجی‌های پروژه‌های React (وابستگی‌ها و build نباید در گیت بروند)
+outbox/react/*/node_modules/
+outbox/react/*/dist/
+outbox/react/*/package-lock.json
