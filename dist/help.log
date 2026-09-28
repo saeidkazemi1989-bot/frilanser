@@ -1,11 +1,11 @@
 usage: frilanser [-h] [--config CONFIG]
-                 {run,scan,screen,propose,demo,report,list,show,needs,decide,serve}
+                 {run,scan,screen,propose,demo,report,list,show,needs,decide,paths,serve}
                  ...
 
 فریلنس‌یار آرنا — پیدا کردن و غربال کردن پروژه‌های فریلنسری ایرانی
 
 positional arguments:
-  {run,scan,screen,propose,demo,report,list,show,needs,decide,serve}
+  {run,scan,screen,propose,demo,report,list,show,needs,decide,paths,serve}
     run                 اجرای کامل خط لوله
     scan                جمع‌آوری آگهی‌ها
     screen              غربالگری پروژه‌ها
@@ -16,6 +16,7 @@ positional arguments:
     show                نمایش جزئیات یک پروژه
     needs               کارهایی که باید خودتان انجام دهید
     decide              ثبت تصمیم شما
+    paths               نمایش مسیرهای مورد استفاده (عیب‌یابی)
     serve               اجرای داشبورد وب
 
 options:
