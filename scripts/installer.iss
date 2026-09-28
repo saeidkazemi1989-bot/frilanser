@@ -13,7 +13,6 @@ AppPublisherURL=https://github.com/saeidkazemi1989-bot/frilanser
 DefaultDirName={autopf}\Frilanser
 DefaultGroupName={#MyAppName}
 DisableProgramGroupPage=yes
-LicenseFile=
 OutputDir=dist
 OutputBaseFilename=Frilanser-Setup
 ArchitecturesInstallIn64BitMode=x64

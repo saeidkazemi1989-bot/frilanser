@@ -76,17 +76,30 @@ jobs:
           Get-Item dist\frilanser-portable.zip | Select-Object Name, Length
 
       - name: ساخت نصب‌کننده (Inno Setup)
+        continue-on-error: true
         shell: pwsh
         run: |
-          $iscc = "C:\Program Files (x86)\Inno Setup 6\ISCC.exe"
-          if (Get-Command iscc -ErrorAction SilentlyContinue) {
-            iscc scripts\installer.iss
-          } elseif (Test-Path $iscc) {
-            & $iscc scripts\installer.iss
-          } else {
-            Write-Host "Inno Setup در این ماشین نیست؛ نصب‌کننده ساخته نمی‌شود"
+          $log = "dist/installer.log"
+          "=== جستجوی Inno Setup ===" | Out-File -FilePath $log -Encoding utf8
+          $iscc = $null
+          $cmd = Get-Command iscc -ErrorAction SilentlyContinue
+          if ($cmd) { $iscc = $cmd.Source }
+          $candidates = @("C:\Program Files (x86)\Inno Setup 6\ISCC.exe",
+                          "C:\Program Files\Inno Setup 6\ISCC.exe")
+          foreach ($c in $candidates) { if (-not $iscc -and (Test-Path $c)) { $iscc = $c } }
+          if (-not $iscc) {
+            $found = Get-ChildItem "C:\Program Files*\Inno Setup*\ISCC.exe" -ErrorAction SilentlyContinue | Select-Object -First 1
+            if ($found) { $iscc = $found.FullName }
           }
-          Get-ChildItem dist
+          "iscc path: $iscc" | Out-File -FilePath $log -Append -Encoding utf8
+          if ($iscc) {
+            & $iscc "/Odist" scripts\installer.iss 2>&1 | Tee-Object -FilePath $log -Append
+            "exit=$LASTEXITCODE" | Out-File -FilePath $log -Append -Encoding utf8
+          } else {
+            "Inno Setup پیدا نشد" | Out-File -FilePath $log -Append -Encoding utf8
+          }
+          Get-ChildItem dist | Out-File -FilePath $log -Append -Encoding utf8
+          Get-Content $log
 
       - name: تست نسخه‌ی اجرایی (smoke test)
         continue-on-error: true
@@ -143,6 +156,7 @@ jobs:
             dist/frilanser-gui.exe
             dist/frilanser-portable.zip
             dist/Frilanser-Setup.exe
+            dist/installer.log
             dist/ci-report.md
             dist/ci-env.txt
             dist/help.log
@@ -158,7 +172,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add -f dist/frilanser.exe
-          for f in frilanser-gui.exe frilanser-portable.zip Frilanser-Setup.exe; do
+          for f in frilanser-gui.exe frilanser-portable.zip Frilanser-Setup.exe installer.log; do
             if [ -f "dist/$f" ]; then git add -f "dist/$f"; fi
           done
           for f in ci-report.md; do
