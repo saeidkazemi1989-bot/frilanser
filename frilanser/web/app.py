@@ -161,6 +161,36 @@ def create_app(cfg: Config, store: Store) -> Flask:
     def api_summary():
         return jsonify(summarize())
 
+    @app.get("/api/update")
+    def api_update():
+        """وضعیت به‌روزرسانی (نسخه‌ی فعلی، آخرین نسخه، درصد پیشرفت)."""
+        from .. import updater
+        from ..version import __version__, platform_key
+
+        state = updater.read_state(cfg)
+        state.setdefault("current", __version__)
+        state.setdefault("platform", platform_key())
+        return jsonify(state)
+
+    @app.post("/api/update")
+    def api_update_do():
+        """بررسی یا دریافت و نصب نسخه‌ی جدید."""
+        from .. import updater
+
+        mode = (request.form.get("mode") or request.args.get("mode") or "check").strip()
+        if mode == "check":
+            return jsonify(updater.check_update(cfg))
+        if mode == "install":
+            return jsonify(updater.update_async(cfg))
+        return jsonify({"ok": False, "error": "حالت نامعلوم"}), 400
+
+    @app.context_processor
+    def _inject_version():
+        """نسخه و سکو را برای نمایش در همه‌ی صفحه‌ها در دسترس می‌گذارد."""
+        from ..version import __version__, platform_key
+
+        return {"app_version": __version__, "app_platform": platform_key()}
+
     @app.get("/healthz")
     def healthz():
         return jsonify({"ok": True, "projects": len(store.projects)})

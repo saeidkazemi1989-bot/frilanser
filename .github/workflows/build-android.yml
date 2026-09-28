@@ -1,0 +1,144 @@
+name: build-android-apk
+
+on:
+  push:
+    branches: ["**"]
+    paths:
+      - "frilanser/**"
+      - "android/**"
+      - "config.toml"
+      - "data/raw/**"
+      - "requirements.txt"
+      - ".github/workflows/build-android.yml"
+  workflow_dispatch:
+    inputs:
+      archs:
+        description: "معماری‌های مورد نظر (مثل arm64-v8a یا arm64-v8a,armeabi-v7a)"
+        required: false
+        default: "arm64-v8a"
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 240
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: "temurin"
+          java-version: "17"
+
+      - name: نصب وابستگی‌های سیستمی buildozer
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends \
+            git zip unzip openjdk-17-jdk autoconf automake libtool pkg-config \
+            zlib1g-dev libncurses5-dev libncursesw5-dev libtinfo5 cmake libffi-dev \
+            libssl-dev python3-pip python3-setuptools patchelf
+
+      - name: نصب buildozer و python-for-android
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install "buildozer==1.5.0" "cython==0.29.37" "setuptools<70" "virtualenv"
+
+      - name: آماده‌سازی پوشه‌ی سورس اندروید
+        run: |
+          cd android
+          rm -rf frilanser config.toml data
+          cp -r ../frilanser .
+          cp ../config.toml .
+          mkdir -p data/raw
+          cp ../data/raw/*.json data/raw/ 2>/dev/null || true
+          cp ../data/raw/*.md data/raw/ 2>/dev/null || true
+          # فایل‌های غیرضروری را برای کوچک‌تر شدن APK حذف می‌کنیم
+          rm -rf frilanser/__pycache__ frilanser/web/__pycache__
+          du -sh .
+
+      - name: ساخت APK
+        timeout-minutes: 180
+        run: |
+          cd android
+          if [ -n "${{ github.event.inputs.archs }}" ]; then
+            sed -i "s/^android.archs = .*/android.archs = ${{ github.event.inputs.archs }}/" buildozer.spec
+          fi
+          buildozer -v android debug 2>&1 | tail -n 200
+
+      - name: گردآوری خروجی
+        id: collect
+        run: |
+          mkdir -p dist/updates
+          APK=$(ls android/bin/*.apk 2>/dev/null | head -1 || true)
+          if [ -z "$APK" ]; then
+            echo "هیچ APKای ساخته نشد" >&2
+            find android/bin -maxdepth 2 -type f 2>/dev/null | head -20 || true
+            exit 1
+          fi
+          cp "$APK" dist/updates/frilanser.apk
+          cp "$APK" dist/frilanser.apk
+          ls -la dist/updates/ dist/*.apk
+          echo "apk_size=$(stat -c %s dist/frilanser.apk)" >> "$GITHUB_OUTPUT"
+          echo "apk_name=$(basename "$APK")" >> "$GITHUB_OUTPUT"
+
+      - name: ثبت در مانیفست به‌روزرسانی
+        run: |
+          VERSION=$(grep -oP '^__version__ = "\K[^"]+' frilanser/version.py)
+          echo "نسخه: $VERSION"
+          python scripts/make_manifest.py set android dist/frilanser.apk \
+            --version "$VERSION" \
+            --notes "نسخه‌ی اندروید فریلنس‌یار آرنا
+داشبورد داخلی روی خود گوشی + به‌روزرسانی درون‌برنامه‌ای"
+
+      - name: انتشار به‌عنوان Release (منبع به‌روزرسانی)
+        if: success()
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: latest
+          name: "آخرین نسخه (اندروید + ویندوز)"
+          body: |
+            نصب روی اندروید: `frilanser.apk` را روی گوشی ببرید و باز کنید
+            (در صورت پیام «ناشر ناشناس»، اجازه بدهید).
+            نصب روی ویندوز: `Frilanser-Setup.exe`.
+
+            برنامه خودش هم این نسخه را پیدا می‌کند: از داشبورد، دکمه‌ی
+            «بررسی نسخه‌ی جدید» را بزنید.
+          files: |
+            dist/frilanser.apk
+            dist/updates/manifest.json
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: بارگذاری APK
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: frilanser-android-apk
+          path: |
+            dist/frilanser.apk
+            dist/updates/manifest.json
+            dist/updates/frilanser.apk
+
+      - name: کامیت APK و مانیفست در شاخه‌ی جاری
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          for f in dist/frilanser.apk dist/updates/manifest.json dist/updates/frilanser.apk; do
+            if [ -f "$f" ]; then git add -f "$f"; fi
+          done
+          if git diff --cached --quiet; then
+            echo "تغییری برای کامیت نیست"
+          else
+            git commit -m "ساخت خودکار: dist/frilanser.apk (اندروید) + مانیفست نسخه"
+            git push origin "HEAD:${GITHUB_REF_NAME}"
+          fi

@@ -121,6 +121,17 @@ jobs:
           EOF
           cat dist/installer.log
 
+      - name: ثبت نسخه‌ی ویندوز در مانیفست به‌روزرسانی
+        continue-on-error: true
+        shell: bash
+        run: |
+          VERSION=$(grep -oP '^__version__ = "\K[^"]+' frilanser/version.py)
+          echo "نسخه: $VERSION"
+          if [ -f dist/Frilanser-Setup.exe ]; then
+            python scripts/make_manifest.py set windows dist/Frilanser-Setup.exe --version "$VERSION"
+          fi
+          cat dist/updates/manifest.json 2>/dev/null || echo "مانیفستی نیست"
+
       - name: تست نسخه‌ی اجرایی (smoke test)
         continue-on-error: true
         shell: bash
@@ -191,8 +202,9 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
+          git pull --rebase origin "${GITHUB_REF_NAME}" 2>/dev/null || true
           git add -f dist/frilanser.exe
-          for f in frilanser-gui.exe frilanser-portable.zip Frilanser-Setup.exe installer.log zip.log; do
+          for f in frilanser-gui.exe frilanser-portable.zip Frilanser-Setup.exe installer.log zip.log updates/manifest.json updates/Frilanser-Setup.exe; do
             if [ -f "dist/$f" ]; then git add -f "dist/$f"; fi
           done
           for f in ci-report.md; do

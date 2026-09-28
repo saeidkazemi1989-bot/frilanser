@@ -32,6 +32,13 @@ ROOT = Path(__file__).resolve().parent.parent
 
 
 # --------------------------------------------------------------- normalize
+def _cfg(root: str):
+    """یک پیکربندیِ کمینه برای تست (بدون نیاز به config.toml واقعی)."""
+    from frilanser.config import Config
+    return Config({"app": {"outbox_dir": "outbox", "data_dir": "data", "demo_dir": "outbox/demos"}},
+                  Path(root))
+
+
 def test_parse_numbers():
     assert parse_int("بودجه 300,000,000 تومان") == 300_000_000
     assert parse_budget("بودجه کارفرمابودجه ۳۰۰,۰۰۰,۰۰۰ تومان") == 300_000_000
@@ -620,3 +627,186 @@ def test_react_project_respects_style(tmp_path):
     assert meta["style"] == "medical_clean"          # انتخاب خودکار از روی آگهی
     css = Path(meta["path"], "tailwind.config.js").read_text(encoding="utf-8")
     assert ds.PALETTES["emerald"].primary in css
+
+
+# ------------------------------------------------- به‌روزرسانیِ درون‌برنامه‌ای
+class _FakeResponse:
+    def __init__(self, data, status=200, headers=None):
+        self._data = data
+        self.status_code = status
+        self.headers = headers or {}
+
+    def json(self):
+        return self._data
+
+    def raise_for_status(self):
+        if self.status_code >= 400:
+            raise RuntimeError("http error")
+
+    def iter_content(self, size):
+        body = self._data if isinstance(self._data, bytes) else b""
+        for i in range(0, len(body), size):
+            yield body[i:i + size]
+
+
+MANIFEST = {
+    "version": "2.1.0",
+    "release_url": "https://example.com/release",
+    "notes": ["بهبود رابط", "افزوده شدن خروجی React"],
+    "assets": {
+        "android": {"file": "frilanser.apk", "url": "https://example.com/a.apk",
+                    "size": 1234, "sha256": ""},
+        "windows": {"file": "Frilanser-Setup.exe", "url": "https://example.com/s.exe",
+                    "size": 4321, "sha256": ""},
+    },
+}
+
+
+def test_check_update_reads_manifest(monkeypatch, tmp_path):
+    from frilanser import updater
+
+    seen = {}
+
+    def fake_get(url, **kwargs):
+        seen["url"] = url
+        return _FakeResponse(MANIFEST)
+
+    class FakeRequests:
+        get = staticmethod(fake_get)
+
+    monkeypatch.setattr(updater, "_request", lambda: FakeRequests)
+    cfg = _cfg(str(tmp_path))
+
+    info = updater.check_update(cfg, key="android")
+    assert info["ok"] is True
+    assert info["latest"] == "2.1.0"
+    assert info["has_update"] is True          # نسخه‌ی فعلی ۱.۰.۰ است
+    assert info["asset"]["file"] == "frilanser.apk"
+    assert "بهبود رابط" in info["notes"]
+
+
+def test_check_update_no_update_when_same_version(monkeypatch, tmp_path):
+    from frilanser import updater
+    from frilanser.version import __version__
+
+    same = dict(MANIFEST, version=__version__)
+    monkeypatch.setattr(updater, "_request",
+                        lambda: type("R", (), {"get": staticmethod(
+                            lambda url, **kw: _FakeResponse(same))}))
+    info = updater.check_update(_cfg(str(tmp_path)), key="windows")
+    assert info["has_update"] is False
+    assert info["latest"] == __version__
+
+
+def test_check_update_falls_back_to_release_api(monkeypatch, tmp_path):
+    from frilanser import updater
+
+    def fake_get(url, **kwargs):
+        if "manifest" in url:
+            raise RuntimeError("مانیفست در دسترس نیست")
+        return _FakeResponse({
+            "tag_name": "v3.0.0",
+            "html_url": "https://example.com/rel",
+            "assets": [{"name": "frilanser.apk", "browser_download_url": "https://x/a.apk",
+                        "size": 10}],
+        })
+
+    monkeypatch.setattr(updater, "_request",
+                        lambda: type("R", (), {"get": staticmethod(fake_get)}))
+    info = updater.check_update(_cfg(str(tmp_path)), key="android")
+    assert info["ok"] is True and info["latest"] == "3.0.0"
+    assert info["asset"]["url"] == "https://x/a.apk"
+
+
+def test_download_and_verify_sha256(monkeypatch, tmp_path):
+    from frilanser import updater
+
+    payload = b"frilanser-apk-bytes" * 10
+
+    def fake_get(url, **kwargs):
+        return _FakeResponse(payload, headers={"content-length": str(len(payload))})
+
+    monkeypatch.setattr(updater, "_request",
+                        lambda: type("R", (), {"get": staticmethod(fake_get)}))
+    cfg = _cfg(str(tmp_path))
+
+    res = updater.download(cfg, "https://example.com/a.apk", tmp_path / "a.apk")
+    assert res["ok"] is True and res["size"] == len(payload)
+
+    digest = updater.sha256_of(tmp_path / "a.apk")
+    bad = updater.download(cfg, "https://example.com/a.apk", tmp_path / "b.apk",
+                           sha256="0" * 64)
+    assert bad["ok"] is False and "امضا" in bad["error"]
+    assert updater.sha256_of(tmp_path / "a.apk") == digest
+
+
+def test_update_downloads_and_calls_installer(monkeypatch, tmp_path):
+    from frilanser import updater
+
+    payload = b"apk"
+
+    def fake_get(url, **kwargs):
+        if "manifest" in url:
+            return _FakeResponse(MANIFEST)
+        return _FakeResponse(payload, headers={"content-length": str(len(payload))})
+
+    monkeypatch.setattr(updater, "_request",
+                        lambda: type("R", (), {"get": staticmethod(fake_get)}))
+    calls = []
+    monkeypatch.setattr(updater, "install", lambda path, key: (calls.append((path, key))
+                                                               or {"ok": True, "message": "نصب شد"}))
+
+    cfg = _cfg(str(tmp_path))
+    out = updater.update(cfg, key="android")
+    assert out["ok"] is True and out["latest"] == "2.1.0"
+    assert calls and calls[0][1] == "android"
+    assert Path(calls[0][0]).name == "frilanser.apk"
+    state = updater.read_state(cfg)
+    assert state.get("installed") is True
+
+
+def test_version_and_platform_helpers():
+    from frilanser.version import is_newer, platform_key, version_tuple
+
+    assert version_tuple("1.10.2") == (1, 10, 2)
+    assert is_newer("1.0.1", "1.0.0") and is_newer("2.0", "1.9.9")
+    assert not is_newer("1.0.0", "1.0.0") and not is_newer("0.9", "1.0")
+    assert platform_key() in ("android", "windows", "linux")
+
+
+# ------------------------------------------------------- بسته‌ی اندروید
+def test_android_entry_and_spec_exist():
+    from frilanser.version import __version__
+
+    main_py = Path(__file__).resolve().parent.parent / "android" / "main.py"
+    spec = Path(__file__).resolve().parent.parent / "android" / "buildozer.spec"
+    assert main_py.exists() and spec.exists()
+
+    main_src = main_py.read_text(encoding="utf-8")
+    spec_src = spec.read_text(encoding="utf-8")
+
+    # بوت‌استرپ webview و پورت هماهنگ با سرور داخلی
+    assert "bootstrap = webview" in spec_src
+    assert "p4a.port = 5000" in spec_src
+    assert "5000" in main_src
+    # مجوز نصبِ به‌روزرسانی و اینترنت
+    assert "REQUEST_INSTALL_PACKAGES" in spec_src and "INTERNET" in spec_src
+    # نسخه‌ی spec با نسخه‌ی برنامه یکی است
+    assert f"version = {__version__}" in spec_src
+    # داده‌ها در پوشه‌ی قابل‌نوشتنِ برنامه نوشته می‌شوند
+    assert "FRILANSER_HOME" in main_src
+
+
+def test_config_honours_frilanser_home(monkeypatch, tmp_path):
+    """روی اندروید ریشه‌ی برنامه از متغیر FRILANSER_HOME خوانده می‌شود."""
+    import importlib
+
+    from frilanser import config as config_mod
+
+    monkeypatch.setenv("FRILANSER_HOME", str(tmp_path / "app"))
+    mod = importlib.reload(config_mod)
+    try:
+        assert Path(mod.ROOT_DIR) == (tmp_path / "app")
+    finally:
+        monkeypatch.delenv("FRILANSER_HOME", raising=False)
+        importlib.reload(config_mod)

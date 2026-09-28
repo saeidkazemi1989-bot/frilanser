@@ -2,6 +2,21 @@
 {% block title %}پروژه‌ها — فریلنس‌یار آرنا{% endblock %}
 {% block body %}
 
+<div class="panel" id="upd-card" style="padding:12px 14px;margin-bottom:12px;border-color:#c7d2fe;background:#f5f8ff">
+  <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+    <div style="flex:1;min-width:230px">
+      <div style="font-weight:700">🔄 به‌روزرسانی برنامه</div>
+      <div class="muted" id="upd-msg">نسخه‌ی فعلی: {{ app_version }} — برای دیدن نسخه‌ی جدید، دکمه را بزنید</div>
+    </div>
+    <button type="button" id="upd-check">بررسی نسخه‌ی جدید</button>
+    <button type="button" id="upd-install" style="display:none">دریافت و نصب به‌روزرسانی</button>
+  </div>
+  <div id="upd-bar-wrap" style="display:none;margin-top:10px;height:8px;background:#e5e7eb;border-radius:99px;overflow:hidden">
+    <div id="upd-bar" style="height:100%;width:0;background:#0f766e;transition:width .3s"></div>
+  </div>
+  <div class="muted" id="upd-notes" style="margin-top:8px;font-size:12.5px"></div>
+</div>
+
 <div class="stats">
   <div class="stat"><div class="k">کل آگهی‌های بررسی‌شده</div><div class="v">{{ stats.total }}</div></div>
   <div class="stat"><div class="k">کاندیدای خوب</div><div class="v">{{ stats.candidate }}</div></div>
@@ -98,5 +113,61 @@
   </table>
 </div>
 {% endif %}
+
+{% block scripts %}
+<script>
+(function(){
+  const msg = document.getElementById('upd-msg');
+  const notes = document.getElementById('upd-notes');
+  const btnCheck = document.getElementById('upd-check');
+  const btnInstall = document.getElementById('upd-install');
+  const barWrap = document.getElementById('upd-bar-wrap');
+  const bar = document.getElementById('upd-bar');
+  if(!msg || !btnCheck) return;
+
+  function setMsg(t){ msg.textContent = t; }
+  async function call(mode){
+    const fd = new FormData(); fd.append('mode', mode);
+    const r = await fetch('/api/update', {method:'POST', body:fd});
+    return await r.json();
+  }
+  function mb(n){ return n ? ' (' + Math.round(n/1048576) + ' مگابایت)' : ''; }
+
+  btnCheck.onclick = async () => {
+    setMsg('در حال بررسی…'); btnCheck.disabled = true;
+    try {
+      const j = await call('check');
+      if(!j.ok){ setMsg('بررسی ناموفق بود: ' + (j.error || 'خطای ناشناخته')); btnCheck.disabled = false; return; }
+      if(j.has_update){
+        setMsg('نسخه‌ی جدید ' + j.latest + ' آماده است' + mb(j.asset && j.asset.size));
+        btnInstall.style.display = '';
+        btnInstall.textContent = 'دریافت و نصب نسخه‌ی ' + j.latest;
+        notes.innerHTML = (j.notes || []).map(n => '• ' + n).join('<br>');
+      } else {
+        setMsg('برنامه به‌روز است (نسخه‌ی ' + j.latest + ')');
+      }
+    } catch(e){ setMsg('خطا در ارتباط: ' + e); }
+    btnCheck.disabled = false;
+  };
+
+  btnInstall.onclick = async () => {
+    barWrap.style.display = ''; bar.style.width = '0%';
+    setMsg('در حال دریافت…'); btnInstall.disabled = true;
+    try { await call('install'); } catch(e){ setMsg('خطا: ' + e); }
+    let tries = 0;
+    const timer = setInterval(async () => {
+      tries++;
+      try {
+        const r = await fetch('/api/update'); const st = await r.json();
+        bar.style.width = (st.percent || 0) + '%';
+        if(st.message){ setMsg(st.message); }
+        if(st.error){ setMsg('خطا: ' + st.error); clearInterval(timer); btnInstall.disabled = false; }
+        else if(st.installed || tries > 200){ clearInterval(timer); bar.style.width = '100%'; }
+      } catch(e){ /* تلاش بعدی */ }
+    }, 1500);
+  };
+})();
+</script>
+{% endblock %}
 
 {% endblock %}

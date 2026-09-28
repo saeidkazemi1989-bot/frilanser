@@ -20,6 +20,16 @@ _PACKAGE_PARENT = Path(__file__).resolve().parent.parent  # پوشه‌ی ریپ
 
 def _detect_dirs() -> tuple[Path, Path]:
     """(پوشه‌ی کاربر/قابل‌نوشتن، پوشه‌ی منابع باندل)"""
+    # ریشه‌ی اجباری (اندروید / سفارشی): FRILANSER_HOME
+    forced = os.environ.get("FRILANSER_HOME")
+    if forced:
+        try:
+            cand = Path(forced)
+            cand.mkdir(parents=True, exist_ok=True)
+            if os.access(cand, os.W_OK):
+                return cand, _PACKAGE_PARENT
+        except OSError:
+            pass
     if not getattr(sys, "frozen", False):
         return _PACKAGE_PARENT, _PACKAGE_PARENT
 

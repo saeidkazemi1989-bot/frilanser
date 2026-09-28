@@ -222,6 +222,39 @@ def cmd_react(args):
     return 0
 
 
+def cmd_update(args):
+    """بررسی/دریافت/نصب نسخه‌ی جدید برنامه."""
+    cfg, store = get_context(args)
+    from . import updater
+    from .version import __version__, platform_key
+
+    print(f"نسخه‌ی فعلی: {__version__} ({platform_key()})")
+    if args.check_only:
+        info = updater.check_update(cfg)
+        if not info["ok"]:
+            print(f"بررسی ناموفق بود: {info['error']}")
+            return 1
+        print(f"آخرین نسخه: {info['latest']}")
+        if info["has_update"]:
+            print(f"نسخه‌ی جدید موجود است ({info['asset'].get('size', 0):,} بایت)")
+            for note in info["notes"][:6]:
+                print(f"  • {note}")
+            if info.get("release_url"):
+                print(f"توضیحات: {info['release_url']}")
+        else:
+            print("برنامه به‌روز است ✓")
+        return 0
+
+    res = updater.update(cfg, auto_install=not args.download_only)
+    if not res.get("ok"):
+        print(f"به‌روزرسانی ناموفق بود: {res.get('error') or res.get('message', '')}")
+        return 1
+    print(res.get("message") or "به‌روزرسانی انجام شد")
+    if res.get("downloaded"):
+        print(f"فایل: {res['downloaded']}")
+    return 0
+
+
 def cmd_styles(args):
     """فهرست سبک‌های طراحیِ قابل انتخاب برای پیش‌نمایش‌ها."""
     from . import design_system as ds
@@ -366,6 +399,11 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--out", default="", help="پوشه‌ی خروجی (پیش‌فرض outbox/react)")
     p.add_argument("--limit", type=int, default=0, help="حداکثر تعداد پروژه")
     p.set_defaults(func=cmd_react)
+
+    p = sub.add_parser("update", help="به‌روزرسانی برنامه به آخرین نسخه")
+    p.add_argument("--check-only", action="store_true", help="فقط بررسی کن، چیزی نصب نکن")
+    p.add_argument("--download-only", action="store_true", help="فقط دانلود کن، نصب نکن")
+    p.set_defaults(func=cmd_update)
 
     p = sub.add_parser("styles", help="فهرست سبک‌های طراحی پیش‌نمایش‌ها")
     p.set_defaults(func=cmd_styles)

@@ -139,3 +139,10 @@ stack = "html"
 # luxury_gold, neon_tech, corporate, warm_editorial, playful,
 # medical_clean, ocean_trust, rose_shop
 style = "auto"
+
+# ---- به‌روزرسانی درون‌برنامه‌ای ----
+[update]
+# مانیفست نسخه (خالی = آدرس پیش‌فرض روی شاخه). می‌توانید آینه‌ی دلخواه خودتان را بگذارید.
+manifest_url = ""
+# بررسی خودکار هنگام بالا آمدن داشبورد (true/false)
+auto_check = false

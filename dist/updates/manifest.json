@@ -1,0 +1,18 @@
+{
+  "version": "1.0.0",
+  "generated_at": "2026-09-28T15:19:18+00:00",
+  "release_url": "https://github.com/saeidkazemi1989-bot/frilanser/releases/tag/latest",
+  "notes": [
+    "نسخه‌ی ویندوز (نصب‌کننده)"
+  ],
+  "assets": {
+    "windows": {
+      "file": "Frilanser-Setup.exe",
+      "size": 29320605,
+      "sha256": "a0749c49caaed2aef24d017f57833d22b2b16e82b1875ebf702b5f8713eb774d",
+      "url": "https://github.com/saeidkazemi1989-bot/frilanser/releases/download/latest/Frilanser-Setup.exe",
+      "mirror": "https://raw.githubusercontent.com/saeidkazemi1989-bot/frilanser/arena/01a0e651-frilanser/dist/updates/Frilanser-Setup.exe",
+      "built_at": "2026-09-28T15:19:18+00:00"
+    }
+  }
+}
