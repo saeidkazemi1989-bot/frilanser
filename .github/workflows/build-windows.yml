@@ -54,7 +54,7 @@ jobs:
           echo "exit=$?" >> run.log
           echo "== خروجی‌های تولیدشده توسط EXE ==" > tree.log
           ls -R . >> tree.log 2>&1
-          cp help.log run.log tree.log "$GITHUB_WORKSPACE/"
+          cp help.log run.log tree.log "$GITHUB_WORKSPACE/dist/"
 
       - name: بارگذاری فایل اجرایی و لاگ تست
         if: always()
@@ -72,3 +72,17 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: dist/frilanser.exe
+
+      - name: کامیت فایل اجرایی در شاخه‌ی جاری
+        if: github.event_name == 'push'
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -f dist/frilanser.exe dist/help.log dist/run.log dist/tree.log
+          if git diff --cached --quiet; then
+            echo "تغییری برای کامیت نیست"
+          else
+            git commit -m "ساخت خودکار: dist/frilanser.exe (ویندوز)"
+            git push origin "HEAD:${GITHUB_REF_NAME}"
+          fi
