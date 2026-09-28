@@ -53,6 +53,7 @@ Parsing [Files] section, line 32
 Parsing [Files] section, line 33
 Parsing [Files] section, line 34
 Parsing [Files] section, line 35
+Deleting Frilanser-Setup.exe from output directory
 Creating setup files
    Verification successful
    Updating icons (Setup.exe)
@@ -74,16 +75,16 @@ Creating setup files
 
 Warning: Architecture identifier "x64" is deprecated. Substituting "x64os", but note that "x64compatible" is preferred in most cases. See the "Architecture Identifiers" topic in help file for more information.
 
-Successful compile (5.046 sec). Resulting Setup program filename is:
+Successful compile (6.109 sec). Resulting Setup program filename is:
 D:\a\frilanser\frilanser\dist\Frilanser-Setup.exe
 
 --- stderr ---
 
 --- محتوای dist ---
 ci-report.md: 4762 بایت
-frilanser-gui.exe: 15394960 بایت
-frilanser-portable.zip: 27269894 بایت
-Frilanser-Setup.exe: 29228531 بایت
-frilanser.exe: 12365204 بایت
+frilanser-gui.exe: 15406776 بایت
+frilanser-portable.zip: 27291632 بایت
+Frilanser-Setup.exe: 29249100 بایت
+frilanser.exe: 12374460 بایت
 installer.log: 0 بایت
 zip.log: 47 بایت

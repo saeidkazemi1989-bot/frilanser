@@ -5,13 +5,13 @@
 ## frilanser.exe --help
 ```
 usage: frilanser [-h] [--config CONFIG]
-                 {run,scan,screen,propose,demo,report,list,show,needs,decide,paths,serve}
+                 {run,scan,screen,propose,demo,report,list,show,needs,decide,doctor,paths,serve}
                  ...
 
 فریلنس‌یار آرنا — پیدا کردن و غربال کردن پروژه‌های فریلنسری ایرانی
 
 positional arguments:
-  {run,scan,screen,propose,demo,report,list,show,needs,decide,paths,serve}
+  {run,scan,screen,propose,demo,report,list,show,needs,decide,doctor,paths,serve}
     run                 اجرای کامل خط لوله
     scan                جمع‌آوری آگهی‌ها
     screen              غربالگری پروژه‌ها
@@ -22,13 +22,13 @@ positional arguments:
     show                نمایش جزئیات یک پروژه
     needs               کارهایی که باید خودتان انجام دهید
     decide              ثبت تصمیم شما
+    doctor              عیب‌یابی: چرا داده نمی‌آید و چه باید کرد
     paths               نمایش مسیرهای مورد استفاده (عیب‌یابی)
     serve               اجرای داشبورد وب
 
 options:
   -h, --help            show this help message and exit
   --config CONFIG       مسیر فایل تنظیمات (پیش‌فرض config.toml)
-help_exit=0
 ```
 
 ## frilanser.exe run --demos 1
@@ -52,6 +52,7 @@ help_exit=0
 — گزارش و اعلان‌ها…
 
 ======================================================================
+آگهی‌های بررسی‌شده: 49 | کاندیدا: 10 | پیش‌نمایش ساخته‌شده: 1
 گزارش: D:\a\_temp\exetest\outbox\reports\2026-09-28.md
 کارهایی که باید خودتان انجام دهید: 22 مورد
   • [ثبت پیشنهاد در سایت] طراحی و پیاده سازی وب سایت کلینیک تخصصی درمانی
