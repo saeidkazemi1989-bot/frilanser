@@ -2,9 +2,9 @@ name: build-windows-exe
 
 on:
   push:
-    branches: ["**"]          # هر push روی هر شاخه → ساخت و بارگذاری فایل اجرایی
-    tags: ["v*"]              # تگ نسخه → علاوه بر آن، انتشار در Release
-  workflow_dispatch:          # اجرای دستی از تب Actions (وقتی روی شاخه‌ی پیش‌فرض باشد)
+    branches: ["**"]          # هر push روی هر شاخه → ساخت فایل اجرایی
+    tags: ["v*"]              # تگ نسخه → انتشار در Release
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -48,86 +48,72 @@ jobs:
         continue-on-error: true
         shell: bash
         run: |
-          mkdir -p "$RUNNER_TEMP/exetest" && cd "$RUNNER_TEMP/exetest"
-          "$GITHUB_WORKSPACE/dist/frilanser.exe" --help > help.log 2>&1
-          echo "exit=$?" >> help.log
-          "$GITHUB_WORKSPACE/dist/frilanser.exe" run --demos 1 > run.log 2>&1
-          echo "exit=$?" >> run.log
-          echo "== خروجی‌های تولیدشده توسط EXE ==" > tree.log
-          ls -R . >> tree.log 2>&1
-          cp help.log run.log tree.log "$GITHUB_WORKSPACE/dist/"
-
-          # گزارش متنی برای بررسی از راه دور (در مخزن کامیت می‌شود)
+          WORK="${GITHUB_WORKSPACE}/dist"
+          TESTDIR="${RUNNER_TEMP}/exetest"
+          mkdir -p "$TESTDIR"
           {
-            echo "# گزارش تست نسخه‌ی اجرایی ویندوز"
+            echo "runner_temp=${RUNNER_TEMP}"
+            echo "workspace=${GITHUB_WORKSPACE}"
+            echo "testdir=${TESTDIR}"
+          } > "$WORK/ci-env.txt" 2>&1
+          cd "$TESTDIR"
+          echo "cwd_after_cd=$(pwd)" >> "$WORK/ci-env.txt"
+          "${WORK}/frilanser.exe" --help > "$WORK/help.log" 2>&1
+          echo "help_exit=$?" >> "$WORK/help.log"
+          "${WORK}/frilanser.exe" run --demos 1 > "$WORK/run.log" 2>&1
+          echo "run_exit=$?" >> "$WORK/run.log"
+          ls -R . > "$WORK/tree.log" 2>&1
+          {
+            echo "# گزارش تست نسخه‌ی اجرایی ویندوز (frilanser.exe)"
             echo
-            echo "- ساخته‌شده با PyInstaller روی windows-latest"
-            echo "- خروجی exit=0 یعنی اجرای موفق"
+            echo "خروجی exit=0 به‌معنی اجرای موفق است."
             echo
-            echo '## frilanser.exe --help'
+            echo "## frilanser.exe --help"
             echo '```'
-            cat help.log
-            echo '```'
-            echo
-            echo '## frilanser.exe run --demos 1'
-            echo '```'
-            head -60 run.log
+            head -25 "$WORK/help.log"
             echo '```'
             echo
-            echo '## فایل‌های تولیدشده'
+            echo "## frilanser.exe run --demos 1"
             echo '```'
-            head -40 tree.log
+            head -60 "$WORK/run.log"
             echo '```'
-          } > "$GITHUB_WORKSPACE/dist/ci-report.md"
+            echo
+            echo "## فایل‌های تولیدشده توسط EXE"
+            echo '```'
+            head -30 "$WORK/tree.log"
+            echo '```'
+          } > "$WORK/ci-report.md" 2>&1
+          echo "== فایل‌های dist بعد از تست =="
+          ls -la "$WORK"
 
-      - name: بارگذاری فایل اجرایی و لاگ تست
+      - name: بارگذاری فایل اجرایی و گزارش تست
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: frilanser-windows-exe
           path: |
             dist/frilanser.exe
+            dist/ci-report.md
+            dist/ci-env.txt
             dist/help.log
             dist/run.log
             dist/tree.log
 
-      - name: کامیت فایل اجرایی در شاخه‌ی جاری
+      - name: کامیت فایل اجرایی و گزارش در شاخه‌ی جاری
         if: always()
         shell: bash
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          {
-            echo "== dist =="
-            ls -la dist 2>&1
-            echo "== add =="
-            git add -f dist/frilanser.exe 2>&1
-            for f in ci-report.md help.log run.log tree.log ci-debug.log; do
-              [ -f "dist/$f" ] && git add -f "dist/$f" 2>&1
-            done
-            echo "== status =="
-            git status --short 2>&1 | head -20
-            echo "== commit =="
-            git commit -m "ساخت خودکار: dist/frilanser.exe (ویندوز)" 2>&1
-            echo "== push =="
-            git push origin "HEAD:${GITHUB_REF_NAME}" 2>&1
-            echo "push_exit=$?"
-          } > dist/ci-debug.log 2>&1
-          cat dist/ci-debug.log
-
-      - name: لاگ‌ها را از مسیر API هم می‌فرستیم (برای بررسی از راه دور)
-        if: always()
-        shell: bash
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          for f in ci-debug run help tree; do
-            src="dist/$f.log"
-            [ -f "$src" ] || continue
-            gh api -X PUT "repos/${GITHUB_REPOSITORY}/contents/dist/ci-$f.log" \
-              -f message="ci: لاگ $f" -f branch="${GITHUB_REF_NAME}" \
-              -f content="$(cat "$src")" > /dev/null 2>&1 \
-              && echo "ارسال شد: ci-$f.log" || echo "ارسال نشد: ci-$f.log"
+          git add -f dist/frilanser.exe
+          for f in ci-report.md ci-env.txt help.log run.log tree.log; do
+            if [ -f "dist/$f" ]; then
+              git add -f "dist/$f"
+            fi
           done
+          if git diff --cached --quiet; then
+            echo "تغییری برای کامیت نیست"
+          else
+            git commit -m "ساخت خودکار: dist/frilanser.exe (ویندوز) + گزارش تست"
+            git push origin "HEAD:${GITHUB_REF_NAME}"
+          fi
