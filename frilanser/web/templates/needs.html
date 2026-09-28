@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}نیاز به ورود شما{% endblock %}
+{% block body %}
+
+<div class="panel">
+  <h2 style="margin-bottom:4px">🔔 کارهایی که فقط خودتان باید انجام دهید</h2>
+  <div class="muted">ثبت پیشنهاد در سایت‌های فریلنسری، گرفتن دسترسی از کارفرما و تحویل نهایی پروژه بر عهده‌ی شماست.
+    بقیه‌ی مراحل (پیدا کردن، غربال کردن، ساخت دمو، قیمت‌گذاری و اجرا) خودکار انجام می‌شود.</div>
+  <div class="toolbar" style="margin-top:12px">
+    <a href="{{ url_for('needs_you') }}" class="{{ 'active' if not show_done else '' }}">انجام‌نشده</a>
+    <a href="{{ url_for('needs_you', done=1) }}" class="{{ 'active' if show_done else '' }}">همه</a>
+  </div>
+</div>
+
+{% if items %}
+  {% for item in items %}
+  <div class="task">
+    <div class="h">
+      <h3>{{ loop.index }}. {{ item.project_title }}</h3>
+      <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+        <span class="need-kind">{{ item.kind_label }}</span>
+        <span class="muted">{{ item.source }}</span>
+        {% if item.price %}<span class="badge ok">{{ '{:,}'.format(item.price) }} تومان</span>{% endif %}
+      </div>
+    </div>
+    <div style="margin-top:6px">{{ item.text }}</div>
+    <div class="muted">روش انجام: {{ item.how }}</div>
+    <div class="actions" style="margin-top:10px">
+      {% if item.url %}<a href="{{ item.url }}" target="_blank" rel="noopener">رفتن به آگهی ↗</a>{% endif %}
+      {% if item.demo_url %}<a href="{{ item.demo_url }}" target="_blank">دیدن دمو ↗</a>{% endif %}
+      <a href="{{ url_for('project_detail', pid=item.project_id) }}">جزئیات پروژه</a>
+      <form method="post" action="{{ url_for('needs_done', key=item.key) }}" style="flex:1">
+        <button type="submit" class="go" style="width:100%;background:#16a34a;color:#fff;border:0;border-radius:10px;padding:8px;cursor:pointer;font-family:inherit">انجام شد ✓</button>
+      </form>
+    </div>
+    {% if item.proposal_text %}
+    <details style="margin-top:10px">
+      <summary>متن پیشنهاد آماده برای کپی</summary>
+      <pre class="prop" id="pt{{ loop.index }}">{{ item.proposal_text }}</pre>
+      <button data-copy="pt{{ loop.index }}" style="margin-top:8px;border:1px solid #d9deeb;background:#fff;border-radius:10px;padding:6px 14px;cursor:pointer;font-family:inherit">📋 کپی متن</button>
+    </details>
+    {% endif %}
+  </div>
+  {% endfor %}
+{% else %}
+  <div class="empty">هیچ کارِ انجام‌نشده‌ای وجود ندارد 🎉</div>
+{% endif %}
+
+{% endblock %}

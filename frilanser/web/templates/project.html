@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+{% block title %}{{ p.title }} — جزئیات{% endblock %}
+{% block body %}
+
+<div class="panel">
+  <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:flex-start">
+    <div>
+      <h2 style="margin:0 0 6px">{{ p.title }}</h2>
+      <div class="muted">
+        {{ p.source_label }} ·
+        <a href="{{ p.url }}" target="_blank" rel="noopener">مشاهده آگهی اصلی ↗</a> ·
+        {% if p.bids is not none %}{{ p.bids }} پیشنهاد ثبت شده{% endif %}
+        {% if p.posted_at %} · {{ p.posted_at }}{% endif %}
+        {% if p.client_deadline_days %} · زمان پیشنهادی کارفرما: {{ p.client_deadline_days }} روز{% endif %}
+      </div>
+    </div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap">
+      {% if p.verdict %}<span class="badge {{ VERDICT_STYLE.get(p.verdict,'neutral') }}">{{ VERDICT_LABELS.get(p.verdict) }}</span>{% endif %}
+      <span class="badge neutral">{{ STATUS_LABELS.get(p.status, p.status) }}</span>
+      {% if p.user_decision %}<span class="badge {{ 'ok' if p.user_decision=='approved' else 'bad' }}">تصمیم شما: {{ p.user_decision }}</span>{% endif %}
+    </div>
+  </div>
+
+  {% if p.skills %}
+  <div style="margin-top:12px" class="kv">
+    {% for s in p.skills[:14] %}<span>{{ s }}</span>{% endfor %}
+  </div>
+  {% endif %}
+</div>
+
+<div class="grid2">
+  <div>
+    <div class="panel">
+      <h2>تحلیل اجراپذیری در آرنا</h2>
+      {% if p.screening %}
+        <div class="stats" style="margin:0 0 12px">
+          <div class="stat"><div class="k">امتیاز</div><div class="v">{{ p.screening.score }}/۱۰۰</div></div>
+          <div class="stat"><div class="k">قابلیت اجرا</div><div class="v" style="font-size:16px">{{ FIT_FA.get(p.screening.arena_fit) }}</div></div>
+          <div class="stat"><div class="k">زمان برآوردی</div><div class="v">{{ p.screening.est_hours }} ساعت</div></div>
+          <div class="stat"><div class="k">تحویل</div><div class="v">{{ p.screening.schedule_days }} روز</div></div>
+        </div>
+        <div class="muted" style="margin-bottom:8px">دسته‌بندی: {{ p.screening.category_label }}</div>
+        <ul class="reasons">
+          {% for r in p.screening.reasons %}
+          <li>
+            {% if r.impact > 0 %}<span class="badge ok">+{{ r.impact }}</span>
+            {% elif r.impact < 0 %}<span class="badge bad">{{ r.impact }}</span>
+            {% else %}<span class="badge neutral">•</span>{% endif %}
+            {{ r.text }}
+          </li>
+          {% endfor %}
+        </ul>
+        {% if p.screening.blockers %}
+          <div style="margin-top:10px" class="muted">🚧 موانع: {{ p.screening.blockers|join(' / ') }}</div>
+        {% endif %}
+        {% if p.screening.risks %}
+          <div class="muted">⚠️ ریسک‌ها: {{ p.screening.risks|join(' / ') }}</div>
+        {% endif %}
+      {% else %}
+        <div class="muted">تحلیل نشده است.</div>
+      {% endif %}
+    </div>
+
+    <div class="panel">
+      <h2>قیمت پیشنهادی</h2>
+      {% if p.proposal %}
+        <div class="stats" style="margin:0 0 12px">
+          <div class="stat"><div class="k">قیمت پیشنهادی</div><div class="v">{{ '{:,}'.format(p.proposal.price) }}</div></div>
+          <div class="stat"><div class="k">بودجه کارفرما</div><div class="v">{{ '{:,}'.format(p.budget_toman) if p.budget_toman else '—' }}</div></div>
+          <div class="stat"><div class="k">زمان</div><div class="v">{{ p.proposal.hours }} ساعت</div></div>
+          <div class="stat"><div class="k">وضعیت بودجه</div>
+            <div class="v" style="font-size:15px">
+              {% set bv = BUDGET_VERDICT_FA.get(p.proposal.budget_verdict, ('—','neutral')) %}
+              <span class="badge {{ bv[1] }}">{{ bv[0] }}</span>
+            </div>
+          </div>
+        </div>
+        <ul class="reasons">
+          {% for n in p.proposal.pricing_notes %}<li>{{ n }}</li>{% endfor %}
+        </ul>
+        {% if p.proposal.alternative %}
+          <div class="muted" style="margin-top:8px">جایگزین: {{ p.proposal.alternative.note }}</div>
+        {% endif %}
+        <h2 style="margin-top:18px">برنامه‌ی پرداخت</h2>
+        <ul class="reasons">
+          {% for m in p.proposal.milestones %}
+          <li><b>{{ m.title }}</b> — {{ (m.share*100)|int }}٪ <span class="muted">({{ m.when }})</span></li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <div class="muted">قیمت‌گذاری نشده است.</div>
+      {% endif %}
+    </div>
+  </div>
+
+  <div>
+    <div class="panel">
+      <h2>دموی ساخته‌شده</h2>
+      {% if p.demo %}
+        <div class="muted" style="margin-bottom:8px">نوع دمو: {{ p.demo.kind }} — با داده‌های نمونه</div>
+        <iframe class="demo" src="{{ url_for('serve_demo', filename=p.demo.rel) }}"></iframe>
+        <div class="actions" style="margin-top:10px">
+          <a class="go" href="{{ url_for('serve_demo', filename=p.demo.rel) }}" target="_blank">باز کردن در تب جدید ↗</a>
+        </div>
+      {% else %}
+        <div class="muted">دمویی ساخته نشده است (فقط برای پروژه‌های کاندید ساخته می‌شود).</div>
+      {% endif %}
+    </div>
+
+    <div class="panel">
+      <h2>تصمیم شما</h2>
+      <form method="post" action="{{ url_for('project_decision', pid=p.id) }}">
+        <input name="note" placeholder="یادداشت (اختیاری)" style="width:100%;border:1px solid #d9deeb;border-radius:10px;padding:8px;font:inherit;margin-bottom:10px">
+        <div class="actions">
+          <button class="go" name="decision" value="approved">✅ تایید — کار را انجام بده</button>
+          <button class="no" name="decision" value="rejected">❌ رد کن</button>
+          <button name="decision" value="delivered">📦 تحویل داده شد</button>
+        </div>
+      </form>
+      {% if p.screening and p.screening.needs_you %}
+        <h2 style="margin-top:16px">مواردی که نیاز به ورود شما دارد</h2>
+        <ul class="reasons">
+          {% for n in p.screening.needs_you %}<li><b>{{ n.kind }}</b>: {{ n.text }}</li>{% endfor %}
+        </ul>
+      {% endif %}
+    </div>
+
+    {% if p.proposal %}
+    <div class="panel">
+      <h2>متن پیشنهاد آماده (کپی و ثبت در سایت)</h2>
+      <pre class="prop" id="prop">{{ p.proposal.proposal_text }}</pre>
+      <div class="actions">
+        <button data-copy="prop">📋 کپی متن پیشنهاد</button>
+        <a href="{{ p.url }}" target="_blank" rel="noopener">رفتن به صفحه ثبت پیشنهاد ↗</a>
+      </div>
+      <details style="margin-top:12px"><summary>سوالاتی که همراه پیشنهاد بفرستید</summary>
+        <ul class="reasons">{% for q in p.proposal.questions %}<li>{{ q }}</li>{% endfor %}</ul>
+      </details>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+{% if p.description %}
+<div class="panel">
+  <h2>متن کامل آگهی</h2>
+  <div style="white-space:pre-wrap;font-size:13.5px">{{ p.description }}</div>
+</div>
+{% endif %}
+
+{% endblock %}

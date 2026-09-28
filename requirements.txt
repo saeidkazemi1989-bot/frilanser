@@ -1,0 +1,14 @@
+# وابستگی‌های اصلی (هسته‌ی برنامه فقط از کتابخانه استاندارد پایتون استفاده می‌کند)
+# نصب معمولی:
+#   pip install -r requirements.txt
+#
+# هسته (collect با اسنپ‌شات / screen / propose / demo / report): بدون نیاز به هیچ پکیجی
+# collect از روی سایت زنده: requests + beautifulsoup4
+# داشبورد وب: Flask
+
+requests>=2.31
+beautifulsoup4>=4.12
+Flask>=3.0
+
+# ابزار توسعه
+pytest>=8.0
