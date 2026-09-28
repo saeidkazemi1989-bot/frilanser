@@ -1,21 +1,86 @@
-"""بارگذاری تنظیمات از config.toml."""
+"""بارگذاری تنظیمات از config.toml.
+
+در حالت عادی ریشه‌ی پروژه همان پوشه‌ی ریپو است. در حالت اجرایی (PyInstaller/EXE)
+منابع فقط-خواندنی داخل باندل هستند و داده‌ها/خروجی‌ها در یک پوشه‌ی قابل‌نوشتن
+(کنار فایل اجرایی یا LOCALAPPDATA) نوشته می‌شوند.
+"""
 
 from __future__ import annotations
 
 import os
+import shutil
+import sys
+import tempfile
 import tomllib
 from dataclasses import dataclass, field
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parent.parent
+_PACKAGE_PARENT = Path(__file__).resolve().parent.parent  # پوشه‌ی ریپو در حالت عادی
+
+
+def _detect_dirs() -> tuple[Path, Path]:
+    """(پوشه‌ی کاربر/قابل‌نوشتن، پوشه‌ی منابع باندل)"""
+    if not getattr(sys, "frozen", False):
+        return _PACKAGE_PARENT, _PACKAGE_PARENT
+
+    bundle = Path(getattr(sys, "_MEIPASS", _PACKAGE_PARENT))
+    exe_dir = Path(sys.executable).resolve().parent
+    candidates: list[Path] = [Path.cwd(), exe_dir]
+
+    # اگر در یکی از این پوشه‌ها config.toml هست، همان را به‌عنوان پوشه‌ی پروژه می‌گیریم
+    for cand in candidates:
+        try:
+            if (cand / "config.toml").exists() and os.access(cand, os.W_OK):
+                return cand, bundle
+        except OSError:
+            continue
+    for cand in candidates:
+        try:
+            if os.access(cand, os.W_OK):
+                return cand, bundle
+        except OSError:
+            continue
+
+    fallback = Path(os.environ.get("LOCALAPPDATA", tempfile.gettempdir())) / "frilanser"
+    fallback.mkdir(parents=True, exist_ok=True)
+    return fallback, bundle
+
+
+ROOT_DIR, BUNDLE_DIR = _detect_dirs()
+ROOT = ROOT_DIR          # سازگاری با کدهای قبلی
+BUNDLE = BUNDLE_DIR
 DEFAULT_CONFIG_PATH = ROOT / "config.toml"
 
 
 def load_config(path: str | os.PathLike | None = None) -> "Config":
-    cfg_path = Path(path) if path else DEFAULT_CONFIG_PATH
+    cfg_path = Path(path) if path else (
+        DEFAULT_CONFIG_PATH if DEFAULT_CONFIG_PATH.exists() else BUNDLE / "config.toml"
+    )
     with open(cfg_path, "rb") as fh:
         raw = tomllib.load(fh)
     return Config(raw, cfg_path)
+
+
+def bootstrap_user_files(cfg: "Config") -> list[str]:
+    """در حالت اجرایی، فایل‌های پیش‌فرض را کنار برنامه کپی می‌کند (قابل ویرایش توسط کاربر)."""
+    if BUNDLE == ROOT:
+        return []
+    copied: list[str] = []
+
+    user_cfg = ROOT / "config.toml"
+    if not user_cfg.exists() and (BUNDLE / "config.toml").exists():
+        shutil.copy2(BUNDLE / "config.toml", user_cfg)
+        copied.append(str(user_cfg))
+
+    user_raw = ROOT / "data" / "raw"
+    bundle_raw = BUNDLE / "data" / "raw"
+    user_raw.mkdir(parents=True, exist_ok=True)
+    if bundle_raw.exists() and not any(user_raw.iterdir()):
+        for item in bundle_raw.iterdir():
+            if item.is_file():
+                shutil.copy2(item, user_raw / item.name)
+        copied.append(str(user_raw))
+    return copied
 
 
 def _dig(d: dict, *keys, default=None):
@@ -36,6 +101,10 @@ class Config:
     @property
     def root(self) -> Path:
         return ROOT
+
+    @property
+    def bundle(self) -> Path:
+        return BUNDLE
 
     def subpath(self, *parts: str) -> Path:
         p = ROOT.joinpath(*parts)

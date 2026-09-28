@@ -1,0 +1,58 @@
+name: build-windows-exe
+
+on:
+  workflow_dispatch:          # اجرای دستی از تب Actions
+  push:
+    tags: ["v*"]              # و انتشار خودکار همراه با تگ نسخه
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: نصب وابستگی‌ها
+        run: python -m pip install --upgrade pip pyinstaller Flask requests beautifulsoup4
+
+      - name: تست سریع قبل از بیلد
+        run: python -m frilanser run --demos 1
+
+      - name: ساخت فایل اجرایی ویندوز
+        shell: bash
+        run: |
+          pyinstaller --noconfirm --onefile --console --name frilanser \
+            --add-data="config.toml;." \
+            --add-data="frilanser/web/templates;frilanser/web/templates" \
+            --add-data="frilanser/web/static;frilanser/web/static" \
+            --add-data="data/raw;data/raw" \
+            --add-data="README.md;." \
+            --hidden-import=flask --hidden-import=jinja2 --hidden-import=werkzeug \
+            --hidden-import=bs4 --hidden-import=requests \
+            frilanser/__main__.py
+
+      - name: تست نسخه‌ی اجرایی (smoke test)
+        shell: bash
+        run: |
+          mkdir -p /tmp/exetest && cd /tmp/exetest
+          "$GITHUB_WORKSPACE/dist/frilanser.exe" --help
+          "$GITHUB_WORKSPACE/dist/frilanser.exe" run --demos 1
+          ls -R "$GITHUB_WORKSPACE/dist"
+
+      - name: بارگذاری فایل اجرایی
+        uses: actions/upload-artifact@v4
+        with:
+          name: frilanser-windows-exe
+          path: dist/frilanser.exe
+
+      - name: انتشار در Release (فقط برای تگ)
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/frilanser.exe

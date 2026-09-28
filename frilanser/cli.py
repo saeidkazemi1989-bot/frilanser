@@ -184,7 +184,13 @@ def cmd_serve(args):
     cfg, store = get_context(args)
     from .web.app import create_app
     app = create_app(cfg, store)
-    print(f"داشبورد روی http://{args.host}:{args.port} در دسترس است")
+    url = f"http://127.0.0.1:{args.port}"
+    print(f"داشبورد روی http://{args.host}:{args.port} در دسترس است ({url})")
+    if args.open:
+        import threading
+        import webbrowser
+
+        threading.Timer(1.5, lambda: webbrowser.open(url)).start()
     app.run(host=args.host, port=args.port, debug=args.debug, threaded=True)
     return 0
 
@@ -254,6 +260,7 @@ def build_parser() -> argparse.ArgumentParser:
     p = sub.add_parser("serve", help="اجرای داشبورد وب")
     p.add_argument("--host", default="0.0.0.0")
     p.add_argument("--port", type=int, default=5000)
+    p.add_argument("--open", action="store_true", help="باز کردن خودکار مرورگر")
     p.add_argument("--debug", action="store_true")
     p.set_defaults(func=cmd_serve)
 

@@ -33,9 +33,19 @@ VERDICT_STYLE = {"candidate": "ok", "review": "warn", "rejected": "bad"}
 FIT_FA = {"yes": "کاملاً قابل اجرا", "partial": "تا حدی", "no": "قابل اجرا نیست"}
 
 
+def _resource_dir(name: str) -> str:
+    """مسیر قالب‌ها/فایل‌های ثابت — چه در ریپو اجرا شویم چه در نسخه‌ی EXE."""
+    from ..config import BUNDLE
+
+    bundled = BUNDLE / "frilanser" / "web" / name
+    if bundled.exists():
+        return str(bundled)
+    return str(Path(__file__).parent / name)
+
+
 def create_app(cfg: Config, store: Store) -> Flask:
-    app = Flask(__name__, template_folder=str(Path(__file__).parent / "templates"),
-                static_folder=str(Path(__file__).parent / "static"))
+    app = Flask(__name__, template_folder=_resource_dir("templates"),
+                static_folder=_resource_dir("static"))
     app.config["JSON_AS_ASCII"] = False
     app.config["TEMPLATES_AUTO_RELOAD"] = True
     app.jinja_env.globals.update(
