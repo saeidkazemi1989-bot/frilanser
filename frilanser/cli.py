@@ -180,6 +180,40 @@ def cmd_decide(args):
     return 0
 
 
+def cmd_paths(args):
+    """نمایش مسیرهای مؤثر — برای عیب‌یابی (مخصوصاً در نسخه‌ی EXE)."""
+    import sys
+
+    cfg, store = get_context(args)
+    from .config import BUNDLE, ROOT
+
+    def info(p):
+        p = Path(p)
+        if not p.exists():
+            return f"{p} (وجود ندارد)"
+        if p.is_dir():
+            try:
+                return f"{p} ({len(list(p.iterdir()))} مورد)"
+            except OSError as exc:  # pragma: no cover
+                return f"{p} (خطا: {exc})"
+        return f"{p} ({p.stat().st_size} بایت)"
+
+    print(f"نسخه                 : {__import__('frilanser').__version__}")
+    print(f"اجرای فریز‌شده (EXE) : {bool(getattr(sys, 'frozen', False))}")
+    print(f"sys.executable       : {sys.executable}")
+    print(f"sys._MEIPASS         : {getattr(sys, '_MEIPASS', '-')}")
+    print(f"پوشه‌ی پروژه (ROOT)  : {info(ROOT)}")
+    print(f"پوشه‌ی باندل (BUNDLE): {info(BUNDLE)}")
+    print(f"فایل تنظیمات         : {info(cfg.path)}")
+    print(f"پوشه‌ی داده‌ها       : {info(cfg.data_dir)}")
+    print(f"پوشه‌ی اسنپ‌شات‌ها   : {info(cfg.raw_dir)}")
+    print(f"پوشه‌ی خروجی         : {info(cfg.outbox_dir)}")
+    print(f"قالب‌های وب          : {info(Path(__file__).parent / 'web' / 'templates')}")
+    bundle_raw = Path(BUNDLE) / "data" / "raw"
+    print(f"اسنپ‌شات‌های باندل   : {info(bundle_raw)}")
+    return 0
+
+
 def cmd_serve(args):
     cfg, store = get_context(args)
     from .web.app import create_app
@@ -257,6 +291,9 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--note", default=None)
     p.set_defaults(func=cmd_decide)
 
+    p = sub.add_parser("paths", help="نمایش مسیرهای مورد استفاده (عیب‌یابی)")
+    p.set_defaults(func=cmd_paths)
+
     p = sub.add_parser("serve", help="اجرای داشبورد وب")
     p.add_argument("--host", default="0.0.0.0")
     p.add_argument("--port", type=int, default=5000)
@@ -270,6 +307,17 @@ def build_parser() -> argparse.ArgumentParser:
 def main(argv: list[str] | None = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
+
+    # در نسخه‌ی اجرایی (EXE) فایل‌های پیش‌فرض را کنار برنامه می‌گذاریم تا قابل ویرایش باشند
+    try:
+        from .config import bootstrap_user_files, load_config
+
+        copied = bootstrap_user_files(load_config(getattr(args, "config", None)))
+        for item in copied:
+            print(f"· فایل پیش‌فرض ایجاد شد: {item}")
+    except Exception as exc:  # pragma: no cover - نباید مانع اجرا شود
+        print(f"هشدار: آماده‌سازی پوشه‌ی کاربر انجام نشد ({exc})")
+
     return args.func(args)
 
 

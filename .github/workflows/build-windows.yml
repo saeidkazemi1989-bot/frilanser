@@ -60,6 +60,9 @@ jobs:
           echo "cwd_after_cd=$(pwd)" >> "$WORK/ci-env.txt"
           "${WORK}/frilanser.exe" --help > "$WORK/help.log" 2>&1
           echo "help_exit=$?" >> "$WORK/help.log"
+          "${WORK}/frilanser.exe" paths > "$WORK/paths.log" 2>&1
+          echo "paths_exit=$?" >> "$WORK/paths.log"
+          "${WORK}/frilanser.exe" paths > "$WORK/paths-after.log" 2>&1
           "${WORK}/frilanser.exe" run --demos 1 > "$WORK/run.log" 2>&1
           echo "run_exit=$?" >> "$WORK/run.log"
           ls -R . > "$WORK/tree.log" 2>&1
@@ -96,6 +99,8 @@ jobs:
             dist/ci-report.md
             dist/ci-env.txt
             dist/help.log
+            dist/paths.log
+            dist/paths-after.log
             dist/run.log
             dist/tree.log
 
@@ -106,7 +111,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add -f dist/frilanser.exe
-          for f in ci-report.md ci-env.txt help.log run.log tree.log; do
+          for f in ci-report.md ci-env.txt help.log paths.log paths-after.log run.log tree.log; do
             if [ -f "dist/$f" ]; then
               git add -f "dist/$f"
             fi
