@@ -328,5 +328,35 @@
     "action": "report",
     "project": "-",
     "detail": "/home/user/frilanser/outbox/reports/2026-09-28.md"
+  },
+  {
+    "at": "2026-09-28T06:25:52",
+    "action": "collect",
+    "project": "-",
+    "detail": "0 جدید / 49 به‌روزرسانی (offline=True)"
+  },
+  {
+    "at": "2026-09-28T06:25:52",
+    "action": "screen",
+    "project": "-",
+    "detail": "40 پروژه غربال شد: {'candidate': 10, 'review': 7, 'rejected': 23}"
+  },
+  {
+    "at": "2026-09-28T06:25:52",
+    "action": "demo",
+    "project": "-",
+    "detail": "1 دمو ساخته شد"
+  },
+  {
+    "at": "2026-09-28T06:25:52",
+    "action": "price",
+    "project": "-",
+    "detail": "40 قیمت‌گذاری"
+  },
+  {
+    "at": "2026-09-28T06:25:52",
+    "action": "report",
+    "project": "-",
+    "detail": "/home/user/frilanser/outbox/reports/2026-09-28.md"
   }
 ]

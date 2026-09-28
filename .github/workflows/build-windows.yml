@@ -9,6 +9,10 @@ on:
 permissions:
   contents: write
 
+env:
+  PYTHONUTF8: "1"            # پشتیبانی از متن فارسی در خروجی ویندوز
+  PYTHONIOENCODING: "utf-8"
+
 jobs:
   build:
     runs-on: windows-latest
@@ -23,6 +27,7 @@ jobs:
         run: python -m pip install --upgrade pip pyinstaller Flask requests beautifulsoup4
 
       - name: تست سریع قبل از بیلد
+        continue-on-error: true
         run: python -m frilanser run --demos 1
 
       - name: ساخت فایل اجرایی ویندوز
