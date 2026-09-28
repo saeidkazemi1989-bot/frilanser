@@ -78,7 +78,8 @@ jobs:
           echo "buildozer_exit=$code" >> ../dist/android-build.log
           echo "=== خروجی‌های احتمالی ===" >> ../dist/android-build.log
           ls -la bin 2>&1 >> ../dist/android-build.log || true
-          find .. -name "*.apk" 2>/dev/null >> ../dist/android-build.log || true
+          find .. -name "*.apk" -printf "%s بایت  %p\n" 2>/dev/null | sort -rn >> ../dist/android-build.log || true
+          echo "=== آخرین ۳۰ خطِ خلاصه ===" >> ../dist/android-build.log
           # فقط انتهای لاگ نگه داشته می‌شود (حجم فایل)
           tail -n 1200 ../dist/android-build.log > ../dist/android-build.tmp
           mv ../dist/android-build.tmp ../dist/android-build.log
@@ -90,7 +91,9 @@ jobs:
         if: always()
         run: |
           mkdir -p dist/updates
-          APK=$(find . -name "*.apk" -not -path "./android/.buildozer/*" 2>/dev/null | head -1 || true)
+          APK=$(find . -name "*.apk" -not -path "./android/.buildozer/*" -size +1M \
+                -printf "%s %p\n" 2>/dev/null | sort -rn | head -1 | cut -d' ' -f2- || true)
+          echo "نامزدها:"; find . -name "*.apk" -printf "%s %p\n" 2>/dev/null | sort -rn | head -5
           if [ -z "$APK" ]; then
             echo "! هیچ APKای ساخته نشد — لاگ در dist/android-build.log" >&2
             find . -maxdepth 3 -name "*.apk" 2>/dev/null | head -10 || true
@@ -148,12 +151,21 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
+          files=""
           for f in dist/frilanser.apk dist/updates/manifest.json dist/updates/frilanser.apk dist/android-build.log; do
-            if [ -f "$f" ]; then git add -f "$f"; fi
+            if [ -f "$f" ]; then files="$files $f"; fi
           done
-          if git diff --cached --quiet; then
-            echo "تغییری برای کامیت نیست"
-          else
+          echo "فایل‌ها برای کامیت:$files"
+          for attempt in 1 2 3 4; do
+            echo "--- تلاش $attempt ---"
+            git pull --rebase origin "${GITHUB_REF_NAME}" >/dev/null 2>&1 || true
+            [ -n "$files" ] && git add -f $files
+            if git diff --cached --quiet; then
+              echo "تغییری برای کامیت نیست"; break
+            fi
             git commit -m "ساخت خودکار: dist/frilanser.apk (اندروید) + مانیفست نسخه"
-            git push origin "HEAD:${GITHUB_REF_NAME}"
-          fi
+            if git push origin "HEAD:${GITHUB_REF_NAME}"; then
+              echo "کامیت و ارسال موفق ✓"; break
+            fi
+            sleep 15
+          done
