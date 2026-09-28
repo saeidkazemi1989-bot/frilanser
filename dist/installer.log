@@ -75,17 +75,17 @@ Creating setup files
 
 Warning: Architecture identifier "x64" is deprecated. Substituting "x64os", but note that "x64compatible" is preferred in most cases. See the "Architecture Identifiers" topic in help file for more information.
 
-Successful compile (4.594 sec). Resulting Setup program filename is:
+Successful compile (5.062 sec). Resulting Setup program filename is:
 D:\a\frilanser\frilanser\dist\Frilanser-Setup.exe
 
 --- stderr ---
 
 --- محتوای dist ---
-ci-report.md: 4942 بایت
-frilanser-gui.exe: 15456346 بایت
-frilanser-portable.zip: 27395871 بایت
-Frilanser-Setup.exe: 29352502 بایت
-frilanser.exe: 12426216 بایت
+ci-report.md: 5033 بایت
+frilanser-gui.exe: 15458753 بایت
+frilanser-portable.zip: 27398271 بایت
+Frilanser-Setup.exe: 29354639 بایت
+frilanser.exe: 12426315 بایت
 installer.log: 0 بایت
 updates: 0 بایت
 zip.log: 47 بایت
