@@ -4,6 +4,13 @@ on:
   push:
     branches: ["**"]          # هر push روی هر شاخه → ساخت فایل اجرایی
     tags: ["v*"]              # تگ نسخه → انتشار در Release
+    paths:                    # فقط وقتی چیزی که روی خروجی اثر دارد تغییر کند
+      - "frilanser/**"
+      - "frilanser_app.py"
+      - "config.toml"
+      - "data/raw/**"
+      - "requirements.txt"
+      - ".github/workflows/build-windows.yml"
   workflow_dispatch:
 
 permissions:
@@ -111,7 +118,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add -f dist/frilanser.exe
-          for f in ci-report.md ci-env.txt help.log paths.log paths-after.log run.log tree.log; do
+          for f in ci-report.md; do
             if [ -f "dist/$f" ]; then
               git add -f "dist/$f"
             fi

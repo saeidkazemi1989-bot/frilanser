@@ -134,8 +134,14 @@ data/needs_you.json      صف کارهایی که باید خودتان انجا
 outbox/demos/            دموهای HTML ساخته‌شده (هر کدام یک فایل مستقل)
 outbox/reports/          گزارش روزانه (latest.md همیشه آخرین گزارش است)
 frilanser/               کد برنامه (sources، screening، pricing، demo_builder، web)
+frilanser_app.py         نقطه‌ی ورود نسخه‌ی اجرایی (EXE)
+dist/frilanser.exe       فایل اجرایی ویندوز (ساخته‌شده توسط CI)
+dist/ci-report.md        گزارش آخرین تست نسخه‌ی اجرایی روی ویندوز
 tests/                   تست‌های خودکار
 scripts/scan.sh          اجرای دوره‌ای (cron)
+scripts/setup.sh         نصب وابستگی‌ها
+scripts/build_exe.bat    ساخت EXE روی ویندوز
+.github/workflows/       ساخت خودکار EXE روی ویندوز
 ```
 
 ## ۷. تست

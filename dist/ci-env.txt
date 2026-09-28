@@ -1,4 +1,0 @@
-runner_temp=D:\a\_temp
-workspace=D:\a\frilanser\frilanser
-testdir=D:\a\_temp/exetest
-cwd_after_cd=/d/a/_temp/exetest
