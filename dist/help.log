@@ -1,0 +1,4 @@
+Traceback (most recent call last):
+  File "__main__.py", line 3, in <module>
+ImportError: attempted relative import with no known parent package
+[PYI-8056:ERROR] Failed to execute script '__main__' due to unhandled exception!
