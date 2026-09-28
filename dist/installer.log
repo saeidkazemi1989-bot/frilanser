@@ -1,0 +1,64 @@
+iscc: C:/Program Files (x86)/Inno Setup 6/ISCC.exe
+exit: 2
+--- stdout ---
+Inno Setup 6 Command-Line Compiler
+Copyright (C) 1997-2026 Jordan Russell. All rights reserved.
+Portions Copyright (C) 2000-2026 Martijn Laan. All rights reserved.
+Portions Copyright (C) 2001-2004 Alex Yackimoff. All rights reserved.
+https://www.innosetup.com
+
+Compiler engine version: Inno Setup 6.7.1
+Non-commercial use only
+
+Preprocessing
+   Reading file: C:\Program Files (x86)\Inno Setup 6\ISPPBuiltins.iss
+Parsing [Setup] section, line 8
+Parsing [Setup] section, line 9
+Parsing [Setup] section, line 10
+Parsing [Setup] section, line 11
+Parsing [Setup] section, line 12
+Parsing [Setup] section, line 13
+Parsing [Setup] section, line 14
+Parsing [Setup] section, line 15
+Parsing [Setup] section, line 16
+Parsing [Setup] section, line 17
+Parsing [Setup] section, line 18
+Parsing [Setup] section, line 19
+Parsing [Setup] section, line 20
+Parsing [Setup] section, line 21
+Parsing [Setup] section, line 22
+Reading file (WizardImageFile)
+Reading file (WizardSmallImageFile)
+Preparing Setup program executable
+   Verification successful
+   Updating icons (Setup.e32)
+   Updating version info (Setup.e32)
+Determining language code pages
+Parsing [Languages] section, line 25
+   Reading file: C:\Program Files (x86)\Inno Setup 6\Default.isl
+   Messages in script file
+Reading default messages from Default.isl
+Parsing [Languages] section, line 25
+   Reading file: C:\Program Files (x86)\Inno Setup 6\Default.isl
+Parsing [LangOptions], [Messages], and [CustomMessages] sections
+   Messages in script file
+Reading [Code] section
+Parsing [Tasks] section, line 28
+Parsing [Icons] section, line 38
+Parsing [Icons] section, line 39
+Parsing [Icons] section, line 40
+Parsing [Icons] section, line 41
+Parsing [Run] section, line 44
+Parsing [Files] section, line 31
+
+--- stderr ---
+Error on line 31 in D:\a\frilanser\frilanser\scripts\installer.iss: Source file "D:\a\frilanser\frilanser\scripts\dist\frilanser-gui.exe" does not exist.
+Compile aborted.
+
+--- محتوای dist ---
+ci-report.md: 4762 بایت
+frilanser-gui.exe: 15395678 بایت
+frilanser-portable.zip: 27271173 بایت
+frilanser.exe: 12365911 بایت
+installer.log: 0 بایت
+zip.log: 47 بایت
