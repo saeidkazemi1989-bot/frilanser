@@ -13,7 +13,7 @@ AppPublisherURL=https://github.com/saeidkazemi1989-bot/frilanser
 DefaultDirName={autopf}\Frilanser
 DefaultGroupName={#MyAppName}
 DisableProgramGroupPage=yes
-OutputDir=dist
+; خروجی با پارامتر /O مشخص می‌شود
 OutputBaseFilename=Frilanser-Setup
 ArchitecturesInstallIn64BitMode=x64
 Compression=lzma2/max
@@ -28,11 +28,11 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 Name: "desktopicon"; Description: "ایجاد میان‌بر روی دسکتاپ"; GroupDescription: "میان‌برها:"; Flags: unchecked
 
 [Files]
-Source: "dist\frilanser-gui.exe"; DestDir: "{app}"; Flags: ignoreversion
-Source: "dist\frilanser.exe"; DestDir: "{app}"; Flags: ignoreversion
-Source: "config.toml"; DestDir: "{app}"; Flags: ignoreversion
-Source: "README.md"; DestDir: "{app}"; Flags: ignoreversion
-Source: "data\raw\*"; DestDir: "{app}\data\raw"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "..\dist\frilanser-gui.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\dist\frilanser.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\config.toml"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\README.md"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\data\raw\*"; DestDir: "{app}\data\raw"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 [Icons]
 Name: "{group}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"
