@@ -207,6 +207,36 @@ def build_window():
         threading.Thread(target=target, daemon=True).start()
         root.after(1200, lambda: webbrowser.open("http://127.0.0.1:5000"))
 
+    def check_update() -> None:
+        """بررسی و نصب آخرین نسخه از داخل برنامه (بدون مراجعه به گیت‌هاب)."""
+        def worker() -> None:
+            try:
+                from frilanser import updater
+                from frilanser.config import load_config
+                from frilanser.version import __version__
+
+                cfg = load_config()
+                say(f"نسخه‌ی فعلی: {__version__} — در حال بررسی…\n")
+                info = updater.check_update(cfg)
+                if not info["ok"]:
+                    say(f"بررسی ناموفق بود: {info['error']}\n")
+                    return
+                if not info["has_update"]:
+                    say(f"برنامه به‌روز است (آخرین نسخه: {info['latest']}) ✓\n")
+                    return
+                say(f"نسخه‌ی جدید {info['latest']} پیدا شد؛ در حال دریافت…\n")
+                res = updater.update(cfg)
+                if res.get("ok"):
+                    say(f"{res.get('message') or 'به‌روزرسانی انجام شد'}\n")
+                    if res.get("downloaded"):
+                        say(f"فایل: {res['downloaded']}\n")
+                else:
+                    say(f"به‌روزرسانی ناموفق بود: {res.get('error') or res.get('message', '')}\n")
+            except Exception as exc:  # noqa: BLE001
+                say(f"خطا در به‌روزرسانی: {exc}\n")
+
+        threading.Thread(target=worker, daemon=True).start()
+
     def open_cmd() -> None:
         exe = Path(sys.executable).with_name("frilanser.exe")
         if getattr(sys, "frozen", False) and exe.exists():
@@ -219,6 +249,7 @@ def build_window():
         ("🌐  دریافت زنده از سایت‌ها", lambda: run_cli(["run", "--online"])),
         ("🖥  داشبورد در مرورگر", start_dashboard),
         ("📋  کارهایی که باید خودم انجام دهم", lambda: run_cli(["needs", "--full"])),
+        ("🔄  به‌روزرسانی برنامه", check_update),
         ("📁  باز کردن پوشه‌ی خروجی", open_outbox),
         ("📄  باز کردن آخرین گزارش", open_report),
         ("📂  پوشه‌ی برنامه", open_folder),

@@ -64,22 +64,37 @@ jobs:
           du -sh .
 
       - name: ساخت APK
+        id: build
+        continue-on-error: true
         timeout-minutes: 180
         run: |
+          mkdir -p dist
           cd android
           if [ -n "${{ github.event.inputs.archs }}" ]; then
             sed -i "s/^android.archs = .*/android.archs = ${{ github.event.inputs.archs }}/" buildozer.spec
           fi
-          buildozer -v android debug 2>&1 | tail -n 200
+          buildozer -v android debug > ../dist/android-build.log 2>&1
+          code=$?
+          echo "buildozer_exit=$code" >> ../dist/android-build.log
+          echo "=== خروجی‌های احتمالی ===" >> ../dist/android-build.log
+          ls -la bin 2>&1 >> ../dist/android-build.log || true
+          find .. -name "*.apk" 2>/dev/null >> ../dist/android-build.log || true
+          # فقط انتهای لاگ نگه داشته می‌شود (حجم فایل)
+          tail -n 1200 ../dist/android-build.log > ../dist/android-build.tmp
+          mv ../dist/android-build.tmp ../dist/android-build.log
+          tail -n 120 ../dist/android-build.log
+          exit $code
 
       - name: گردآوری خروجی
         id: collect
+        if: always()
         run: |
           mkdir -p dist/updates
-          APK=$(ls android/bin/*.apk 2>/dev/null | head -1 || true)
+          APK=$(find . -name "*.apk" -not -path "./android/.buildozer/*" 2>/dev/null | head -1 || true)
           if [ -z "$APK" ]; then
-            echo "هیچ APKای ساخته نشد" >&2
-            find android/bin -maxdepth 2 -type f 2>/dev/null | head -20 || true
+            echo "! هیچ APKای ساخته نشد — لاگ در dist/android-build.log" >&2
+            find . -maxdepth 3 -name "*.apk" 2>/dev/null | head -10 || true
+            ls -la android/bin 2>/dev/null || true
             exit 1
           fi
           cp "$APK" dist/updates/frilanser.apk
@@ -126,13 +141,14 @@ jobs:
             dist/frilanser.apk
             dist/updates/manifest.json
             dist/updates/frilanser.apk
+            dist/android-build.log
 
       - name: کامیت APK و مانیفست در شاخه‌ی جاری
         if: always()
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          for f in dist/frilanser.apk dist/updates/manifest.json dist/updates/frilanser.apk; do
+          for f in dist/frilanser.apk dist/updates/manifest.json dist/updates/frilanser.apk dist/android-build.log; do
             if [ -f "$f" ]; then git add -f "$f"; fi
           done
           if git diff --cached --quiet; then
