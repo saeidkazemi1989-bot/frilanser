@@ -23,8 +23,7 @@ source.exclude_patterns = */__pycache__/*,*/.pytest_cache/*
 version = 1.0.0
 
 # (list) نیازمندی‌ها: وب‌سرور Flask + کتابخانه‌های دریافت داده + پل جاوا برای نصب به‌روزرسانی
-requirements = python3,flask,werkzeug,jinja2,click,itsdangerous,markupsafe,blinker,\
-    requests,urllib3,idna,certifi,charset-normalizer,beautifulsoup4,soupsieve,pyjnius
+requirements = python3,flask,requests,beautifulsoup4,pyjnius
 
 # (str) جهت صفحه
 orientation = portrait
@@ -51,8 +50,8 @@ android.bootstrap = webview
 # (int) پورتی که WebView به آن متصل می‌شود (با FRILANSER_PORT در main.py یکی است)
 p4a.port = 5000
 
-# (str) شاخه‌ی python-for-android
-p4a.branch = develop
+# (str) نسخه‌ی پایدار python-for-android (شاخه‌ی develop در حال حاضر بسته‌ی android را ندارد)
+p4a.branch = v2024.01.21
 
 # (bool) در حالت اشکال‌زدایی ساخته شود (بدون نیاز به امضای توسعه‌دهنده)
 android.debug = 1
