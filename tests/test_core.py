@@ -283,9 +283,12 @@ def test_demo_builds_for_all_kinds(category, expected_kind, tmp_path):
 
 # --------------------------------------------------------------- pipeline
 def test_full_pipeline_offline(tmp_path):
+    import shutil
+
     from frilanser import pipeline
 
     cfg = load_config()
+    shutil.copytree(Path("data/raw"), tmp_path / "data" / "raw")
     cfg.raw["app"]["data_dir"] = str(tmp_path / "data")
     cfg.raw["app"]["outbox_dir"] = str(tmp_path / "outbox")
     cfg.raw["app"]["demo_dir"] = str(tmp_path / "outbox" / "demos")
@@ -387,3 +390,45 @@ def test_demo_bilingual_shop(tmp_path):
     assert meta["archetype"] == "shop"
     html = Path(meta["path"]).read_text(encoding="utf-8")
     assert "English version" in html
+
+
+# --------------------------------------------------------------- عیب‌یابی
+def test_doctor_reports_missing_data(tmp_path):
+    from frilanser.doctor import run_doctor
+
+    cfg = load_config()
+    cfg.raw["app"]["data_dir"] = str(tmp_path / "data")
+    cfg.raw["app"]["outbox_dir"] = str(tmp_path / "outbox")
+    cfg.raw["app"]["demo_dir"] = str(tmp_path / "outbox" / "demos")
+    cfg.raw["app"]["report_dir"] = str(tmp_path / "outbox" / "reports")
+    store = Store(cfg.data_dir)
+
+    text = run_doctor(cfg, store, check_network=False)
+
+    assert "گزارش عیب‌یابی" in text
+    assert "هیچ اسنپ‌شاتی" in text          # اسنپ‌شات ندارد
+    assert "تعداد پروژه‌ها : 0" in text
+    assert "اجرای کامل" in text              # پیشنهاد اقدام
+    assert (Path(cfg.outbox_dir) / "doctor.txt").exists()
+
+
+def test_doctor_with_data_and_no_network(tmp_path):
+    from frilanser.doctor import run_doctor
+
+    import shutil
+
+    cfg = load_config()
+    shutil.copytree(Path("data/raw"), tmp_path / "data" / "raw")
+    cfg.raw["app"]["data_dir"] = str(tmp_path / "data")
+    cfg.raw["app"]["outbox_dir"] = str(tmp_path / "outbox")
+    cfg.raw["app"]["demo_dir"] = str(tmp_path / "outbox" / "demos")
+    cfg.raw["app"]["report_dir"] = str(tmp_path / "outbox" / "reports")
+    cfg.raw["fetch"]["allow_network"] = False
+
+    store = Store(cfg.data_dir)
+    from frilanser import pipeline
+    pipeline.collect(cfg, store, offline=True)
+
+    text = run_doctor(cfg, store, check_network=False)
+    assert "تعداد پروژه‌ها : 0" not in text
+    assert "اسنپ‌شات" in text

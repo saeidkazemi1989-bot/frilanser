@@ -43,9 +43,22 @@ def cmd_run(args):
         force=args.force,
         demo_verdicts=tuple(v.strip() for v in args.verdicts.split(",") if v.strip()),
     )
+    if result["collect"]["fetched"] == 0:
+        print()
+        print("!" * 70)
+        print("هیچ آگهی‌ای پیدا نشد. دلیل را در گزارش زیر ببینید:")
+        print("!" * 70)
+        from .doctor import run_doctor
+
+        print(run_doctor(cfg, store, check_network=not args.online))
+        return 1
+
     n = result["notify"]
     print()
     print("=" * 70)
+    print(f"آگهی‌های بررسی‌شده: {result['collect']['fetched']} | "
+          f"کاندیدا: {result['screen']['counts'].get('candidate', 0)} | "
+          f"پیش‌نمایش ساخته‌شده: {result['demos']['built']}")
     print(f"گزارش: {n['report_path']}")
     print(f"کارهایی که باید خودتان انجام دهید: {len(n['open_items'])} مورد")
     for item in n["open_items"][:10]:
@@ -180,6 +193,18 @@ def cmd_decide(args):
     return 0
 
 
+def cmd_doctor(args):
+    """گزارش عیب‌یابی: چرا داده نمی‌آید (و چه باید کرد)."""
+    cfg, store = get_context(args)
+    from .doctor import run_doctor
+
+    text = run_doctor(cfg, store, check_network=not args.offline, timeout=args.timeout)
+    print(text)
+    print()
+    print(f"این گزارش در فایل زیر هم ذخیره شد: {Path(cfg.outbox_dir) / 'doctor.txt'}")
+    return 0
+
+
 def cmd_paths(args):
     """نمایش مسیرهای مؤثر — برای عیب‌یابی (مخصوصاً در نسخه‌ی EXE)."""
     import sys
@@ -290,6 +315,11 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("decision", choices=["approved", "rejected", "delivered"])
     p.add_argument("--note", default=None)
     p.set_defaults(func=cmd_decide)
+
+    p = sub.add_parser("doctor", help="عیب‌یابی: چرا داده نمی‌آید و چه باید کرد")
+    p.add_argument("--offline", action="store_true", help="بررسی نکردنِ اینترنت")
+    p.add_argument("--timeout", type=float, default=6.0)
+    p.set_defaults(func=cmd_doctor)
 
     p = sub.add_parser("paths", help="نمایش مسیرهای مورد استفاده (عیب‌یابی)")
     p.set_defaults(func=cmd_paths)

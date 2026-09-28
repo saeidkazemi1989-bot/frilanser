@@ -115,13 +115,24 @@ class Config:
     def data_dir(self) -> Path:
         return self.subpath(_dig(self.raw, "app", "data_dir", default="data"))
 
+    def _under_data(self, key: str, name: str) -> Path:
+        """مسیرهای داخل پوشه‌ی داده‌ها؛ اگر data_dir مطلق باشد، آن‌ها هم مطلق می‌شوند."""
+        override = _dig(self.raw, "app", key)
+        if override:
+            cand = Path(override)
+            if cand.is_absolute():
+                return self.subpath(str(cand))
+            # مسیر نسبی (مثل data/raw) → نسبت به پوشه‌ی داده‌ها
+            return self.subpath(str(self.data_dir), cand.name)
+        return self.subpath(str(self.data_dir), name)
+
     @property
     def raw_dir(self) -> Path:
-        return self.subpath(_dig(self.raw, "app", "raw_dir", default="data/raw"))
+        return self._under_data("raw_dir", "raw")
 
     @property
     def cache_dir(self) -> Path:
-        return self.subpath(_dig(self.raw, "app", "cache_dir", default="data/cache"))
+        return self._under_data("cache_dir", "cache")
 
     @property
     def outbox_dir(self) -> Path:

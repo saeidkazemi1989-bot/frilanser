@@ -36,7 +36,27 @@
   </form>
 </div>
 
-{% if projects %}
+{% if not projects %}
+<div class="panel" style="border-color:#ffe08a;background:#fff8e6">
+  <h2>هنوز هیچ آگهی‌ای در برنامه نیست</h2>
+  <p class="muted">
+    برای اینکه داده بیاید یکی از این دو کار را انجام دهید:
+  </p>
+  <ol style="line-height:2">
+    <li>در پنجره‌ی برنامه روی <b>«اجرای کامل»</b> کلیک کنید
+        (بدون اینترنت هم از اسنپ‌شات‌های داخل برنامه می‌خواند).</li>
+    <li>اگر می‌خواهید از سایت‌ها زنده بخواند، در برنامه <b>«دریافت زنده از سایت‌ها»</b> را بزنید؛
+        اگر سایت‌ها روی شبکه‌ی شما بسته باشند، خودکار به اسنپ‌شات برمی‌گردد.</li>
+  </ol>
+  <p class="muted">اگر باز هم چیزی نیامد، دکمه‌ی <b>«عیب‌یابی»</b> را در برنامه بزنید؛
+  علت دقیق را می‌گوید و فایل <code>outbox/doctor.txt</code> را می‌سازد.</p>
+  <div style="margin-top:10px">
+    <form method="post" action="{{ url_for('rescan') }}">
+      <button type="submit">🔄 همین حالا اسکن کن (آفلاین)</button>
+    </form>
+  </div>
+</div>
+{% else %}
 <div class="cards">
 {% for p in projects %}
   <div class="card">

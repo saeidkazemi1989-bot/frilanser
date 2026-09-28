@@ -125,7 +125,23 @@ def build_window():
             sys.stdout = sys.stderr = _Writer()
             try:
                 code = cli_main(args)
-                say(f"\n✔ پایان اجرا (کد خروج: {code})")
+                if code == 0:
+                    try:
+                        from frilanser.config import load_config
+                        from frilanser.store import Store
+
+                        st = Store(load_config().data_dir)
+                        allp = st.all()
+                        cand = [p for p in allp if p.verdict == "candidate"]
+                        demos = [p for p in allp if p.demo]
+                        say(f"\n✔ پایان اجرا — {len(allp)} آگهی، "
+                            f"{len(cand)} کاندیدا، {len(demos)} پیش‌نمایش ساخته شد.")
+                        say("برای دیدن نتایج روی «داشبورد در مرورگر» کلیک کنید.")
+                    except Exception as exc:  # noqa: BLE001
+                        say(f"\n✔ پایان اجرا ({exc})")
+                else:
+                    say(f"\n⚠ اجرا با کد {code} تمام شد؛ گزارش بالا را بخوانید "
+                        f"(در صورت نیاز دکمه‌ی عیب‌یابی را بزنید).")
             except Exception as exc:  # noqa: BLE001
                 say(f"\n✖ خطا: {exc}")
             finally:
@@ -206,6 +222,7 @@ def build_window():
         ("📁  باز کردن پوشه‌ی خروجی", open_outbox),
         ("📄  باز کردن آخرین گزارش", open_report),
         ("📂  پوشه‌ی برنامه", open_folder),
+        ("🩺  عیب‌یابی (چرا داده نمی‌آید؟)", lambda: run_cli(["doctor"])),
         ("⌨  خط فرمان (CLI)", open_cmd),
     ]
     for label, cmd in specs:
@@ -213,11 +230,29 @@ def build_window():
         btn.pack(side="left", padx=4, pady=4)
         buttons.append(btn)
 
+    def count_projects() -> int:
+        try:
+            from frilanser.config import load_config
+            from frilanser.store import Store
+
+            return len(Store(load_config().data_dir).all())
+        except Exception:  # noqa: BLE001
+            return -1
+
+    def first_start() -> None:
+        n = count_projects()
+        if n == 0:
+            say("هیچ داده‌ای در برنامه نیست؛ اسکن خودکار شروع می‌شود…\n")
+            root.after(300, lambda: run_cli(["run"]))
+        elif n > 0:
+            say(f"{n} آگهی در برنامه وجود دارد. برای تازه‌سازی «اجرای کامل» را بزنید.\n")
+
     say("به فریلنس‌یار آرنا خوش آمدید.\n"
-        "برای شروع روی «اجرای کامل» کلیک کنید؛ نتیجه در همین پنجره نمایش داده می‌شود\n"
-        "و خروجی‌ها (پیش‌نمایش‌ها و گزارش) در پوشه‌ی outbox ذخیره می‌شوند.\n")
+        "دکمه‌ی «اجرای کامل» آگهی‌ها را می‌خواند، غربال می‌کند و پیش‌نمایش می‌سازد؛\n"
+        "نتیجه در همین پنجره نمایش داده می‌شود و در داشبورد هم می‌بینید.\n")
     pump()
-    root.after(400, start_dashboard)
+    root.after(500, first_start)
+    root.after(900, start_dashboard)
     return root
 
 
