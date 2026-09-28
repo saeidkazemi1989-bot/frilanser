@@ -57,6 +57,29 @@ jobs:
           ls -R . >> tree.log 2>&1
           cp help.log run.log tree.log "$GITHUB_WORKSPACE/dist/"
 
+          # گزارش متنی برای بررسی از راه دور (در مخزن کامیت می‌شود)
+          {
+            echo "# گزارش تست نسخه‌ی اجرایی ویندوز"
+            echo
+            echo "- ساخته‌شده با PyInstaller روی windows-latest"
+            echo "- خروجی exit=0 یعنی اجرای موفق"
+            echo
+            echo '## frilanser.exe --help'
+            echo '```'
+            cat help.log
+            echo '```'
+            echo
+            echo '## frilanser.exe run --demos 1'
+            echo '```'
+            head -60 run.log
+            echo '```'
+            echo
+            echo '## فایل‌های تولیدشده'
+            echo '```'
+            head -40 tree.log
+            echo '```'
+          } > "$GITHUB_WORKSPACE/dist/ci-report.md"
+
       - name: بارگذاری فایل اجرایی و لاگ تست
         if: always()
         uses: actions/upload-artifact@v4
@@ -81,7 +104,7 @@ jobs:
             ls -la dist 2>&1
             echo "== add =="
             git add -f dist/frilanser.exe 2>&1
-            for f in help.log run.log tree.log; do
+            for f in ci-report.md help.log run.log tree.log ci-debug.log; do
               [ -f "dist/$f" ] && git add -f "dist/$f" 2>&1
             done
             echo "== status =="
