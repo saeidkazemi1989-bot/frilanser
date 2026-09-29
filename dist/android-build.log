@@ -1,0 +1,1200 @@
+[1m[90m[DEBUG][39m[0m:   	  adding: importlib/metadata/_collections.pyc (deflated 46%)
+[1m[90m[DEBUG][39m[0m:   	  adding: importlib/metadata/__init__.pyc (deflated 63%)
+[1m[90m[DEBUG][39m[0m:   	  adding: importlib/metadata/_meta.pyc (deflated 59%)
+[1m[90m[DEBUG][39m[0m:   	  adding: importlib/resources/_itertools.pyc (deflated 38%)
+[1m[90m[DEBUG][39m[0m:   	  adding: importlib/resources/readers.pyc (deflated 57%)
+[1m[90m[DEBUG][39m[0m:   	  adding: importlib/resources/_adapters.pyc (deflated 62%)
+[1m[90m[DEBUG][39m[0m:   	  adding: importlib/resources/simple.pyc (deflated 57%)
+[1m[90m[DEBUG][39m[0m:   	  adding: importlib/resources/__init__.pyc (deflated 45%)
+[1m[90m[DEBUG][39m[0m:   	  adding: importlib/resources/_legacy.pyc (deflated 52%)
+[1m[90m[DEBUG][39m[0m:   	  adding: importlib/resources/_common.pyc (deflated 48%)
+[1m[90m[DEBUG][39m[0m:   	  adding: importlib/resources/abc.pyc (deflated 62%)
+[1m[90m[DEBUG][39m[0m:   	  adding: concurrent/__init__.pyc (deflated 29%)
+[1m[90m[DEBUG][39m[0m:   	  adding: concurrent/futures/thread.pyc (deflated 52%)
+[1m[90m[DEBUG][39m[0m:   	  adding: concurrent/futures/process.pyc (deflated 58%)
+[1m[90m[DEBUG][39m[0m:   	  adding: concurrent/futures/_base.pyc (deflated 65%)
+[1m[90m[DEBUG][39m[0m:   	  adding: concurrent/futures/__init__.pyc (deflated 42%)
+[1m[90m[DEBUG][39m[0m:   	  adding: venv/__init__.pyc (deflated 55%)
+[1m[90m[DEBUG][39m[0m:   	  adding: venv/__main__.pyc (deflated 28%)
+[1m[90m[DEBUG][39m[0m:   	  adding: venv/scripts/common/activate (deflated 66%)
+[1m[90m[DEBUG][39m[0m:   	  adding: venv/scripts/common/Activate.ps1 (deflated 68%)
+[1m[90m[DEBUG][39m[0m:   	  adding: venv/scripts/nt/activate.bat (deflated 61%)
+[1m[90m[DEBUG][39m[0m:   	  adding: venv/scripts/nt/deactivate.bat (deflated 64%)
+[1m[90m[DEBUG][39m[0m:   	  adding: venv/scripts/posix/activate.fish (deflated 63%)
+[1m[90m[DEBUG][39m[0m:   	  adding: venv/scripts/posix/activate.csh (deflated 53%)
+[1m[90m[DEBUG][39m[0m:   	  adding: dbm/dumb.pyc (deflated 59%)
+[1m[90m[DEBUG][39m[0m:   	  adding: dbm/gnu.pyc (deflated 27%)
+[1m[90m[DEBUG][39m[0m:   	  adding: dbm/ndbm.pyc (deflated 27%)
+[1m[90m[DEBUG][39m[0m:   	  adding: dbm/__init__.pyc (deflated 48%)
+[1m[90m[DEBUG][39m[0m:   	  adding: collections/__init__.pyc (deflated 68%)
+[1m[90m[DEBUG][39m[0m:   	  adding: collections/abc.pyc (deflated 32%)
+[1m[90m[DEBUG][39m[0m:   	  adding: re/_parser.pyc (deflated 58%)
+[1m[90m[DEBUG][39m[0m:   	  adding: re/_compiler.pyc (deflated 56%)
+[1m[90m[DEBUG][39m[0m:   	  adding: re/_constants.pyc (deflated 47%)
+[1m[90m[DEBUG][39m[0m:   	  adding: re/_casefix.pyc (deflated 50%)
+[1m[90m[DEBUG][39m[0m:   	  adding: re/__init__.pyc (deflated 53%)
+[1m[90m[DEBUG][39m[0m:   	  adding: distutils/archive_util.pyc (deflated 49%)
+[1m[90m[DEBUG][39m[0m:   	  adding: distutils/README (deflated 34%)
+[1m[90m[DEBUG][39m[0m:   	  adding: distutils/file_util.pyc (deflated 52%)
+[1m[90m[DEBUG][39m[0m:   	  adding: distutils/bcppcompiler.pyc (deflated 52%)
+[1m[90m[DEBUG][39m[0m:   	  adding: distutils/core.pyc (deflated 47%)
+[1m[90m[DEBUG][39m[0m:   	  adding: distutils/dir_util.pyc (deflated 50%)
+[1m[90m[DEBUG][39m[0m:   	  adding: distutils/fancy_getopt.pyc (deflated 51%)
+[1m[90m[DEBUG][39m[0m:   	  adding: distutils/filelist.pyc (deflated 59%)
+[1m[90m[DEBUG][39m[0m:   	  adding: distutils/errors.pyc (deflated 73%)
+[1m[90m[DEBUG][39m[0m:   	  adding: distutils/dep_util.pyc (deflated 49%)
+[1m[90m[DEBUG][39m[0m:   	  adding: distutils/spawn.pyc (deflated 45%)
+[1m[90m[DEBUG][39m[0m:   	  adding: distutils/msvccompiler.pyc (deflated 54%)
+[1m[90m[DEBUG][39m[0m:   	  adding: distutils/log.pyc (deflated 55%)
+[1m[90m[DEBUG][39m[0m:   	  adding: distutils/cmd.pyc (deflated 55%)
+[1m[90m[DEBUG][39m[0m:   	  adding: distutils/sysconfig.pyc (deflated 49%)
+[1m[90m[DEBUG][39m[0m:   	  adding: distutils/cygwinccompiler.pyc (deflated 50%)
+[1m[90m[DEBUG][39m[0m:   	  adding: distutils/versionpredicate.pyc (deflated 48%)
+[1m[90m[DEBUG][39m[0m:   	  adding: distutils/version.pyc (deflated 57%)
+[1m[90m[DEBUG][39m[0m:   	  adding: distutils/msvc9compiler.pyc (deflated 55%)
+[1m[90m[DEBUG][39m[0m:   	  adding: distutils/extension.pyc (deflated 50%)
+[1m[90m[DEBUG][39m[0m:   	  adding: distutils/ccompiler.pyc (deflated 58%)
+[1m[90m[DEBUG][39m[0m:   	  adding: distutils/_msvccompiler.pyc (deflated 53%)
+[1m[90m[DEBUG][39m[0m:   	  adding: distutils/debug.pyc (deflated 26%)
+[1m[90m[DEBUG][39m[0m:   	  adding: distutils/config.pyc (deflated 48%)
+[1m[90m[DEBUG][39m[0m:   	  adding: distutils/__init__.pyc (deflated 28%)
+[1m[90m[DEBUG][39m[0m:   	  adding: distutils/util.pyc (deflated 51%)
+[1m[90m[DEBUG][39m[0m:   	  adding: distutils/dist.pyc (deflated 60%)
+[1m[90m[DEBUG][39m[0m:   	  adding: distutils/text_file.pyc (deflated 50%)
+[1m[90m[DEBUG][39m[0m:   	  adding: distutils/unixccompiler.pyc (deflated 53%)
+[1m[90m[DEBUG][39m[0m:   	  adding: distutils/command/build_scripts.pyc (deflated 49%)
+[1m[90m[DEBUG][39m[0m:   	  adding: distutils/command/command_template (deflated 51%)
+[1m[90m[DEBUG][39m[0m:   	  adding: distutils/command/install.pyc (deflated 57%)
+[1m[90m[DEBUG][39m[0m:   	  adding: distutils/command/register.pyc (deflated 53%)
+[1m[90m[DEBUG][39m[0m:   	  adding: distutils/command/install_lib.pyc (deflated 53%)
+[1m[90m[DEBUG][39m[0m:   	  adding: distutils/command/build_ext.pyc (deflated 56%)
+[1m[90m[DEBUG][39m[0m:   	  adding: distutils/command/bdist.pyc (deflated 47%)
+[1m[90m[DEBUG][39m[0m:   	  adding: distutils/command/bdist_dumb.pyc (deflated 49%)
+[1m[90m[DEBUG][39m[0m:   	  adding: distutils/command/install_egg_info.pyc (deflated 50%)
+[1m[90m[DEBUG][39m[0m:   	  adding: distutils/command/bdist_rpm.pyc (deflated 57%)
+[1m[90m[DEBUG][39m[0m:   	  adding: distutils/command/install_headers.pyc (deflated 48%)
+[1m[90m[DEBUG][39m[0m:   	  adding: distutils/command/upload.pyc (deflated 49%)
+[1m[90m[DEBUG][39m[0m:   	  adding: distutils/command/check.pyc (deflated 49%)
+[1m[90m[DEBUG][39m[0m:   	  adding: distutils/command/sdist.pyc (deflated 57%)
+[1m[90m[DEBUG][39m[0m:   	  adding: distutils/command/install_data.pyc (deflated 49%)
+[1m[90m[DEBUG][39m[0m:   	  adding: distutils/command/config.pyc (deflated 57%)
+[1m[90m[DEBUG][39m[0m:   	  adding: distutils/command/build.pyc (deflated 54%)
+[1m[90m[DEBUG][39m[0m:   	  adding: distutils/command/__init__.pyc (deflated 33%)
+[1m[90m[DEBUG][39m[0m:   	  adding: distutils/command/install_scripts.pyc (deflated 48%)
+[1m[90m[DEBUG][39m[0m:   	  adding: distutils/command/build_clib.pyc (deflated 53%)
+[1m[90m[DEBUG][39m[0m:   	  adding: distutils/command/build_py.pyc (deflated 56%)
+[1m[90m[DEBUG][39m[0m:   	  adding: distutils/command/clean.pyc (deflated 50%)
+[1m[90m[DEBUG][39m[0m:   	  adding: urllib/response.pyc (deflated 58%)
+[1m[90m[DEBUG][39m[0m:   	  adding: urllib/error.pyc (deflated 52%)
+[1m[90m[DEBUG][39m[0m:   	  adding: urllib/parse.pyc (deflated 59%)
+[1m[90m[DEBUG][39m[0m:   	  adding: urllib/__init__.pyc (deflated 31%)
+[1m[90m[DEBUG][39m[0m:   	  adding: urllib/request.pyc (deflated 58%)
+[1m[90m[DEBUG][39m[0m:   	  adding: urllib/robotparser.pyc (deflated 57%)
+[1m[90m[DEBUG][39m[0m:   	  adding: http/server.pyc (deflated 56%)
+[1m[90m[DEBUG][39m[0m:   	  adding: http/cookiejar.pyc (deflated 58%)
+[1m[90m[DEBUG][39m[0m:   	  adding: http/client.pyc (deflated 58%)
+[1m[90m[DEBUG][39m[0m:   	  adding: http/cookies.pyc (deflated 54%)
+[1m[90m[DEBUG][39m[0m:   	  adding: http/__init__.pyc (deflated 45%)
+[1m[90m[DEBUG][39m[0m:   	  adding: __phello__/spam.pyc (deflated 32%)
+[1m[90m[DEBUG][39m[0m:   	  adding: __phello__/__init__.pyc (deflated 32%)
+[1m[90m[DEBUG][39m[0m:   	  adding: __phello__/ham/eggs.pyc (deflated 29%)
+[1m[90m[DEBUG][39m[0m:   	  adding: __phello__/ham/__init__.pyc (deflated 29%)
+[1m[90m[DEBUG][39m[0m:   	  adding: msilib/schema.pyc (deflated 75%)
+[1m[90m[DEBUG][39m[0m:   	  adding: msilib/text.pyc (deflated 67%)
+[1m[90m[DEBUG][39m[0m:   	  adding: msilib/sequence.pyc (deflated 50%)
+[1m[90m[DEBUG][39m[0m:   	  adding: msilib/__init__.pyc (deflated 55%)
+[1m[90m[DEBUG][39m[0m:   	  adding: site-packages/README.txt (deflated 18%)
+[1m[90m[DEBUG][39m[0m:   	  adding: wsgiref/handlers.pyc (deflated 56%)
+[1m[90m[DEBUG][39m[0m:   	  adding: wsgiref/validate.pyc (deflated 58%)
+[1m[90m[DEBUG][39m[0m:   	  adding: wsgiref/headers.pyc (deflated 56%)
+[1m[90m[DEBUG][39m[0m:   	  adding: wsgiref/simple_server.pyc (deflated 49%)
+[1m[90m[DEBUG][39m[0m:   	  adding: wsgiref/types.pyc (deflated 55%)
+[1m[90m[DEBUG][39m[0m:   	  adding: wsgiref/__init__.pyc (deflated 26%)
+[1m[90m[DEBUG][39m[0m:   	  adding: wsgiref/util.pyc (deflated 50%)
+[1m[90m[DEBUG][39m[0m:   	  adding: pydoc_data/_pydoc.css (deflated 66%)
+[1m[90m[DEBUG][39m[0m:   	  adding: pydoc_data/topics.pyc (deflated 71%)
+[1m[90m[DEBUG][39m[0m:   	  adding: pydoc_data/__init__.pyc (deflated 29%)
+[1m[90m[DEBUG][39m[0m:   	  adding: ctypes/_aix.pyc (deflated 48%)
+[1m[90m[DEBUG][39m[0m:   	  adding: ctypes/wintypes.pyc (deflated 57%)
+[1m[90m[DEBUG][39m[0m:   	  adding: ctypes/_endian.pyc (deflated 53%)
+[1m[90m[DEBUG][39m[0m:   	  adding: ctypes/__init__.pyc (deflated 58%)
+[1m[90m[DEBUG][39m[0m:   	  adding: ctypes/util.pyc (deflated 56%)
+[1m[90m[DEBUG][39m[0m:   	  adding: ctypes/macholib/dylib.pyc (deflated 32%)
+[1m[90m[DEBUG][39m[0m:   	  adding: ctypes/macholib/fetch_macholib (deflated 12%)
+[1m[90m[DEBUG][39m[0m:   	  adding: ctypes/macholib/framework.pyc (deflated 33%)
+[1m[90m[DEBUG][39m[0m:   	  adding: ctypes/macholib/dyld.pyc (deflated 56%)
+[1m[90m[DEBUG][39m[0m:   	  adding: ctypes/macholib/README.ctypes (deflated 27%)
+[1m[90m[DEBUG][39m[0m:   	  adding: ctypes/macholib/__init__.pyc (deflated 24%)
+[1m[90m[DEBUG][39m[0m:   	  adding: ctypes/macholib/fetch_macholib.bat (deflated 9%)
+[1m[90m[DEBUG][39m[0m:   	  adding: html/parser.pyc (deflated 59%)
+[1m[90m[DEBUG][39m[0m:   	  adding: html/entities.pyc (deflated 62%)
+[1m[90m[DEBUG][39m[0m:   	  adding: html/__init__.pyc (deflated 47%)
+[1m[90m[DEBUG][39m[0m:   	  adding: email/utils.pyc (deflated 49%)
+[1m[90m[DEBUG][39m[0m:   	  adding: email/architecture.rst (deflated 64%)
+[1m[90m[DEBUG][39m[0m:   	  adding: email/generator.pyc (deflated 56%)
+[1m[90m[DEBUG][39m[0m:   	  adding: email/_header_value_parser.pyc (deflated 68%)
+[1m[90m[DEBUG][39m[0m:   	  adding: email/policy.pyc (deflated 49%)
+[1m[90m[DEBUG][39m[0m:   	  adding: email/parser.pyc (deflated 56%)
+[1m[90m[DEBUG][39m[0m:   	  adding: email/errors.pyc (deflated 68%)
+[1m[90m[DEBUG][39m[0m:   	  adding: email/feedparser.pyc (deflated 59%)
+[1m[90m[DEBUG][39m[0m:   	  adding: email/header.pyc (deflated 54%)
+[1m[90m[DEBUG][39m[0m:   	  adding: email/charset.pyc (deflated 54%)
+[1m[90m[DEBUG][39m[0m:   	  adding: email/contentmanager.pyc (deflated 53%)
+[1m[90m[DEBUG][39m[0m:   	  adding: email/quoprimime.pyc (deflated 49%)
+[1m[90m[DEBUG][39m[0m:   	  adding: email/headerregistry.pyc (deflated 63%)
+[1m[90m[DEBUG][39m[0m:   	  adding: email/_parseaddr.pyc (deflated 63%)
+[1m[90m[DEBUG][39m[0m:   	  adding: email/iterators.pyc (deflated 47%)
+[1m[90m[DEBUG][39m[0m:   	  adding: email/_encoded_words.pyc (deflated 49%)
+[1m[90m[DEBUG][39m[0m:   	  adding: email/__init__.pyc (deflated 55%)
+[1m[90m[DEBUG][39m[0m:   	  adding: email/_policybase.pyc (deflated 55%)
+[1m[90m[DEBUG][39m[0m:   	  adding: email/message.pyc (deflated 58%)
+[1m[90m[DEBUG][39m[0m:   	  adding: email/encoders.pyc (deflated 49%)
+[1m[90m[DEBUG][39m[0m:   	  adding: email/base64mime.pyc (deflated 42%)
+[1m[90m[DEBUG][39m[0m:   	  adding: email/mime/application.pyc (deflated 40%)
+[1m[90m[DEBUG][39m[0m:   	  adding: email/mime/image.pyc (deflated 61%)
+[1m[90m[DEBUG][39m[0m:   	  adding: email/mime/multipart.pyc (deflated 38%)
+[1m[90m[DEBUG][39m[0m:   	  adding: email/mime/audio.pyc (deflated 45%)
+[1m[90m[DEBUG][39m[0m:   	  adding: email/mime/text.pyc (deflated 37%)
+[1m[90m[DEBUG][39m[0m:   	  adding: email/mime/base.pyc (deflated 37%)
+[1m[90m[DEBUG][39m[0m:   	  adding: email/mime/__init__.pyc (deflated 29%)
+[1m[90m[DEBUG][39m[0m:   	  adding: email/mime/message.pyc (deflated 40%)
+[1m[90m[DEBUG][39m[0m:   	  adding: email/mime/nonmultipart.pyc (deflated 40%)
+[1m[90m[DEBUG][39m[0m:   	  adding: turtledemo/lindenmayer.pyc (deflated 52%)
+[1m[90m[DEBUG][39m[0m:   	  adding: turtledemo/colormixer.pyc (deflated 55%)
+[1m[90m[DEBUG][39m[0m:   	  adding: turtledemo/rosette.pyc (deflated 49%)
+[1m[90m[DEBUG][39m[0m:   	  adding: turtledemo/minimal_hanoi.pyc (deflated 50%)
+[1m[90m[DEBUG][39m[0m:   	  adding: turtledemo/tree.pyc (deflated 48%)
+[1m[90m[DEBUG][39m[0m:   	  adding: turtledemo/round_dance.pyc (deflated 46%)
+[1m[90m[DEBUG][39m[0m:   	  adding: turtledemo/paint.pyc (deflated 47%)
+[1m[90m[DEBUG][39m[0m:   	  adding: turtledemo/planet_and_moon.pyc (deflated 57%)
+[1m[90m[DEBUG][39m[0m:   	  adding: turtledemo/peace.pyc (deflated 56%)
+[1m[90m[DEBUG][39m[0m:   	  adding: turtledemo/two_canvases.pyc (deflated 53%)
+[1m[90m[DEBUG][39m[0m:   	  adding: turtledemo/sorting_animate.pyc (deflated 61%)
+[1m[90m[DEBUG][39m[0m:   	  adding: turtledemo/forest.pyc (deflated 51%)
+[1m[90m[DEBUG][39m[0m:   	  adding: turtledemo/yinyang.pyc (deflated 54%)
+[1m[90m[DEBUG][39m[0m:   	  adding: turtledemo/bytedesign.pyc (deflated 71%)
+[1m[90m[DEBUG][39m[0m:   	  adding: turtledemo/clock.pyc (deflated 57%)
+[1m[90m[DEBUG][39m[0m:   	  adding: turtledemo/penrose.pyc (deflated 64%)
+[1m[90m[DEBUG][39m[0m:   	  adding: turtledemo/turtle.cfg (deflated 27%)
+[1m[90m[DEBUG][39m[0m:   	  adding: turtledemo/nim.pyc (deflated 58%)
+[1m[90m[DEBUG][39m[0m:   	  adding: turtledemo/chaos.pyc (deflated 52%)
+[1m[90m[DEBUG][39m[0m:   	  adding: turtledemo/__init__.pyc (deflated 27%)
+[1m[90m[DEBUG][39m[0m:   	  adding: turtledemo/__main__.pyc (deflated 57%)
+[1m[90m[DEBUG][39m[0m:   	  adding: turtledemo/fractalcurves.pyc (deflated 66%)
+[1m[90m[DEBUG][39m[0m:   	  adding: json/scanner.pyc (deflated 45%)
+[1m[90m[DEBUG][39m[0m:   	  adding: json/tool.pyc (deflated 46%)
+[1m[90m[DEBUG][39m[0m:   	  adding: json/decoder.pyc (deflated 50%)
+[1m[90m[DEBUG][39m[0m:   	  adding: json/encoder.pyc (deflated 53%)
+[1m[90m[DEBUG][39m[0m:   	  adding: json/__init__.pyc (deflated 47%)
+[1m[90m[DEBUG][39m[0m:   	  adding: encodings/iso8859_5.pyc (deflated 53%)
+[1m[90m[DEBUG][39m[0m:   	  adding: encodings/cp500.pyc (deflated 53%)
+[1m[90m[DEBUG][39m[0m:   	  adding: encodings/unicode_escape.pyc (deflated 59%)
+[1m[90m[DEBUG][39m[0m:   	  adding: encodings/cp1250.pyc (deflated 52%)
+[1m[90m[DEBUG][39m[0m:   	  adding: encodings/shift_jis.pyc (deflated 58%)
+[1m[90m[DEBUG][39m[0m:   	  adding: encodings/iso8859_3.pyc (deflated 53%)
+[1m[90m[DEBUG][39m[0m:   	  adding: encodings/big5.pyc (deflated 58%)
+[1m[90m[DEBUG][39m[0m:   	  adding: encodings/hex_codec.pyc (deflated 60%)
+[1m[90m[DEBUG][39m[0m:   	  adding: encodings/hz.pyc (deflated 58%)
+[1m[90m[DEBUG][39m[0m:   	  adding: encodings/utf_16_be.pyc (deflated 56%)
+[1m[90m[DEBUG][39m[0m:   	  adding: encodings/mac_iceland.pyc (deflated 52%)
+[1m[90m[DEBUG][39m[0m:   	  adding: encodings/iso8859_8.pyc (deflated 55%)
+[1m[90m[DEBUG][39m[0m:   	  adding: encodings/cp932.pyc (deflated 58%)
+[1m[90m[DEBUG][39m[0m:   	  adding: encodings/iso2022_jp_2004.pyc (deflated 58%)
+[1m[90m[DEBUG][39m[0m:   	  adding: encodings/undefined.pyc (deflated 61%)
+[1m[90m[DEBUG][39m[0m:   	  adding: encodings/cp1125.pyc (deflated 59%)
+[1m[90m[DEBUG][39m[0m:   	  adding: encodings/iso8859_4.pyc (deflated 52%)
+[1m[90m[DEBUG][39m[0m:   	  adding: encodings/cp1251.pyc (deflated 52%)
+[1m[90m[DEBUG][39m[0m:   	  adding: encodings/iso8859_9.pyc (deflated 53%)
+[1m[90m[DEBUG][39m[0m:   	  adding: encodings/cp874.pyc (deflated 54%)
+[1m[90m[DEBUG][39m[0m:   	  adding: encodings/utf_8_sig.pyc (deflated 61%)
+[1m[90m[DEBUG][39m[0m:   	  adding: encodings/cp857.pyc (deflated 58%)
+[1m[90m[DEBUG][39m[0m:   	  adding: encodings/iso8859_7.pyc (deflated 52%)
+[1m[90m[DEBUG][39m[0m:   	  adding: encodings/aliases.pyc (deflated 59%)
+[1m[90m[DEBUG][39m[0m:   	  adding: encodings/cp775.pyc (deflated 59%)
+[1m[90m[DEBUG][39m[0m:   	  adding: encodings/cp858.pyc (deflated 58%)
+[1m[90m[DEBUG][39m[0m:   	  adding: encodings/iso2022_jp_1.pyc (deflated 58%)
+[1m[90m[DEBUG][39m[0m:   	  adding: encodings/cp1254.pyc (deflated 52%)
+[1m[90m[DEBUG][39m[0m:   	  adding: encodings/cp862.pyc (deflated 59%)
+[1m[90m[DEBUG][39m[0m:   	  adding: encodings/oem.pyc (deflated 55%)
+[1m[90m[DEBUG][39m[0m:   	  adding: encodings/cp869.pyc (deflated 58%)
+[1m[90m[DEBUG][39m[0m:   	  adding: encodings/quopri_codec.pyc (deflated 60%)
+[1m[90m[DEBUG][39m[0m:   	  adding: encodings/cp1006.pyc (deflated 52%)
+[1m[90m[DEBUG][39m[0m:   	  adding: encodings/mbcs.pyc (deflated 55%)
+[1m[90m[DEBUG][39m[0m:   	  adding: encodings/shift_jisx0213.pyc (deflated 58%)
+[1m[90m[DEBUG][39m[0m:   	  adding: encodings/cp1140.pyc (deflated 53%)
+[1m[90m[DEBUG][39m[0m:   	  adding: encodings/cp860.pyc (deflated 59%)
+[1m[90m[DEBUG][39m[0m:   	  adding: encodings/ascii.pyc (deflated 60%)
+[1m[90m[DEBUG][39m[0m:   	  adding: encodings/cp866.pyc (deflated 59%)
+[1m[90m[DEBUG][39m[0m:   	  adding: encodings/utf_32.pyc (deflated 61%)
+[1m[90m[DEBUG][39m[0m:   	  adding: encodings/iso2022_jp_3.pyc (deflated 58%)
+[1m[90m[DEBUG][39m[0m:   	  adding: encodings/mac_farsi.pyc (deflated 53%)
+[1m[90m[DEBUG][39m[0m:   	  adding: encodings/cp1253.pyc (deflated 53%)
+[1m[90m[DEBUG][39m[0m:   	  adding: encodings/mac_croatian.pyc (deflated 52%)
+[1m[90m[DEBUG][39m[0m:   	  adding: encodings/johab.pyc (deflated 58%)
+[1m[90m[DEBUG][39m[0m:   	  adding: encodings/cp037.pyc (deflated 53%)
+[1m[90m[DEBUG][39m[0m:   	  adding: encodings/euc_jis_2004.pyc (deflated 58%)
+[1m[90m[DEBUG][39m[0m:   	  adding: encodings/euc_kr.pyc (deflated 58%)
+[1m[90m[DEBUG][39m[0m:   	  adding: encodings/mac_arabic.pyc (deflated 59%)
+[1m[90m[DEBUG][39m[0m:   	  adding: encodings/koi8_t.pyc (deflated 53%)
+[1m[90m[DEBUG][39m[0m:   	  adding: encodings/iso8859_14.pyc (deflated 52%)
+[1m[90m[DEBUG][39m[0m:   	  adding: encodings/iso8859_11.pyc (deflated 52%)
+[1m[90m[DEBUG][39m[0m:   	  adding: encodings/charmap.pyc (deflated 65%)
+[1m[90m[DEBUG][39m[0m:   	  adding: encodings/ptcp154.pyc (deflated 52%)
+[1m[90m[DEBUG][39m[0m:   	  adding: encodings/mac_latin2.pyc (deflated 52%)
+[1m[90m[DEBUG][39m[0m:   	  adding: encodings/iso8859_13.pyc (deflated 52%)
+[1m[90m[DEBUG][39m[0m:   	  adding: encodings/euc_jisx0213.pyc (deflated 58%)
+[1m[90m[DEBUG][39m[0m:   	  adding: encodings/cp1257.pyc (deflated 53%)
+[1m[90m[DEBUG][39m[0m:   	  adding: encodings/cp864.pyc (deflated 58%)
+[1m[90m[DEBUG][39m[0m:   	  adding: encodings/mac_romanian.pyc (deflated 52%)
+[1m[90m[DEBUG][39m[0m:   	  adding: encodings/mac_roman.pyc (deflated 52%)
+[1m[90m[DEBUG][39m[0m:   	  adding: encodings/utf_7.pyc (deflated 56%)
+[1m[90m[DEBUG][39m[0m:   	  adding: encodings/iso2022_kr.pyc (deflated 58%)
+[1m[90m[DEBUG][39m[0m:   	  adding: encodings/utf_16.pyc (deflated 61%)
+[1m[90m[DEBUG][39m[0m:   	  adding: encodings/gb18030.pyc (deflated 58%)
+[1m[90m[DEBUG][39m[0m:   	  adding: encodings/mac_turkish.pyc (deflated 52%)
+[1m[90m[DEBUG][39m[0m:   	  adding: encodings/cp865.pyc (deflated 59%)
+[1m[90m[DEBUG][39m[0m:   	  adding: encodings/cp863.pyc (deflated 59%)
+[1m[90m[DEBUG][39m[0m:   	  adding: encodings/palmos.pyc (deflated 52%)
+[1m[90m[DEBUG][39m[0m:   	  adding: encodings/zlib_codec.pyc (deflated 62%)
+[1m[90m[DEBUG][39m[0m:   	  adding: encodings/idna.pyc (deflated 58%)
+[1m[90m[DEBUG][39m[0m:   	  adding: encodings/mac_greek.pyc (deflated 52%)
+[1m[90m[DEBUG][39m[0m:   	  adding: encodings/iso8859_15.pyc (deflated 53%)
+[1m[90m[DEBUG][39m[0m:   	  adding: encodings/iso2022_jp_ext.pyc (deflated 58%)
+[1m[90m[DEBUG][39m[0m:   	  adding: encodings/iso2022_jp_2.pyc (deflated 58%)
+[1m[90m[DEBUG][39m[0m:   	  adding: encodings/cp852.pyc (deflated 59%)
+[1m[90m[DEBUG][39m[0m:   	  adding: encodings/cp720.pyc (deflated 52%)
+[1m[90m[DEBUG][39m[0m:   	  adding: encodings/iso8859_1.pyc (deflated 53%)
+[1m[90m[DEBUG][39m[0m:   	  adding: encodings/koi8_u.pyc (deflated 52%)
+[1m[90m[DEBUG][39m[0m:   	  adding: encodings/cp850.pyc (deflated 58%)
+[1m[90m[DEBUG][39m[0m:   	  adding: encodings/cp855.pyc (deflated 59%)
+[1m[90m[DEBUG][39m[0m:   	  adding: encodings/hp_roman8.pyc (deflated 53%)
+[1m[90m[DEBUG][39m[0m:   	  adding: encodings/shift_jis_2004.pyc (deflated 58%)
+[1m[90m[DEBUG][39m[0m:   	  adding: encodings/utf_32_le.pyc (deflated 56%)
+[1m[90m[DEBUG][39m[0m:   	  adding: encodings/cp1256.pyc (deflated 52%)
+[1m[90m[DEBUG][39m[0m:   	  adding: encodings/cp950.pyc (deflated 58%)
+[1m[90m[DEBUG][39m[0m:   	  adding: encodings/cp424.pyc (deflated 55%)
+[1m[90m[DEBUG][39m[0m:   	  adding: encodings/koi8_r.pyc (deflated 52%)
+[1m[90m[DEBUG][39m[0m:   	  adding: encodings/__init__.pyc (deflated 46%)
+[1m[90m[DEBUG][39m[0m:   	  adding: encodings/cp1026.pyc (deflated 53%)
+[1m[90m[DEBUG][39m[0m:   	  adding: encodings/iso8859_2.pyc (deflated 52%)
+[1m[90m[DEBUG][39m[0m:   	  adding: encodings/utf_8.pyc (deflated 56%)
+[1m[90m[DEBUG][39m[0m:   	  adding: encodings/rot_13.pyc (deflated 57%)
+[1m[90m[DEBUG][39m[0m:   	  adding: encodings/raw_unicode_escape.pyc (deflated 59%)
+[1m[90m[DEBUG][39m[0m:   	  adding: encodings/cp1252.pyc (deflated 52%)
+[1m[90m[DEBUG][39m[0m:   	  adding: encodings/big5hkscs.pyc (deflated 58%)
+[1m[90m[DEBUG][39m[0m:   	  adding: encodings/bz2_codec.pyc (deflated 60%)
+[1m[90m[DEBUG][39m[0m:   	  adding: encodings/gb2312.pyc (deflated 58%)
+[1m[90m[DEBUG][39m[0m:   	  adding: encodings/cp949.pyc (deflated 58%)
+[1m[90m[DEBUG][39m[0m:   	  adding: encodings/cp875.pyc (deflated 53%)
+[1m[90m[DEBUG][39m[0m:   	  adding: encodings/mac_cyrillic.pyc (deflated 52%)
+[1m[90m[DEBUG][39m[0m:   	  adding: encodings/kz1048.pyc (deflated 52%)
+[1m[90m[DEBUG][39m[0m:   	  adding: encodings/utf_16_le.pyc (deflated 56%)
+[1m[90m[DEBUG][39m[0m:   	  adding: encodings/tis_620.pyc (deflated 52%)
+[1m[90m[DEBUG][39m[0m:   	  adding: encodings/uu_codec.pyc (deflated 54%)
+[1m[90m[DEBUG][39m[0m:   	  adding: encodings/cp437.pyc (deflated 59%)
+[1m[90m[DEBUG][39m[0m:   	  adding: encodings/cp737.pyc (deflated 59%)
+[1m[90m[DEBUG][39m[0m:   	  adding: encodings/gbk.pyc (deflated 58%)
+[1m[90m[DEBUG][39m[0m:   	  adding: encodings/latin_1.pyc (deflated 60%)
+[1m[90m[DEBUG][39m[0m:   	  adding: encodings/cp1255.pyc (deflated 53%)
+[1m[90m[DEBUG][39m[0m:   	  adding: encodings/cp856.pyc (deflated 54%)
+[1m[90m[DEBUG][39m[0m:   	  adding: encodings/punycode.pyc (deflated 52%)
+[1m[90m[DEBUG][39m[0m:   	  adding: encodings/euc_jp.pyc (deflated 58%)
+[1m[90m[DEBUG][39m[0m:   	  adding: encodings/iso8859_6.pyc (deflated 55%)
+[1m[90m[DEBUG][39m[0m:   	  adding: encodings/iso2022_jp.pyc (deflated 58%)
+[1m[90m[DEBUG][39m[0m:   	  adding: encodings/cp273.pyc (deflated 53%)
+[1m[90m[DEBUG][39m[0m:   	  adding: encodings/iso8859_10.pyc (deflated 52%)
+[1m[90m[DEBUG][39m[0m:   	  adding: encodings/cp861.pyc (deflated 59%)
+[1m[90m[DEBUG][39m[0m:   	  adding: encodings/base64_codec.pyc (deflated 60%)
+[1m[90m[DEBUG][39m[0m:   	  adding: encodings/iso8859_16.pyc (deflated 52%)
+[1m[90m[DEBUG][39m[0m:   	  adding: encodings/cp1258.pyc (deflated 52%)
+[1m[90m[DEBUG][39m[0m:   	  adding: encodings/utf_32_be.pyc (deflated 56%)
+[1m[90m[DEBUG][39m[0m:   	  adding: logging/handlers.pyc (deflated 60%)
+[1m[90m[DEBUG][39m[0m:   	  adding: logging/config.pyc (deflated 57%)
+[1m[90m[DEBUG][39m[0m:   	  adding: logging/__init__.pyc (deflated 61%)
+[1m[90m[DEBUG][39m[0m:   	  adding: xml/__init__.pyc (deflated 24%)
+[1m[90m[DEBUG][39m[0m:   	  adding: xml/sax/saxutils.pyc (deflated 64%)
+[1m[90m[DEBUG][39m[0m:   	  adding: xml/sax/xmlreader.pyc (deflated 69%)
+[1m[90m[DEBUG][39m[0m:   	  adding: xml/sax/handler.pyc (deflated 65%)
+[1m[90m[DEBUG][39m[0m:   	  adding: xml/sax/expatreader.pyc (deflated 60%)
+[1m[90m[DEBUG][39m[0m:   	  adding: xml/sax/__init__.pyc (deflated 49%)
+[1m[90m[DEBUG][39m[0m:   	  adding: xml/sax/_exceptions.pyc (deflated 57%)
+[1m[90m[DEBUG][39m[0m:   	  adding: xml/parsers/__init__.pyc (deflated 27%)
+[1m[90m[DEBUG][39m[0m:   	  adding: xml/parsers/expat.pyc (deflated 32%)
+[1m[90m[DEBUG][39m[0m:   	  adding: xml/dom/minicompat.pyc (deflated 54%)
+[1m[90m[DEBUG][39m[0m:   	  adding: xml/dom/expatbuilder.pyc (deflated 62%)
+[1m[90m[DEBUG][39m[0m:   	  adding: xml/dom/minidom.pyc (deflated 64%)
+[1m[90m[DEBUG][39m[0m:   	  adding: xml/dom/NodeFilter.pyc (deflated 40%)
+[1m[90m[DEBUG][39m[0m:   	  adding: xml/dom/xmlbuilder.pyc (deflated 59%)
+[1m[90m[DEBUG][39m[0m:   	  adding: xml/dom/domreg.pyc (deflated 42%)
+[1m[90m[DEBUG][39m[0m:   	  adding: xml/dom/__init__.pyc (deflated 64%)
+[1m[90m[DEBUG][39m[0m:   	  adding: xml/dom/pulldom.pyc (deflated 61%)
+[1m[90m[DEBUG][39m[0m:   	  adding: xml/etree/ElementPath.pyc (deflated 57%)
+[1m[90m[DEBUG][39m[0m:   	  adding: xml/etree/ElementTree.pyc (deflated 60%)
+[1m[90m[DEBUG][39m[0m:   	  adding: xml/etree/ElementInclude.pyc (deflated 46%)
+[1m[90m[DEBUG][39m[0m:   	  adding: xml/etree/__init__.pyc (deflated 28%)
+[1m[90m[DEBUG][39m[0m:   	  adding: xml/etree/cElementTree.pyc (deflated 28%)
+[1m[90m[DEBUG][39m[0m:   	  adding: zoneinfo/_tzpath.pyc (deflated 49%)
+[1m[90m[DEBUG][39m[0m:   	  adding: zoneinfo/__init__.pyc (deflated 38%)
+[1m[90m[DEBUG][39m[0m:   	  adding: zoneinfo/_common.pyc (deflated 47%)
+[1m[90m[DEBUG][39m[0m:   	  adding: zoneinfo/_zoneinfo.pyc (deflated 54%)
+[1m[90m[DEBUG][39m[0m:   	  adding: unittest/signals.pyc (deflated 51%)
+[1m[90m[DEBUG][39m[0m:   	  adding: unittest/_log.pyc (deflated 52%)
+[1m[90m[DEBUG][39m[0m:   	  adding: unittest/result.pyc (deflated 56%)
+[1m[90m[DEBUG][39m[0m:   	  adding: unittest/suite.pyc (deflated 58%)
+[1m[90m[DEBUG][39m[0m:   	  adding: unittest/case.pyc (deflated 61%)
+[1m[90m[DEBUG][39m[0m:   	  adding: unittest/mock.pyc (deflated 58%)
+[1m[90m[DEBUG][39m[0m:   	  adding: unittest/loader.pyc (deflated 56%)
+[1m[90m[DEBUG][39m[0m:   	  adding: unittest/__init__.pyc (deflated 47%)
+[1m[90m[DEBUG][39m[0m:   	  adding: unittest/main.pyc (deflated 55%)
+[1m[90m[DEBUG][39m[0m:   	  adding: unittest/__main__.pyc (deflated 33%)
+[1m[90m[DEBUG][39m[0m:   	  adding: unittest/util.pyc (deflated 51%)
+[1m[90m[DEBUG][39m[0m:   	  adding: unittest/async_case.pyc (deflated 57%)
+[1m[90m[DEBUG][39m[0m:   	  adding: unittest/runner.pyc (deflated 63%)
+[1m[90m[DEBUG][39m[0m:   	  adding: multiprocessing/process.pyc (deflated 58%)
+[1m[90m[DEBUG][39m[0m:   	  adding: multiprocessing/reduction.pyc (deflated 54%)
+[1m[90m[DEBUG][39m[0m:   	  adding: multiprocessing/context.pyc (deflated 63%)
+[1m[90m[DEBUG][39m[0m:   	  adding: multiprocessing/queues.pyc (deflated 60%)
+[1m[90m[DEBUG][39m[0m:   	  adding: multiprocessing/forkserver.pyc (deflated 53%)
+[1m[90m[DEBUG][39m[0m:   	  adding: multiprocessing/managers.pyc (deflated 60%)
+[1m[90m[DEBUG][39m[0m:   	  adding: multiprocessing/popen_spawn_win32.pyc (deflated 48%)
+[1m[90m[DEBUG][39m[0m:   	  adding: multiprocessing/connection.pyc (deflated 58%)
+[1m[90m[DEBUG][39m[0m:   	  adding: multiprocessing/pool.pyc (deflated 60%)
+[1m[90m[DEBUG][39m[0m:   	  adding: multiprocessing/spawn.pyc (deflated 52%)
+[1m[90m[DEBUG][39m[0m:   	  adding: multiprocessing/resource_tracker.pyc (deflated 53%)
+[1m[90m[DEBUG][39m[0m:   	  adding: multiprocessing/popen_fork.pyc (deflated 52%)
+[1m[90m[DEBUG][39m[0m:   	  adding: multiprocessing/resource_sharer.pyc (deflated 56%)
+[1m[90m[DEBUG][39m[0m:   	  adding: multiprocessing/sharedctypes.pyc (deflated 57%)
+[1m[90m[DEBUG][39m[0m:   	  adding: multiprocessing/__init__.pyc (deflated 35%)
+[1m[90m[DEBUG][39m[0m:   	  adding: multiprocessing/popen_forkserver.pyc (deflated 47%)
+[1m[90m[DEBUG][39m[0m:   	  adding: multiprocessing/util.pyc (deflated 54%)
+[1m[90m[DEBUG][39m[0m:   	  adding: multiprocessing/heap.pyc (deflated 55%)
+[1m[90m[DEBUG][39m[0m:   	  adding: multiprocessing/shared_memory.pyc (deflated 56%)
+[1m[90m[DEBUG][39m[0m:   	  adding: multiprocessing/synchronize.pyc (deflated 61%)
+[1m[90m[DEBUG][39m[0m:   	  adding: multiprocessing/popen_spawn_posix.pyc (deflated 52%)
+[1m[90m[DEBUG][39m[0m:   	  adding: multiprocessing/dummy/connection.pyc (deflated 54%)
+[1m[90m[DEBUG][39m[0m:   	  adding: multiprocessing/dummy/__init__.pyc (deflated 52%)
+[1m[90m[DEBUG][39m[0m:   	  adding: tomllib/_parser.pyc (deflated 57%)
+[1m[90m[DEBUG][39m[0m:   	  adding: tomllib/_types.pyc (deflated 27%)
+[1m[90m[DEBUG][39m[0m:   	  adding: tomllib/__init__.pyc (deflated 31%)
+[1m[90m[DEBUG][39m[0m:   	  adding: tomllib/_re.pyc (deflated 48%)
+[1m[90m[DEBUG][39m[0m:   	  adding: xmlrpc/server.pyc (deflated 57%)
+[1m[90m[DEBUG][39m[0m:   	  adding: xmlrpc/client.pyc (deflated 60%)
+[1m[90m[DEBUG][39m[0m:   	  adding: xmlrpc/__init__.pyc (deflated 29%)
+[1m[90m[DEBUG][39m[0m:   	  adding: asyncio/coroutines.pyc (deflated 46%)
+[1m[90m[DEBUG][39m[0m:   	  adding: asyncio/proactor_events.pyc (deflated 63%)
+[1m[90m[DEBUG][39m[0m:   	  adding: asyncio/events.pyc (deflated 67%)
+[1m[90m[DEBUG][39m[0m:   	  adding: asyncio/transports.pyc (deflated 66%)
+[1m[90m[DEBUG][39m[0m:   	  adding: asyncio/staggered.pyc (deflated 46%)
+[1m[90m[DEBUG][39m[0m:   	  adding: asyncio/windows_utils.pyc (deflated 51%)
+[1m[90m[DEBUG][39m[0m:   	  adding: asyncio/trsock.pyc (deflated 61%)
+[1m[90m[DEBUG][39m[0m:   	  adding: asyncio/base_subprocess.pyc (deflated 62%)
+[1m[90m[DEBUG][39m[0m:   	  adding: asyncio/unix_events.pyc (deflated 64%)
+[1m[90m[DEBUG][39m[0m:   	  adding: asyncio/exceptions.pyc (deflated 56%)
+[1m[90m[DEBUG][39m[0m:   	  adding: asyncio/protocols.pyc (deflated 64%)
+[1m[90m[DEBUG][39m[0m:   	  adding: asyncio/queues.pyc (deflated 61%)
+[1m[90m[DEBUG][39m[0m:   	  adding: asyncio/futures.pyc (deflated 56%)
+[1m[90m[DEBUG][39m[0m:   	  adding: asyncio/base_events.pyc (deflated 59%)
+[1m[90m[DEBUG][39m[0m:   	  adding: asyncio/base_futures.pyc (deflated 45%)
+[1m[90m[DEBUG][39m[0m:   	  adding: asyncio/base_tasks.pyc (deflated 48%)
+[1m[90m[DEBUG][39m[0m:   	  adding: asyncio/runners.pyc (deflated 55%)
+[1m[90m[DEBUG][39m[0m:   	  adding: asyncio/format_helpers.pyc (deflated 49%)
+[1m[90m[DEBUG][39m[0m:   	  adding: asyncio/constants.pyc (deflated 34%)
+[1m[90m[DEBUG][39m[0m:   	  adding: asyncio/log.pyc (deflated 24%)
+[1m[90m[DEBUG][39m[0m:   	  adding: asyncio/tasks.pyc (deflated 57%)
+[1m[90m[DEBUG][39m[0m:   	  adding: asyncio/threads.pyc (deflated 35%)
+[1m[90m[DEBUG][39m[0m:   	  adding: asyncio/locks.pyc (deflated 65%)
+[1m[90m[DEBUG][39m[0m:   	  adding: asyncio/sslproto.pyc (deflated 63%)
+[1m[90m[DEBUG][39m[0m:   	  adding: asyncio/timeouts.pyc (deflated 52%)
+[1m[90m[DEBUG][39m[0m:   	  adding: asyncio/windows_events.pyc (deflated 63%)
+[1m[90m[DEBUG][39m[0m:   	  adding: asyncio/taskgroups.pyc (deflated 51%)
+[1m[90m[DEBUG][39m[0m:   	  adding: asyncio/__init__.pyc (deflated 48%)
+[1m[90m[DEBUG][39m[0m:   	  adding: asyncio/__main__.pyc (deflated 49%)
+[1m[90m[DEBUG][39m[0m:   	  adding: asyncio/mixins.pyc (deflated 40%)
+[1m[90m[DEBUG][39m[0m:   	  adding: asyncio/streams.pyc (deflated 61%)
+[1m[90m[DEBUG][39m[0m:   	  adding: asyncio/selector_events.pyc (deflated 67%)
+[1m[90m[DEBUG][39m[0m:   	  adding: asyncio/subprocess.pyc (deflated 59%)
+[1m[90m[DEBUG][39m[0m:   	  adding: sqlite3/dump.pyc (deflated 50%)
+[1m[90m[DEBUG][39m[0m:   	  adding: sqlite3/__init__.pyc (deflated 34%)
+[1m[90m[DEBUG][39m[0m:   	  adding: sqlite3/dbapi2.pyc (deflated 52%)
+[1m[INFO][0m:    [36m<- directory context /home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser[39m
+[1m[90m[DEBUG][39m[0m:   Create directory /home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/_python_bundle__arm64-v8a/_python_bundle/site-packages
+[1m[INFO][0m:    [36m-> directory context /home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/build/python-installs/frilanser/arm64-v8a[39m
+[1m[INFO][0m:    Copy 411 files into the site-packages
+[1m[INFO][0m:     - copy ./setup_sdist.pyc
+[1m[INFO][0m:     - copy ./android-1.0-py3.11.egg-info
+[1m[INFO][0m:     - copy ./six.pyc
+[1m[INFO][0m:     - copy ./easy_install.pyc
+[1m[INFO][0m:     - copy ./distutils-precedence.pth
+[1m[INFO][0m:     - copy ./six-1.15.0-py3.11.egg-info
+[1m[INFO][0m:     - copy ./jnius_config.pyc
+[1m[INFO][0m:     - copy ./jnius/signatures.pyc
+[1m[90m[DEBUG][39m[0m:   Create directory /home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/_python_bundle__arm64-v8a/_python_bundle/site-packages/./jnius
+[1m[INFO][0m:     - copy ./jnius/env.pyc
+[1m[INFO][0m:     - copy ./jnius/__init__.pyc
+[1m[INFO][0m:     - copy ./jnius/jnius.cpython-311-x86_64-linux-gnu.so
+[1m[INFO][0m:     - copy ./jnius/reflect.pyc
+[1m[INFO][0m:     - copy ./jnius/src/org/jnius/NativeInvocationHandler.class
+[1m[90m[DEBUG][39m[0m:   Create directory /home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/_python_bundle__arm64-v8a/_python_bundle/site-packages/./jnius/src/org/jnius
+[1m[INFO][0m:     - copy ./jnius/src/org/jnius/NativeInvocationHandler.java
+[1m[INFO][0m:     - copy ./pyjnius-1.6.1-py3.11.egg-info/SOURCES.txt
+[1m[90m[DEBUG][39m[0m:   Create directory /home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/_python_bundle__arm64-v8a/_python_bundle/site-packages/./pyjnius-1.6.1-py3.11.egg-info
+[1m[INFO][0m:     - copy ./pyjnius-1.6.1-py3.11.egg-info/top_level.txt
+[1m[INFO][0m:     - copy ./pyjnius-1.6.1-py3.11.egg-info/PKG-INFO
+[1m[INFO][0m:     - copy ./pyjnius-1.6.1-py3.11.egg-info/requires.txt
+[1m[INFO][0m:     - copy ./pyjnius-1.6.1-py3.11.egg-info/dependency_links.txt
+[1m[INFO][0m:     - copy ./markupsafe/_speedups.c
+[1m[90m[DEBUG][39m[0m:   Create directory /home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/_python_bundle__arm64-v8a/_python_bundle/site-packages/./markupsafe
+[1m[INFO][0m:     - copy ./markupsafe/_native.pyc
+[1m[INFO][0m:     - copy ./markupsafe/_speedups.pyi
+[1m[INFO][0m:     - copy ./markupsafe/_speedups.cpython-311-x86_64-linux-gnu.so
+[1m[INFO][0m:     - copy ./markupsafe/__init__.pyc
+[1m[INFO][0m:     - copy ./markupsafe/py.typed
+[1m[INFO][0m:     - copy ./jinja2-3.1.4.dist-info/RECORD
+[1m[90m[DEBUG][39m[0m:   Create directory /home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/_python_bundle__arm64-v8a/_python_bundle/site-packages/./jinja2-3.1.4.dist-info
+[1m[INFO][0m:     - copy ./jinja2-3.1.4.dist-info/INSTALLER
+[1m[INFO][0m:     - copy ./jinja2-3.1.4.dist-info/LICENSE.txt
+[1m[INFO][0m:     - copy ./jinja2-3.1.4.dist-info/WHEEL
+[1m[INFO][0m:     - copy ./jinja2-3.1.4.dist-info/REQUESTED
+[1m[INFO][0m:     - copy ./jinja2-3.1.4.dist-info/METADATA
+[1m[INFO][0m:     - copy ./jinja2-3.1.4.dist-info/entry_points.txt
+[1m[INFO][0m:     - copy ./jinja2/utils.pyc
+[1m[90m[DEBUG][39m[0m:   Create directory /home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/_python_bundle__arm64-v8a/_python_bundle/site-packages/./jinja2
+[1m[INFO][0m:     - copy ./jinja2/ext.pyc
+[1m[INFO][0m:     - copy ./jinja2/loaders.pyc
+[1m[INFO][0m:     - copy ./jinja2/environment.pyc
+[1m[INFO][0m:     - copy ./jinja2/exceptions.pyc
+[1m[INFO][0m:     - copy ./jinja2/_identifier.pyc
+[1m[INFO][0m:     - copy ./jinja2/filters.pyc
+[1m[INFO][0m:     - copy ./jinja2/async_utils.pyc
+[1m[INFO][0m:     - copy ./jinja2/parser.pyc
+[1m[INFO][0m:     - copy ./jinja2/meta.pyc
+[1m[INFO][0m:     - copy ./jinja2/optimizer.pyc
+[1m[INFO][0m:     - copy ./jinja2/defaults.pyc
+[1m[INFO][0m:     - copy ./jinja2/bccache.pyc
+[1m[INFO][0m:     - copy ./jinja2/runtime.pyc
+[1m[INFO][0m:     - copy ./jinja2/compiler.pyc
+[1m[INFO][0m:     - copy ./jinja2/constants.pyc
+[1m[INFO][0m:     - copy ./jinja2/debug.pyc
+[1m[INFO][0m:     - copy ./jinja2/sandbox.pyc
+[1m[INFO][0m:     - copy ./jinja2/idtracking.pyc
+[1m[INFO][0m:     - copy ./jinja2/__init__.pyc
+[1m[INFO][0m:     - copy ./jinja2/nativetypes.pyc
+[1m[INFO][0m:     - copy ./jinja2/py.typed
+[1m[INFO][0m:     - copy ./jinja2/nodes.pyc
+[1m[INFO][0m:     - copy ./jinja2/lexer.pyc
+[1m[INFO][0m:     - copy ./jinja2/tests.pyc
+[1m[INFO][0m:     - copy ./jinja2/visitor.pyc
+[1m[INFO][0m:     - copy ./requests-2.34.2.dist-info/RECORD
+[1m[90m[DEBUG][39m[0m:   Create directory /home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/_python_bundle__arm64-v8a/_python_bundle/site-packages/./requests-2.34.2.dist-info
+[1m[INFO][0m:     - copy ./requests-2.34.2.dist-info/INSTALLER
+[1m[INFO][0m:     - copy ./requests-2.34.2.dist-info/top_level.txt
+[1m[INFO][0m:     - copy ./requests-2.34.2.dist-info/WHEEL
+[1m[INFO][0m:     - copy ./requests-2.34.2.dist-info/REQUESTED
+[1m[INFO][0m:     - copy ./requests-2.34.2.dist-info/METADATA
+[1m[INFO][0m:     - copy ./requests-2.34.2.dist-info/licenses/LICENSE
+[1m[90m[DEBUG][39m[0m:   Create directory /home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/_python_bundle__arm64-v8a/_python_bundle/site-packages/./requests-2.34.2.dist-info/licenses
+[1m[INFO][0m:     - copy ./requests-2.34.2.dist-info/licenses/NOTICE
+[1m[INFO][0m:     - copy ./usr/local/bin/easy_install-3.11
+[1m[90m[DEBUG][39m[0m:   Create directory /home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/_python_bundle__arm64-v8a/_python_bundle/site-packages/./usr/local/bin
+[1m[INFO][0m:     - copy ./usr/local/bin/flask
+[1m[INFO][0m:     - copy ./usr/local/bin/easy_install
+[1m[INFO][0m:     - copy ./flask/templating.pyc
+[1m[90m[DEBUG][39m[0m:   Create directory /home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/_python_bundle__arm64-v8a/_python_bundle/site-packages/./flask
+[1m[INFO][0m:     - copy ./flask/signals.pyc
+[1m[INFO][0m:     - copy ./flask/globals.pyc
+[1m[INFO][0m:     - copy ./flask/scaffold.pyc
+[1m[INFO][0m:     - copy ./flask/app.pyc
+[1m[INFO][0m:     - copy ./flask/views.pyc
+[1m[INFO][0m:     - copy ./flask/debughelpers.pyc
+[1m[INFO][0m:     - copy ./flask/cli.pyc
+[1m[INFO][0m:     - copy ./flask/typing.pyc
+[1m[INFO][0m:     - copy ./flask/logging.pyc
+[1m[INFO][0m:     - copy ./flask/blueprints.pyc
+[1m[INFO][0m:     - copy ./flask/helpers.pyc
+[1m[INFO][0m:     - copy ./flask/config.pyc
+[1m[INFO][0m:     - copy ./flask/wrappers.pyc
+[1m[INFO][0m:     - copy ./flask/__init__.pyc
+[1m[INFO][0m:     - copy ./flask/testing.pyc
+[1m[INFO][0m:     - copy ./flask/__main__.pyc
+[1m[INFO][0m:     - copy ./flask/py.typed
+[1m[INFO][0m:     - copy ./flask/sessions.pyc
+[1m[INFO][0m:     - copy ./flask/ctx.pyc
+[1m[INFO][0m:     - copy ./flask/json/tag.pyc
+[1m[90m[DEBUG][39m[0m:   Create directory /home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/_python_bundle__arm64-v8a/_python_bundle/site-packages/./flask/json
+[1m[INFO][0m:     - copy ./flask/json/provider.pyc
+[1m[INFO][0m:     - copy ./flask/json/__init__.pyc
+[1m[INFO][0m:     - copy ./Werkzeug-2.2.3.dist-info/RECORD
+[1m[90m[DEBUG][39m[0m:   Create directory /home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/_python_bundle__arm64-v8a/_python_bundle/site-packages/./Werkzeug-2.2.3.dist-info
+[1m[INFO][0m:     - copy ./Werkzeug-2.2.3.dist-info/INSTALLER
+[1m[INFO][0m:     - copy ./Werkzeug-2.2.3.dist-info/LICENSE.rst
+[1m[INFO][0m:     - copy ./Werkzeug-2.2.3.dist-info/top_level.txt
+[1m[INFO][0m:     - copy ./Werkzeug-2.2.3.dist-info/WHEEL
+[1m[INFO][0m:     - copy ./Werkzeug-2.2.3.dist-info/REQUESTED
+[1m[INFO][0m:     - copy ./Werkzeug-2.2.3.dist-info/METADATA
+[1m[INFO][0m:     - copy ./markupsafe-3.0.3.dist-info/RECORD
+[1m[90m[DEBUG][39m[0m:   Create directory /home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/_python_bundle__arm64-v8a/_python_bundle/site-packages/./markupsafe-3.0.3.dist-info
+[1m[INFO][0m:     - copy ./markupsafe-3.0.3.dist-info/INSTALLER
+[1m[INFO][0m:     - copy ./markupsafe-3.0.3.dist-info/top_level.txt
+[1m[INFO][0m:     - copy ./markupsafe-3.0.3.dist-info/WHEEL
+[1m[INFO][0m:     - copy ./markupsafe-3.0.3.dist-info/REQUESTED
+[1m[INFO][0m:     - copy ./markupsafe-3.0.3.dist-info/METADATA
+[1m[INFO][0m:     - copy ./markupsafe-3.0.3.dist-info/licenses/LICENSE.txt
+[1m[90m[DEBUG][39m[0m:   Create directory /home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/_python_bundle__arm64-v8a/_python_bundle/site-packages/./markupsafe-3.0.3.dist-info/licenses
+[1m[INFO][0m:     - copy ./beautifulsoup4-4.15.0.dist-info/RECORD
+[1m[90m[DEBUG][39m[0m:   Create directory /home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/_python_bundle__arm64-v8a/_python_bundle/site-packages/./beautifulsoup4-4.15.0.dist-info
+[1m[INFO][0m:     - copy ./beautifulsoup4-4.15.0.dist-info/INSTALLER
+[1m[INFO][0m:     - copy ./beautifulsoup4-4.15.0.dist-info/WHEEL
+[1m[INFO][0m:     - copy ./beautifulsoup4-4.15.0.dist-info/REQUESTED
+[1m[INFO][0m:     - copy ./beautifulsoup4-4.15.0.dist-info/METADATA
+[1m[INFO][0m:     - copy ./beautifulsoup4-4.15.0.dist-info/licenses/LICENSE
+[1m[90m[DEBUG][39m[0m:   Create directory /home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/_python_bundle__arm64-v8a/_python_bundle/site-packages/./beautifulsoup4-4.15.0.dist-info/licenses
+[1m[INFO][0m:     - copy ./beautifulsoup4-4.15.0.dist-info/licenses/AUTHORS
+[1m[INFO][0m:     - copy ./android/_android.cpython-311-x86_64-linux-gnu.so
+[1m[90m[DEBUG][39m[0m:   Create directory /home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/_python_bundle__arm64-v8a/_python_bundle/site-packages/./android
+[1m[INFO][0m:     - copy ./android/billing.pyc
+[1m[INFO][0m:     - copy ./android/broadcast.pyc
+[1m[INFO][0m:     - copy ./android/_ctypes_library_finder.pyc
+[1m[INFO][0m:     - copy ./android/_android_billing.cpython-311-x86_64-linux-gnu.so
+[1m[INFO][0m:     - copy ./android/activity.pyc
+[1m[INFO][0m:     - copy ./android/runnable.pyc
+[1m[INFO][0m:     - copy ./android/config.pyc
+[1m[INFO][0m:     - copy ./android/storage.pyc
+[1m[INFO][0m:     - copy ./android/__init__.pyc
+[1m[INFO][0m:     - copy ./android/permissions.pyc
+[1m[INFO][0m:     - copy ./android/loadingscreen.pyc
+[1m[INFO][0m:     - copy ./android/mixer.pyc
+[1m[INFO][0m:     - copy ./itsdangerous/url_safe.pyc
+[1m[90m[DEBUG][39m[0m:   Create directory /home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/_python_bundle__arm64-v8a/_python_bundle/site-packages/./itsdangerous
+[1m[INFO][0m:     - copy ./itsdangerous/timed.pyc
+[1m[INFO][0m:     - copy ./itsdangerous/encoding.pyc
+[1m[INFO][0m:     - copy ./itsdangerous/_json.pyc
+[1m[INFO][0m:     - copy ./itsdangerous/serializer.pyc
+[1m[INFO][0m:     - copy ./itsdangerous/exc.pyc
+[1m[INFO][0m:     - copy ./itsdangerous/__init__.pyc
+[1m[INFO][0m:     - copy ./itsdangerous/signer.pyc
+[1m[INFO][0m:     - copy ./itsdangerous/py.typed
+[1m[INFO][0m:     - copy ./bs4/exceptions.pyc
+[1m[90m[DEBUG][39m[0m:   Create directory /home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/_python_bundle__arm64-v8a/_python_bundle/site-packages/./bs4
+[1m[INFO][0m:     - copy ./bs4/diagnose.pyc
+[1m[INFO][0m:     - copy ./bs4/_typing.pyc
+[1m[INFO][0m:     - copy ./bs4/filter.pyc
+[1m[INFO][0m:     - copy ./bs4/_deprecation.pyc
+[1m[INFO][0m:     - copy ./bs4/element.pyc
+[1m[INFO][0m:     - copy ./bs4/formatter.pyc
+[1m[INFO][0m:     - copy ./bs4/_warnings.pyc
+[1m[INFO][0m:     - copy ./bs4/__init__.pyc
+[1m[INFO][0m:     - copy ./bs4/dammit.pyc
+[1m[INFO][0m:     - copy ./bs4/py.typed
+[1m[INFO][0m:     - copy ./bs4/css.pyc
+[1m[INFO][0m:     - copy ./bs4/builder/_htmlparser.pyc
+[1m[90m[DEBUG][39m[0m:   Create directory /home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/_python_bundle__arm64-v8a/_python_bundle/site-packages/./bs4/builder
+[1m[INFO][0m:     - copy ./bs4/builder/_lxml.pyc
+[1m[INFO][0m:     - copy ./bs4/builder/_html5lib.pyc
+[1m[INFO][0m:     - copy ./bs4/builder/__init__.pyc
+[1m[INFO][0m:     - copy ./setuptools-51.3.3-py3.11.egg-info/SOURCES.txt
+[1m[90m[DEBUG][39m[0m:   Create directory /home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/_python_bundle__arm64-v8a/_python_bundle/site-packages/./setuptools-51.3.3-py3.11.egg-info
+[1m[INFO][0m:     - copy ./setuptools-51.3.3-py3.11.egg-info/top_level.txt
+[1m[INFO][0m:     - copy ./setuptools-51.3.3-py3.11.egg-info/PKG-INFO
+[1m[INFO][0m:     - copy ./setuptools-51.3.3-py3.11.egg-info/requires.txt
+[1m[INFO][0m:     - copy ./setuptools-51.3.3-py3.11.egg-info/dependency_links.txt
+[1m[INFO][0m:     - copy ./setuptools-51.3.3-py3.11.egg-info/entry_points.txt
+[1m[INFO][0m:     - copy ./click-8.1.7.dist-info/RECORD
+[1m[90m[DEBUG][39m[0m:   Create directory /home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/_python_bundle__arm64-v8a/_python_bundle/site-packages/./click-8.1.7.dist-info
+[1m[INFO][0m:     - copy ./click-8.1.7.dist-info/INSTALLER
+[1m[INFO][0m:     - copy ./click-8.1.7.dist-info/LICENSE.rst
+[1m[INFO][0m:     - copy ./click-8.1.7.dist-info/top_level.txt
+[1m[INFO][0m:     - copy ./click-8.1.7.dist-info/WHEEL
+[1m[INFO][0m:     - copy ./click-8.1.7.dist-info/REQUESTED
+[1m[INFO][0m:     - copy ./click-8.1.7.dist-info/METADATA
+[1m[INFO][0m:     - copy ./pkg_resources/__init__.pyc
+[1m[90m[DEBUG][39m[0m:   Create directory /home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/_python_bundle__arm64-v8a/_python_bundle/site-packages/./pkg_resources
+[1m[INFO][0m:     - copy ./pkg_resources/extern/__init__.pyc
+[1m[90m[DEBUG][39m[0m:   Create directory /home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/_python_bundle__arm64-v8a/_python_bundle/site-packages/./pkg_resources/extern
+[1m[INFO][0m:     - copy ./pkg_resources/_vendor/pyparsing.pyc
+[1m[90m[DEBUG][39m[0m:   Create directory /home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/_python_bundle__arm64-v8a/_python_bundle/site-packages/./pkg_resources/_vendor
+[1m[INFO][0m:     - copy ./pkg_resources/_vendor/appdirs.pyc
+[1m[INFO][0m:     - copy ./pkg_resources/_vendor/__init__.pyc
+[1m[INFO][0m:     - copy ./pkg_resources/_vendor/packaging/utils.pyc
+[1m[90m[DEBUG][39m[0m:   Create directory /home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/_python_bundle__arm64-v8a/_python_bundle/site-packages/./pkg_resources/_vendor/packaging
+[1m[INFO][0m:     - copy ./pkg_resources/_vendor/packaging/markers.pyc
+[1m[INFO][0m:     - copy ./pkg_resources/_vendor/packaging/tags.pyc
+[1m[INFO][0m:     - copy ./pkg_resources/_vendor/packaging/_typing.pyc
+[1m[INFO][0m:     - copy ./pkg_resources/_vendor/packaging/_structures.pyc
+[1m[INFO][0m:     - copy ./pkg_resources/_vendor/packaging/version.pyc
+[1m[INFO][0m:     - copy ./pkg_resources/_vendor/packaging/specifiers.pyc
+[1m[INFO][0m:     - copy ./pkg_resources/_vendor/packaging/_compat.pyc
+[1m[INFO][0m:     - copy ./pkg_resources/_vendor/packaging/requirements.pyc
+[1m[INFO][0m:     - copy ./pkg_resources/_vendor/packaging/__init__.pyc
+[1m[INFO][0m:     - copy ./pkg_resources/_vendor/packaging/__about__.pyc
+[1m[INFO][0m:     - copy ./itsdangerous-2.1.2.dist-info/RECORD
+[1m[90m[DEBUG][39m[0m:   Create directory /home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/_python_bundle__arm64-v8a/_python_bundle/site-packages/./itsdangerous-2.1.2.dist-info
+[1m[INFO][0m:     - copy ./itsdangerous-2.1.2.dist-info/INSTALLER
+[1m[INFO][0m:     - copy ./itsdangerous-2.1.2.dist-info/LICENSE.rst
+[1m[INFO][0m:     - copy ./itsdangerous-2.1.2.dist-info/top_level.txt
+[1m[INFO][0m:     - copy ./itsdangerous-2.1.2.dist-info/WHEEL
+[1m[INFO][0m:     - copy ./itsdangerous-2.1.2.dist-info/REQUESTED
+[1m[INFO][0m:     - copy ./itsdangerous-2.1.2.dist-info/METADATA
+[1m[INFO][0m:     - copy ./Flask-2.2.5-py3.11.egg-info/SOURCES.txt
+[1m[90m[DEBUG][39m[0m:   Create directory /home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/_python_bundle__arm64-v8a/_python_bundle/site-packages/./Flask-2.2.5-py3.11.egg-info
+[1m[INFO][0m:     - copy ./Flask-2.2.5-py3.11.egg-info/top_level.txt
+[1m[INFO][0m:     - copy ./Flask-2.2.5-py3.11.egg-info/PKG-INFO
+[1m[INFO][0m:     - copy ./Flask-2.2.5-py3.11.egg-info/requires.txt
+[1m[INFO][0m:     - copy ./Flask-2.2.5-py3.11.egg-info/dependency_links.txt
+[1m[INFO][0m:     - copy ./Flask-2.2.5-py3.11.egg-info/entry_points.txt
+[1m[INFO][0m:     - copy ./setuptools/archive_util.pyc
+[1m[90m[DEBUG][39m[0m:   Create directory /home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/_python_bundle__arm64-v8a/_python_bundle/site-packages/./setuptools
+[1m[INFO][0m:     - copy ./setuptools/cli-64.exe
+[1m[INFO][0m:     - copy ./setuptools/installer.pyc
+[1m[INFO][0m:     - copy ./setuptools/namespaces.pyc
+[1m[INFO][0m:     - copy ./setuptools/script.tmpl
+[1m[INFO][0m:     - copy ./setuptools/build_meta.pyc
+[1m[INFO][0m:     - copy ./setuptools/cli-32.exe
+[1m[INFO][0m:     - copy ./setuptools/msvc.pyc
+[1m[INFO][0m:     - copy ./setuptools/errors.pyc
+[1m[INFO][0m:     - copy ./setuptools/dep_util.pyc
+[1m[INFO][0m:     - copy ./setuptools/_imp.pyc
+[1m[INFO][0m:     - copy ./setuptools/gui.exe
+[1m[INFO][0m:     - copy ./setuptools/ssl_support.pyc
+[1m[INFO][0m:     - copy ./setuptools/wheel.pyc
+[1m[INFO][0m:     - copy ./setuptools/depends.pyc
+[1m[INFO][0m:     - copy ./setuptools/gui-64.exe
+[1m[INFO][0m:     - copy ./setuptools/lib2to3_ex.pyc
+[1m[INFO][0m:     - copy ./setuptools/version.pyc
+[1m[INFO][0m:     - copy ./setuptools/monkey.pyc
+[1m[INFO][0m:     - copy ./setuptools/extension.pyc
+[1m[INFO][0m:     - copy ./setuptools/cli.exe
+[1m[INFO][0m:     - copy ./setuptools/_deprecation_warning.pyc
+[1m[INFO][0m:     - copy ./setuptools/unicode_utils.pyc
+[1m[INFO][0m:     - copy ./setuptools/package_index.pyc
+[1m[INFO][0m:     - copy ./setuptools/config.pyc
+[1m[INFO][0m:     - copy ./setuptools/sandbox.pyc
+[1m[INFO][0m:     - copy ./setuptools/__init__.pyc
+[1m[INFO][0m:     - copy ./setuptools/py34compat.pyc
+[1m[INFO][0m:     - copy ./setuptools/glob.pyc
+[1m[INFO][0m:     - copy ./setuptools/gui-32.exe
+[1m[INFO][0m:     - copy ./setuptools/windows_support.pyc
+[1m[INFO][0m:     - copy ./setuptools/dist.pyc
+[1m[INFO][0m:     - copy ./setuptools/launch.pyc
+[1m[INFO][0m:     - copy ./setuptools/script (dev).tmpl
+[1m[INFO][0m:     - copy ./setuptools/extern/__init__.pyc
+[1m[90m[DEBUG][39m[0m:   Create directory /home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/_python_bundle__arm64-v8a/_python_bundle/site-packages/./setuptools/extern
+[1m[INFO][0m:     - copy ./setuptools/_distutils/archive_util.pyc
+[1m[90m[DEBUG][39m[0m:   Create directory /home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/_python_bundle__arm64-v8a/_python_bundle/site-packages/./setuptools/_distutils
+[1m[INFO][0m:     - copy ./setuptools/_distutils/file_util.pyc
+[1m[INFO][0m:     - copy ./setuptools/_distutils/bcppcompiler.pyc
+[1m[INFO][0m:     - copy ./setuptools/_distutils/core.pyc
+[1m[INFO][0m:     - copy ./setuptools/_distutils/dir_util.pyc
+[1m[INFO][0m:     - copy ./setuptools/_distutils/fancy_getopt.pyc
+[1m[INFO][0m:     - copy ./setuptools/_distutils/filelist.pyc
+[1m[INFO][0m:     - copy ./setuptools/_distutils/errors.pyc
+[1m[INFO][0m:     - copy ./setuptools/_distutils/dep_util.pyc
+[1m[INFO][0m:     - copy ./setuptools/_distutils/spawn.pyc
+[1m[INFO][0m:     - copy ./setuptools/_distutils/msvccompiler.pyc
+[1m[INFO][0m:     - copy ./setuptools/_distutils/log.pyc
+[1m[INFO][0m:     - copy ./setuptools/_distutils/py35compat.pyc
+[1m[INFO][0m:     - copy ./setuptools/_distutils/cmd.pyc
+[1m[INFO][0m:     - copy ./setuptools/_distutils/sysconfig.pyc
+[1m[INFO][0m:     - copy ./setuptools/_distutils/cygwinccompiler.pyc
+[1m[INFO][0m:     - copy ./setuptools/_distutils/versionpredicate.pyc
+[1m[INFO][0m:     - copy ./setuptools/_distutils/version.pyc
+[1m[INFO][0m:     - copy ./setuptools/_distutils/msvc9compiler.pyc
+[1m[INFO][0m:     - copy ./setuptools/_distutils/extension.pyc
+[1m[INFO][0m:     - copy ./setuptools/_distutils/ccompiler.pyc
+[1m[INFO][0m:     - copy ./setuptools/_distutils/_msvccompiler.pyc
+[1m[INFO][0m:     - copy ./setuptools/_distutils/debug.pyc
+[1m[INFO][0m:     - copy ./setuptools/_distutils/config.pyc
+[1m[INFO][0m:     - copy ./setuptools/_distutils/__init__.pyc
+[1m[INFO][0m:     - copy ./setuptools/_distutils/util.pyc
+[1m[INFO][0m:     - copy ./setuptools/_distutils/py38compat.pyc
+[1m[INFO][0m:     - copy ./setuptools/_distutils/dist.pyc
+[1m[INFO][0m:     - copy ./setuptools/_distutils/text_file.pyc
+[1m[INFO][0m:     - copy ./setuptools/_distutils/unixccompiler.pyc
+[1m[INFO][0m:     - copy ./setuptools/_distutils/command/py37compat.pyc
+[1m[90m[DEBUG][39m[0m:   Create directory /home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/_python_bundle__arm64-v8a/_python_bundle/site-packages/./setuptools/_distutils/command
+[1m[INFO][0m:     - copy ./setuptools/_distutils/command/bdist_wininst.pyc
+[1m[INFO][0m:     - copy ./setuptools/_distutils/command/bdist_msi.pyc
+[1m[INFO][0m:     - copy ./setuptools/_distutils/command/build_scripts.pyc
+[1m[INFO][0m:     - copy ./setuptools/_distutils/command/install.pyc
+[1m[INFO][0m:     - copy ./setuptools/_distutils/command/register.pyc
+[1m[INFO][0m:     - copy ./setuptools/_distutils/command/install_lib.pyc
+[1m[INFO][0m:     - copy ./setuptools/_distutils/command/build_ext.pyc
+[1m[INFO][0m:     - copy ./setuptools/_distutils/command/bdist.pyc
+[1m[INFO][0m:     - copy ./setuptools/_distutils/command/bdist_dumb.pyc
+[1m[INFO][0m:     - copy ./setuptools/_distutils/command/install_egg_info.pyc
+[1m[INFO][0m:     - copy ./setuptools/_distutils/command/bdist_rpm.pyc
+[1m[INFO][0m:     - copy ./setuptools/_distutils/command/install_headers.pyc
+[1m[INFO][0m:     - copy ./setuptools/_distutils/command/upload.pyc
+[1m[INFO][0m:     - copy ./setuptools/_distutils/command/check.pyc
+[1m[INFO][0m:     - copy ./setuptools/_distutils/command/sdist.pyc
+[1m[INFO][0m:     - copy ./setuptools/_distutils/command/install_data.pyc
+[1m[INFO][0m:     - copy ./setuptools/_distutils/command/config.pyc
+[1m[INFO][0m:     - copy ./setuptools/_distutils/command/build.pyc
+[1m[INFO][0m:     - copy ./setuptools/_distutils/command/__init__.pyc
+[1m[INFO][0m:     - copy ./setuptools/_distutils/command/install_scripts.pyc
+[1m[INFO][0m:     - copy ./setuptools/_distutils/command/build_clib.pyc
+[1m[INFO][0m:     - copy ./setuptools/_distutils/command/build_py.pyc
+[1m[INFO][0m:     - copy ./setuptools/_distutils/command/clean.pyc
+[1m[INFO][0m:     - copy ./setuptools/command/develop.pyc
+[1m[90m[DEBUG][39m[0m:   Create directory /home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/_python_bundle__arm64-v8a/_python_bundle/site-packages/./setuptools/command
+[1m[INFO][0m:     - copy ./setuptools/command/upload_docs.pyc
+[1m[INFO][0m:     - copy ./setuptools/command/bdist_wininst.pyc
+[1m[INFO][0m:     - copy ./setuptools/command/alias.pyc
+[1m[INFO][0m:     - copy ./setuptools/command/launcher manifest.xml
+[1m[INFO][0m:     - copy ./setuptools/command/setopt.pyc
+[1m[INFO][0m:     - copy ./setuptools/command/install.pyc
+[1m[INFO][0m:     - copy ./setuptools/command/register.pyc
+[1m[INFO][0m:     - copy ./setuptools/command/py36compat.pyc
+[1m[INFO][0m:     - copy ./setuptools/command/install_lib.pyc
+[1m[INFO][0m:     - copy ./setuptools/command/build_ext.pyc
+[1m[INFO][0m:     - copy ./setuptools/command/bdist_egg.pyc
+[1m[INFO][0m:     - copy ./setuptools/command/dist_info.pyc
+[1m[INFO][0m:     - copy ./setuptools/command/egg_info.pyc
+[1m[INFO][0m:     - copy ./setuptools/command/install_egg_info.pyc
+[1m[INFO][0m:     - copy ./setuptools/command/bdist_rpm.pyc
+[1m[INFO][0m:     - copy ./setuptools/command/easy_install.pyc
+[1m[INFO][0m:     - copy ./setuptools/command/upload.pyc
+[1m[INFO][0m:     - copy ./setuptools/command/sdist.pyc
+[1m[INFO][0m:     - copy ./setuptools/command/__init__.pyc
+[1m[INFO][0m:     - copy ./setuptools/command/install_scripts.pyc
+[1m[INFO][0m:     - copy ./setuptools/command/rotate.pyc
+[1m[INFO][0m:     - copy ./setuptools/command/build_clib.pyc
+[1m[INFO][0m:     - copy ./setuptools/command/build_py.pyc
+[1m[INFO][0m:     - copy ./setuptools/command/test.pyc
+[1m[INFO][0m:     - copy ./setuptools/command/saveopts.pyc
+[1m[INFO][0m:     - copy ./setuptools/_vendor/pyparsing.pyc
+[1m[90m[DEBUG][39m[0m:   Create directory /home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/_python_bundle__arm64-v8a/_python_bundle/site-packages/./setuptools/_vendor
+[1m[INFO][0m:     - copy ./setuptools/_vendor/ordered_set.pyc
+[1m[INFO][0m:     - copy ./setuptools/_vendor/__init__.pyc
+[1m[INFO][0m:     - copy ./setuptools/_vendor/packaging/utils.pyc
+[1m[90m[DEBUG][39m[0m:   Create directory /home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/_python_bundle__arm64-v8a/_python_bundle/site-packages/./setuptools/_vendor/packaging
+[1m[INFO][0m:     - copy ./setuptools/_vendor/packaging/markers.pyc
+[1m[INFO][0m:     - copy ./setuptools/_vendor/packaging/tags.pyc
+[1m[INFO][0m:     - copy ./setuptools/_vendor/packaging/_typing.pyc
+[1m[INFO][0m:     - copy ./setuptools/_vendor/packaging/_structures.pyc
+[1m[INFO][0m:     - copy ./setuptools/_vendor/packaging/version.pyc
+[1m[INFO][0m:     - copy ./setuptools/_vendor/packaging/specifiers.pyc
+[1m[INFO][0m:     - copy ./setuptools/_vendor/packaging/_compat.pyc
+[1m[INFO][0m:     - copy ./setuptools/_vendor/packaging/requirements.pyc
+[1m[INFO][0m:     - copy ./setuptools/_vendor/packaging/__init__.pyc
+[1m[INFO][0m:     - copy ./setuptools/_vendor/packaging/__about__.pyc
+[1m[INFO][0m:     - copy ./click/utils.pyc
+[1m[90m[DEBUG][39m[0m:   Create directory /home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/_python_bundle__arm64-v8a/_python_bundle/site-packages/./click
+[1m[INFO][0m:     - copy ./click/decorators.pyc
+[1m[INFO][0m:     - copy ./click/globals.pyc
+[1m[INFO][0m:     - copy ./click/core.pyc
+[1m[INFO][0m:     - copy ./click/termui.pyc
+[1m[INFO][0m:     - copy ./click/exceptions.pyc
+[1m[INFO][0m:     - copy ./click/formatting.pyc
+[1m[INFO][0m:     - copy ./click/parser.pyc
+[1m[INFO][0m:     - copy ./click/shell_completion.pyc
+[1m[INFO][0m:     - copy ./click/_winconsole.pyc
+[1m[INFO][0m:     - copy ./click/_textwrap.pyc
+[1m[INFO][0m:     - copy ./click/types.pyc
+[1m[INFO][0m:     - copy ./click/_compat.pyc
+[1m[INFO][0m:     - copy ./click/__init__.pyc
+[1m[INFO][0m:     - copy ./click/testing.pyc
+[1m[INFO][0m:     - copy ./click/_termui_impl.pyc
+[1m[INFO][0m:     - copy ./click/py.typed
+[1m[INFO][0m:     - copy ./werkzeug/utils.pyc
+[1m[90m[DEBUG][39m[0m:   Create directory /home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/_python_bundle__arm64-v8a/_python_bundle/site-packages/./werkzeug
+[1m[INFO][0m:     - copy ./werkzeug/_internal.pyc
+[1m[INFO][0m:     - copy ./werkzeug/formparser.pyc
+[1m[INFO][0m:     - copy ./werkzeug/exceptions.pyc
+[1m[INFO][0m:     - copy ./werkzeug/security.pyc
+[1m[INFO][0m:     - copy ./werkzeug/user_agent.pyc
+[1m[INFO][0m:     - copy ./werkzeug/urls.pyc
+[1m[INFO][0m:     - copy ./werkzeug/testapp.pyc
+[1m[INFO][0m:     - copy ./werkzeug/datastructures.pyi
+[1m[INFO][0m:     - copy ./werkzeug/serving.pyc
+[1m[INFO][0m:     - copy ./werkzeug/http.pyc
+[1m[INFO][0m:     - copy ./werkzeug/local.pyc
+[1m[INFO][0m:     - copy ./werkzeug/__init__.pyc
+[1m[INFO][0m:     - copy ./werkzeug/py.typed
+[1m[INFO][0m:     - copy ./werkzeug/datastructures.pyc
+[1m[INFO][0m:     - copy ./werkzeug/wsgi.pyc
+[1m[INFO][0m:     - copy ./werkzeug/test.pyc
+[1m[INFO][0m:     - copy ./werkzeug/_reloader.pyc
+[1m[INFO][0m:     - copy ./werkzeug/middleware/lint.pyc
+[1m[90m[DEBUG][39m[0m:   Create directory /home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/_python_bundle__arm64-v8a/_python_bundle/site-packages/./werkzeug/middleware
+[1m[INFO][0m:     - copy ./werkzeug/middleware/proxy_fix.pyc
+[1m[INFO][0m:     - copy ./werkzeug/middleware/http_proxy.pyc
+[1m[INFO][0m:     - copy ./werkzeug/middleware/shared_data.pyc
+[1m[INFO][0m:     - copy ./werkzeug/middleware/profiler.pyc
+[1m[INFO][0m:     - copy ./werkzeug/middleware/__init__.pyc
+[1m[INFO][0m:     - copy ./werkzeug/middleware/dispatcher.pyc
+[1m[INFO][0m:     - copy ./werkzeug/sansio/utils.pyc
+[1m[90m[DEBUG][39m[0m:   Create directory /home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/_python_bundle__arm64-v8a/_python_bundle/site-packages/./werkzeug/sansio
+[1m[INFO][0m:     - copy ./werkzeug/sansio/response.pyc
+[1m[INFO][0m:     - copy ./werkzeug/sansio/multipart.pyc
+[1m[INFO][0m:     - copy ./werkzeug/sansio/http.pyc
+[1m[INFO][0m:     - copy ./werkzeug/sansio/__init__.pyc
+[1m[INFO][0m:     - copy ./werkzeug/sansio/request.pyc
+[1m[INFO][0m:     - copy ./werkzeug/wrappers/response.pyc
+[1m[90m[DEBUG][39m[0m:   Create directory /home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/_python_bundle__arm64-v8a/_python_bundle/site-packages/./werkzeug/wrappers
+[1m[INFO][0m:     - copy ./werkzeug/wrappers/__init__.pyc
+[1m[INFO][0m:     - copy ./werkzeug/wrappers/request.pyc
+[1m[INFO][0m:     - copy ./werkzeug/routing/matcher.pyc
+[1m[90m[DEBUG][39m[0m:   Create directory /home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/_python_bundle__arm64-v8a/_python_bundle/site-packages/./werkzeug/routing
+[1m[INFO][0m:     - copy ./werkzeug/routing/exceptions.pyc
+[1m[INFO][0m:     - copy ./werkzeug/routing/converters.pyc
+[1m[INFO][0m:     - copy ./werkzeug/routing/map.pyc
+[1m[INFO][0m:     - copy ./werkzeug/routing/rules.pyc
+[1m[INFO][0m:     - copy ./werkzeug/routing/__init__.pyc
+[1m[INFO][0m:     - copy ./werkzeug/debug/console.pyc
+[1m[90m[DEBUG][39m[0m:   Create directory /home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/_python_bundle__arm64-v8a/_python_bundle/site-packages/./werkzeug/debug
+[1m[INFO][0m:     - copy ./werkzeug/debug/repr.pyc
+[1m[INFO][0m:     - copy ./werkzeug/debug/__init__.pyc
+[1m[INFO][0m:     - copy ./werkzeug/debug/tbtools.pyc
+[1m[INFO][0m:     - copy ./werkzeug/debug/shared/ICON_LICENSE.md
+[1m[90m[DEBUG][39m[0m:   Create directory /home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/_python_bundle__arm64-v8a/_python_bundle/site-packages/./werkzeug/debug/shared
+[1m[INFO][0m:     - copy ./werkzeug/debug/shared/less.png
+[1m[INFO][0m:     - copy ./werkzeug/debug/shared/more.png
+[1m[INFO][0m:     - copy ./werkzeug/debug/shared/console.png
+[1m[INFO][0m:     - copy ./werkzeug/debug/shared/debugger.js
+[1m[INFO][0m:     - copy ./werkzeug/debug/shared/style.css
+[1m[INFO][0m:     - copy ./requests/utils.pyc
+[1m[90m[DEBUG][39m[0m:   Create directory /home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/_python_bundle__arm64-v8a/_python_bundle/site-packages/./requests
+[1m[INFO][0m:     - copy ./requests/packages.pyc
+[1m[INFO][0m:     - copy ./requests/certs.pyc
+[1m[INFO][0m:     - copy ./requests/_types.pyc
+[1m[INFO][0m:     - copy ./requests/exceptions.pyc
+[1m[INFO][0m:     - copy ./requests/auth.pyc
+[1m[INFO][0m:     - copy ./requests/__version__.pyc
+[1m[INFO][0m:     - copy ./requests/models.pyc
+[1m[INFO][0m:     - copy ./requests/compat.pyc
+[1m[INFO][0m:     - copy ./requests/structures.pyc
+[1m[INFO][0m:     - copy ./requests/_internal_utils.pyc
+[1m[INFO][0m:     - copy ./requests/status_codes.pyc
+[1m[INFO][0m:     - copy ./requests/cookies.pyc
+[1m[INFO][0m:     - copy ./requests/adapters.pyc
+[1m[INFO][0m:     - copy ./requests/__init__.pyc
+[1m[INFO][0m:     - copy ./requests/help.pyc
+[1m[INFO][0m:     - copy ./requests/py.typed
+[1m[INFO][0m:     - copy ./requests/hooks.pyc
+[1m[INFO][0m:     - copy ./requests/api.pyc
+[1m[INFO][0m:     - copy ./requests/sessions.pyc
+[1m[INFO][0m:     - copy ./_distutils_hack/override.pyc
+[1m[90m[DEBUG][39m[0m:   Create directory /home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/_python_bundle__arm64-v8a/_python_bundle/site-packages/./_distutils_hack
+[1m[INFO][0m:     - copy ./_distutils_hack/__init__.pyc
+[1m[INFO][0m:    [36m<- directory context /home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser[39m
+stty: 'standard input': Inappropriate ioctl for device
+[1m[90m[DEBUG][39m[0m:   [90m->[0m running cp /home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/build/other_builds/python3/arm64-v8a__ndk_target_24/python3/android-build/libpython3.11.so /home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/libs/arm64-v8a[0m
+[1m[INFO][0m:    Renaming .so files to reflect cross-compile
+stty: 'standard input': Inappropriate ioctl for device
+[1m[90m[DEBUG][39m[0m:   [90m->[0m running find /home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/_python_bundle__arm64-v8a/_python_bundle/site-packages -iname *.so[0m
+[1m[90m[DEBUG][39m[0m:   	/home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/_python_bundle__arm64-v8a/_python_bundle/site-packages/jnius/jnius.cpython-311-x86_64-linux-gnu.so
+[1m[90m[DEBUG][39m[0m:   	/home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/_python_bundle__arm64-v8a/_python_bundle/site-packages/markupsafe/_speedups.cpython-311-x86_64-linux-gnu.so
+[1m[90m[DEBUG][39m[0m:   	/home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/_python_bundle__arm64-v8a/_python_bundle/site-packages/android/_android.cpython-311-x86_64-linux-gnu.so
+[1m[90m[DEBUG][39m[0m:   	/home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/_python_bundle__arm64-v8a/_python_bundle/site-packages/android/_android_billing.cpython-311-x86_64-linux-gnu.so
+[1m[90m[DEBUG][39m[0m:   Moving /home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/_python_bundle__arm64-v8a/_python_bundle/site-packages/jnius/jnius.cpython-311-x86_64-linux-gnu.so to /home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/_python_bundle__arm64-v8a/_python_bundle/site-packages/jnius/jnius.so
+[1m[90m[DEBUG][39m[0m:   Moving /home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/_python_bundle__arm64-v8a/_python_bundle/site-packages/markupsafe/_speedups.cpython-311-x86_64-linux-gnu.so to /home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/_python_bundle__arm64-v8a/_python_bundle/site-packages/markupsafe/_speedups.so
+[1m[90m[DEBUG][39m[0m:   Moving /home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/_python_bundle__arm64-v8a/_python_bundle/site-packages/android/_android.cpython-311-x86_64-linux-gnu.so to /home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/_python_bundle__arm64-v8a/_python_bundle/site-packages/android/_android.so
+[1m[90m[DEBUG][39m[0m:   Moving /home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/_python_bundle__arm64-v8a/_python_bundle/site-packages/android/_android_billing.cpython-311-x86_64-linux-gnu.so to /home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/_python_bundle__arm64-v8a/_python_bundle/site-packages/android/_android_billing.so
+[1m[INFO][0m:    Stripping libraries
+stty: 'standard input': Inappropriate ioctl for device
+[1m[90m[DEBUG][39m[0m:   [90m->[0m running find /home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/_python_bundle__arm64-v8a/_python_bundle/modules /home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/libs -iname *.so[0m
+[1m[90m[DEBUG][39m[0m:   	/home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/_python_bundle__arm64-v8a/_python_bundle/modules/_struct.cpython-311.so
+[1m[90m[DEBUG][39m[0m:   	/home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/_python_bundle__arm64-v8a/_python_bundle/modules/array.cpython-311.so
+[1m[90m[DEBUG][39m[0m:   	/home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/_python_bundle__arm64-v8a/_python_bundle/modules/_multiprocessing.cpython-311.so
+[1m[90m[DEBUG][39m[0m:   	/home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/_python_bundle__arm64-v8a/_python_bundle/modules/_typing.cpython-311.so
+[1m[90m[DEBUG][39m[0m:   	/home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/_python_bundle__arm64-v8a/_python_bundle/modules/audioop.cpython-311.so
+[1m[90m[DEBUG][39m[0m:   	/home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/_python_bundle__arm64-v8a/_python_bundle/modules/_md5.cpython-311.so
+[1m[90m[DEBUG][39m[0m:   	/home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/_python_bundle__arm64-v8a/_python_bundle/modules/binascii.cpython-311.so
+[1m[90m[DEBUG][39m[0m:   	/home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/_python_bundle__arm64-v8a/_python_bundle/modules/xxlimited.cpython-311.so
+[1m[90m[DEBUG][39m[0m:   	/home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/_python_bundle__arm64-v8a/_python_bundle/modules/_posixsubprocess.cpython-311.so
+[1m[90m[DEBUG][39m[0m:   	/home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/_python_bundle__arm64-v8a/_python_bundle/modules/_contextvars.cpython-311.so
+[1m[90m[DEBUG][39m[0m:   	/home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/_python_bundle__arm64-v8a/_python_bundle/modules/_socket.cpython-311.so
+[1m[90m[DEBUG][39m[0m:   	/home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/_python_bundle__arm64-v8a/_python_bundle/modules/_codecs_iso2022.cpython-311.so
+[1m[90m[DEBUG][39m[0m:   	/home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/_python_bundle__arm64-v8a/_python_bundle/modules/_sha256.cpython-311.so
+[1m[90m[DEBUG][39m[0m:   	/home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/_python_bundle__arm64-v8a/_python_bundle/modules/_sha1.cpython-311.so
+[1m[90m[DEBUG][39m[0m:   	/home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/_python_bundle__arm64-v8a/_python_bundle/modules/_pickle.cpython-311.so
+[1m[90m[DEBUG][39m[0m:   	/home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/_python_bundle__arm64-v8a/_python_bundle/modules/_codecs_cn.cpython-311.so
+[1m[90m[DEBUG][39m[0m:   	/home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/_python_bundle__arm64-v8a/_python_bundle/modules/cmath.cpython-311.so
+[1m[90m[DEBUG][39m[0m:   	/home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/_python_bundle__arm64-v8a/_python_bundle/modules/_csv.cpython-311.so
+[1m[90m[DEBUG][39m[0m:   	/home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/_python_bundle__arm64-v8a/_python_bundle/modules/_sha3.cpython-311.so
+[1m[90m[DEBUG][39m[0m:   	/home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/_python_bundle__arm64-v8a/_python_bundle/modules/_codecs_tw.cpython-311.so
+[1m[90m[DEBUG][39m[0m:   	/home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/_python_bundle__arm64-v8a/_python_bundle/modules/_sha512.cpython-311.so
+[1m[90m[DEBUG][39m[0m:   	/home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/_python_bundle__arm64-v8a/_python_bundle/modules/_asyncio.cpython-311.so
+[1m[90m[DEBUG][39m[0m:   	/home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/_python_bundle__arm64-v8a/_python_bundle/modules/_codecs_kr.cpython-311.so
+[1m[90m[DEBUG][39m[0m:   	/home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/_python_bundle__arm64-v8a/_python_bundle/modules/_testcapi.cpython-311.so
+[1m[90m[DEBUG][39m[0m:   	/home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/_python_bundle__arm64-v8a/_python_bundle/modules/_ctypes.cpython-311.so
+[1m[90m[DEBUG][39m[0m:   	/home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/_python_bundle__arm64-v8a/_python_bundle/modules/_testclinic.cpython-311.so
+[1m[90m[DEBUG][39m[0m:   	/home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/_python_bundle__arm64-v8a/_python_bundle/modules/unicodedata.cpython-311.so
+[1m[90m[DEBUG][39m[0m:   	/home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/_python_bundle__arm64-v8a/_python_bundle/modules/ossaudiodev.cpython-311.so
+[1m[90m[DEBUG][39m[0m:   	/home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/_python_bundle__arm64-v8a/_python_bundle/modules/termios.cpython-311.so
+[1m[90m[DEBUG][39m[0m:   	/home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/_python_bundle__arm64-v8a/_python_bundle/modules/_opcode.cpython-311.so
+[1m[90m[DEBUG][39m[0m:   	/home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/_python_bundle__arm64-v8a/_python_bundle/modules/_lsprof.cpython-311.so
+[1m[90m[DEBUG][39m[0m:   	/home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/_python_bundle__arm64-v8a/_python_bundle/modules/_zoneinfo.cpython-311.so
+[1m[90m[DEBUG][39m[0m:   	/home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/_python_bundle__arm64-v8a/_python_bundle/modules/_ctypes_test.cpython-311.so
+[1m[90m[DEBUG][39m[0m:   	/home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/_python_bundle__arm64-v8a/_python_bundle/modules/xxlimited_35.cpython-311.so
+[1m[90m[DEBUG][39m[0m:   	/home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/_python_bundle__arm64-v8a/_python_bundle/modules/_hashlib.cpython-311.so
+[1m[90m[DEBUG][39m[0m:   	/home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/_python_bundle__arm64-v8a/_python_bundle/modules/_codecs_jp.cpython-311.so
+[1m[90m[DEBUG][39m[0m:   	/home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/_python_bundle__arm64-v8a/_python_bundle/modules/_codecs_hk.cpython-311.so
+[1m[90m[DEBUG][39m[0m:   	/home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/_python_bundle__arm64-v8a/_python_bundle/modules/_blake2.cpython-311.so
+[1m[90m[DEBUG][39m[0m:   	/home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/_python_bundle__arm64-v8a/_python_bundle/modules/_heapq.cpython-311.so
+[1m[90m[DEBUG][39m[0m:   	/home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/_python_bundle__arm64-v8a/_python_bundle/modules/_testinternalcapi.cpython-311.so
+[1m[90m[DEBUG][39m[0m:   	/home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/_python_bundle__arm64-v8a/_python_bundle/modules/_multibytecodec.cpython-311.so
+[1m[90m[DEBUG][39m[0m:   	/home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/_python_bundle__arm64-v8a/_python_bundle/modules/resource.cpython-311.so
+[1m[90m[DEBUG][39m[0m:   	/home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/_python_bundle__arm64-v8a/_python_bundle/modules/_statistics.cpython-311.so
+[1m[90m[DEBUG][39m[0m:   	/home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/_python_bundle__arm64-v8a/_python_bundle/modules/_elementtree.cpython-311.so
+[1m[90m[DEBUG][39m[0m:   	/home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/_python_bundle__arm64-v8a/_python_bundle/modules/_random.cpython-311.so
+[1m[90m[DEBUG][39m[0m:   	/home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/_python_bundle__arm64-v8a/_python_bundle/modules/_testmultiphase.cpython-311.so
+[1m[90m[DEBUG][39m[0m:   	/home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/_python_bundle__arm64-v8a/_python_bundle/modules/_datetime.cpython-311.so
+[1m[90m[DEBUG][39m[0m:   	/home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/_python_bundle__arm64-v8a/_python_bundle/modules/zlib.cpython-311.so
+[1m[90m[DEBUG][39m[0m:   	/home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/_python_bundle__arm64-v8a/_python_bundle/modules/fcntl.cpython-311.so
+[1m[90m[DEBUG][39m[0m:   	/home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/_python_bundle__arm64-v8a/_python_bundle/modules/pyexpat.cpython-311.so
+[1m[90m[DEBUG][39m[0m:   	/home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/_python_bundle__arm64-v8a/_python_bundle/modules/_decimal.cpython-311.so
+[1m[90m[DEBUG][39m[0m:   	/home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/_python_bundle__arm64-v8a/_python_bundle/modules/math.cpython-311.so
+[1m[90m[DEBUG][39m[0m:   	/home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/_python_bundle__arm64-v8a/_python_bundle/modules/_json.cpython-311.so
+[1m[90m[DEBUG][39m[0m:   	/home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/_python_bundle__arm64-v8a/_python_bundle/modules/_testbuffer.cpython-311.so
+[1m[90m[DEBUG][39m[0m:   	/home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/_python_bundle__arm64-v8a/_python_bundle/modules/_sqlite3.cpython-311.so
+[1m[90m[DEBUG][39m[0m:   	/home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/_python_bundle__arm64-v8a/_python_bundle/modules/syslog.cpython-311.so
+[1m[90m[DEBUG][39m[0m:   	/home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/_python_bundle__arm64-v8a/_python_bundle/modules/select.cpython-311.so
+[1m[90m[DEBUG][39m[0m:   	/home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/_python_bundle__arm64-v8a/_python_bundle/modules/_bisect.cpython-311.so
+[1m[90m[DEBUG][39m[0m:   	/home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/_python_bundle__arm64-v8a/_python_bundle/modules/_testimportmultiple.cpython-311.so
+[1m[90m[DEBUG][39m[0m:   	/home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/_python_bundle__arm64-v8a/_python_bundle/modules/_ssl.cpython-311.so
+[1m[90m[DEBUG][39m[0m:   	/home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/_python_bundle__arm64-v8a/_python_bundle/modules/_xxsubinterpreters.cpython-311.so
+[1m[90m[DEBUG][39m[0m:   	/home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/_python_bundle__arm64-v8a/_python_bundle/modules/_xxtestfuzz.cpython-311.so
+[1m[90m[DEBUG][39m[0m:   	/home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/_python_bundle__arm64-v8a/_python_bundle/modules/_queue.cpython-311.so
+[1m[90m[DEBUG][39m[0m:   	/home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/_python_bundle__arm64-v8a/_python_bundle/modules/mmap.cpython-311.so
+[1m[90m[DEBUG][39m[0m:   	/home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/libs/arm64-v8a/libffi.so
+[1m[90m[DEBUG][39m[0m:   	/home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/libs/arm64-v8a/libmain.so
+[1m[90m[DEBUG][39m[0m:   	/home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/libs/arm64-v8a/libssl1.1.so
+[1m[90m[DEBUG][39m[0m:   	/home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/libs/arm64-v8a/libpython3.11.so
+[1m[90m[DEBUG][39m[0m:   	/home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/libs/arm64-v8a/libcrypto1.1.so
+[1m[90m[DEBUG][39m[0m:   	/home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/libs/arm64-v8a/libsqlite3.so
+[1m[INFO][0m:    Stripping libraries in private dir
+[1m[INFO][0m:    Frying eggs in /home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/_python_bundle__arm64-v8a/_python_bundle/site-packages
+[1m[INFO][0m:    [36m<- directory context /home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/python-for-android[39m
+[1m[INFO][0m:    [36m-> directory context /home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser[39m
+[1m[INFO][0m:    Saving distribution info
+[1m[INFO][0m:    [36m<- directory context /home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/python-for-android[39m
+[1m[INFO][0m:    [1m[32m# Your distribution was created successfully, exiting.[0m[39m
+[1m[INFO][0m:    Dist can be found at (for now) /home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser
+
+
+[WARNING]: prerequisites.py is experimental and does not support all prerequisites yet.
+[0m[1;34m# Build the application #1[0m
+[0m[1;30m# Copy application source from /home/runner/work/frilanser/frilanser/android[0m
+[0m[1;30m# Create directory /home/runner/work/frilanser/frilanser/android/.buildozer/android/app[0m
+[0m[1;30m# Copy /home/runner/work/frilanser/frilanser/android/config.toml[0m
+[0m[1;30m# Copy /home/runner/work/frilanser/frilanser/android/main.py[0m
+[0m[1;30m# Copy /home/runner/work/frilanser/frilanser/android/presplash.png[0m
+[0m[1;30m# Copy /home/runner/work/frilanser/frilanser/android/icon.png[0m
+[0m[1;30m# Create directory /home/runner/work/frilanser/frilanser/android/.buildozer/android/app/data/raw[0m
+[0m[1;30m# Copy /home/runner/work/frilanser/frilanser/android/data/raw/parscoders-2026-09-28.json[0m
+[0m[1;30m# Copy /home/runner/work/frilanser/frilanser/android/data/raw/ponisha-2026-09-28.json[0m
+[0m[1;30m# Copy /home/runner/work/frilanser/frilanser/android/data/raw/karlancer-2026-09-28.md[0m
+[0m[1;30m# Copy /home/runner/work/frilanser/frilanser/android/data/raw/karlancer_web_design-2026-09-28.json[0m
+[0m[1;30m# Copy /home/runner/work/frilanser/frilanser/android/data/raw/parscoders-2026-09-28.md[0m
+[0m[1;30m# Copy /home/runner/work/frilanser/frilanser/android/data/raw/karlancer-2026-09-28.json[0m
+[0m[1;30m# Copy /home/runner/work/frilanser/frilanser/android/data/raw/ponisha-2026-09-28.md[0m
+[0m[1;30m# Copy /home/runner/work/frilanser/frilanser/android/data/raw/karlancer_programming-2026-09-28.json[0m
+[0m[1;30m# Create directory /home/runner/work/frilanser/frilanser/android/.buildozer/android/app/p4a-recipes/flask[0m
+[0m[1;30m# Copy /home/runner/work/frilanser/frilanser/android/p4a-recipes/flask/__init__.py[0m
+[0m[1;30m# Create directory /home/runner/work/frilanser/frilanser/android/.buildozer/android/app/frilanser[0m
+[0m[1;30m# Copy /home/runner/work/frilanser/frilanser/android/frilanser/cli.py[0m
+[0m[1;30m# Copy /home/runner/work/frilanser/frilanser/android/frilanser/pipeline.py[0m
+[0m[1;30m# Copy /home/runner/work/frilanser/frilanser/android/frilanser/demo_builder.py[0m
+[0m[1;30m# Copy /home/runner/work/frilanser/frilanser/android/frilanser/design_system.py[0m
+[0m[1;30m# Copy /home/runner/work/frilanser/frilanser/android/frilanser/__init__.py[0m
+[0m[1;30m# Copy /home/runner/work/frilanser/frilanser/android/frilanser/__main__.py[0m
+[0m[1;30m# Copy /home/runner/work/frilanser/frilanser/android/frilanser/normalize.py[0m
+[0m[1;30m# Copy /home/runner/work/frilanser/frilanser/android/frilanser/doctor.py[0m
+[0m[1;30m# Copy /home/runner/work/frilanser/frilanser/android/frilanser/pricing.py[0m
+[0m[1;30m# Copy /home/runner/work/frilanser/frilanser/android/frilanser/models.py[0m
+[0m[1;30m# Copy /home/runner/work/frilanser/frilanser/android/frilanser/version.py[0m
+[0m[1;30m# Copy /home/runner/work/frilanser/frilanser/android/frilanser/screening.py[0m
+[0m[1;30m# Copy /home/runner/work/frilanser/frilanser/android/frilanser/config.py[0m
+[0m[1;30m# Copy /home/runner/work/frilanser/frilanser/android/frilanser/react_builder.py[0m
+[0m[1;30m# Copy /home/runner/work/frilanser/frilanser/android/frilanser/updater.py[0m
+[0m[1;30m# Copy /home/runner/work/frilanser/frilanser/android/frilanser/store.py[0m
+[0m[1;30m# Copy /home/runner/work/frilanser/frilanser/android/frilanser/reporting.py[0m
+[0m[1;30m# Copy /home/runner/work/frilanser/frilanser/android/frilanser/tracking.py[0m
+[0m[1;30m# Create directory /home/runner/work/frilanser/frilanser/android/.buildozer/android/app/frilanser/sources[0m
+[0m[1;30m# Copy /home/runner/work/frilanser/frilanser/android/frilanser/sources/registry.py[0m
+[0m[1;30m# Copy /home/runner/work/frilanser/frilanser/android/frilanser/sources/ponisha.py[0m
+[0m[1;30m# Copy /home/runner/work/frilanser/frilanser/android/frilanser/sources/karlancer.py[0m
+[0m[1;30m# Copy /home/runner/work/frilanser/frilanser/android/frilanser/sources/parscoders.py[0m
+[0m[1;30m# Copy /home/runner/work/frilanser/frilanser/android/frilanser/sources/base.py[0m
+[0m[1;30m# Create directory /home/runner/work/frilanser/frilanser/android/.buildozer/android/app/frilanser/web[0m
+[0m[1;30m# Copy /home/runner/work/frilanser/frilanser/android/frilanser/web/app.py[0m
+[0m[1;30m# Copy /home/runner/work/frilanser/frilanser/android/frilanser/web/__init__.py[0m
+[0m[1;30m# Create directory /home/runner/work/frilanser/frilanser/android/.buildozer/android/app/frilanser/web/static[0m
+[0m[1;30m# Copy /home/runner/work/frilanser/frilanser/android/frilanser/web/static/style.css[0m
+[0m[1;30m# Create directory /home/runner/work/frilanser/frilanser/android/.buildozer/android/app/frilanser/web/templates[0m
+[0m[1;30m# Copy /home/runner/work/frilanser/frilanser/android/frilanser/web/templates/activity.html[0m
+[0m[1;30m# Copy /home/runner/work/frilanser/frilanser/android/frilanser/web/templates/base.html[0m
+[0m[1;30m# Copy /home/runner/work/frilanser/frilanser/android/frilanser/web/templates/project.html[0m
+[0m[1;30m# Copy /home/runner/work/frilanser/frilanser/android/frilanser/web/templates/demos.html[0m
+[0m[1;30m# Copy /home/runner/work/frilanser/frilanser/android/frilanser/web/templates/index.html[0m
+[0m[1;30m# Copy /home/runner/work/frilanser/frilanser/android/frilanser/web/templates/needs.html[0m
+[0m[1;34m# Package the application[0m
+[0m[1;30m# project.properties updated[0m
+[0m[1;30m# Run ['/opt/hostedtoolcache/Python/3.11.16/x64/bin/python', '-m', 'pythonforandroid.toolchain', 'apk', '--bootstrap', 'webview', '--dist_name', 'frilanser', '--name', 'فریلنسر یار آرنا', '--version', '1.0.1', '--package', 'org.arena.frilanser', '--minsdk', '24', '--ndk-api', '24', '--private', '/home/runner/work/frilanser/frilanser/android/.buildozer/android/app', '--permission', 'INTERNET', '--permission', 'ACCESS_NETWORK_STATE', '--permission', 'REQUEST_INSTALL_PACKAGES', '--permission', '\\\nREAD_EXTERNAL_STORAGE', '--permission', 'WRITE_EXTERNAL_STORAGE', '--android-entrypoint', 'org.kivy.android.PythonActivity', '--android-apptheme', '@android:style/Theme.NoTitleBar', '--presplash', '/home/runner/work/frilanser/frilanser/android/./presplash.png', '--icon', '/home/runner/work/frilanser/frilanser/android/./icon.png', '--orientation', 'portrait', '--window', '--enable-androidx', '--copy-libs', '--local-recipes', '/home/runner/work/frilanser/frilanser/android/p4a-recipes', '--arch', 'arm64-v8a', '--color=always', '--storage-dir=/home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a', '--ndk-api=24', '--port=5000', '--ignore-setup-py', '--debug'][0m
+[0m[1;30m# Cwd /home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/python-for-android[0m
+[WARNING]: Please report any issues to the python-for-android issue tracker.
+[WARNING]: prerequisites.py is experimental and does not support all prerequisites yet.
+[WARNING]: Please report any issues to the python-for-android issue tracker.
+[1m[INFO][0m:    Will compile for the following archs: arm64-v8a
+[1m[INFO][0m:    Found Android API target in $ANDROIDAPI: 33
+[1m[INFO][0m:    Available Android APIs are (33)
+[1m[INFO][0m:    Requested API target 33 is available, continuing.
+[1m[INFO][0m:    Found NDK dir in $ANDROIDNDK: /home/runner/.buildozer/android/platform/android-ndk-r25b
+[1m[INFO][0m:    Found NDK version 25b
+[1m[INFO][0m:    Getting NDK API version (i.e. minimum supported API) from user argument
+[1m[INFO][0m:    ccache is missing, the build will not be optimized in the future.
+[1m[90m[DEBUG][39m[0m:   All possible dists: [<Distribution: name frilanser with recipes (hostpython3, libffi, openssl, sqlite3, python3, genericndkbuild, setuptools, flask, six, pyjnius, android, click==8.1.7, werkzeug==2.2.3, itsdangerous==2.1.2, markupsafe, jinja2==3.1.4, beautifulsoup4, requests)>]
+[1m[90m[DEBUG][39m[0m:   Dist matching name and arch: [<Distribution: name frilanser with recipes (hostpython3, libffi, openssl, sqlite3, python3, genericndkbuild, setuptools, flask, six, pyjnius, android, click==8.1.7, werkzeug==2.2.3, itsdangerous==2.1.2, markupsafe, jinja2==3.1.4, beautifulsoup4, requests)>]
+[1m[90m[DEBUG][39m[0m:   Dist matching ndk_api and recipe: [<Distribution: name frilanser with recipes (hostpython3, libffi, openssl, sqlite3, python3, genericndkbuild, setuptools, flask, six, pyjnius, android, click==8.1.7, werkzeug==2.2.3, itsdangerous==2.1.2, markupsafe, jinja2==3.1.4, beautifulsoup4, requests)>]
+[1m[INFO][0m:    Of the existing distributions, the following meet the given requirements:
+[1m[INFO][0m:    	[32m[1mfrilanser[0m: min API 24, includes recipes ([32mhostpython3, libffi, openssl, sqlite3, python3, genericndkbuild, setuptools, flask, six, pyjnius, android, click==8.1.7, werkzeug==2.2.3, itsdangerous==2.1.2, markupsafe, jinja2==3.1.4, beautifulsoup4, requests[0m), built for archs ([34marm64-v8a[0m)
+[1m[INFO][0m:    [1m[94mfrilanser has compatible recipes, using this one[0m
+[1m[90m[DEBUG][39m[0m:   All possible dists: [<Distribution: name frilanser with recipes (hostpython3, libffi, openssl, sqlite3, python3, genericndkbuild, setuptools, flask, six, pyjnius, android, click==8.1.7, werkzeug==2.2.3, itsdangerous==2.1.2, markupsafe, jinja2==3.1.4, beautifulsoup4, requests)>]
+[1m[90m[DEBUG][39m[0m:   Dist matching name and arch: [<Distribution: name frilanser with recipes (hostpython3, libffi, openssl, sqlite3, python3, genericndkbuild, setuptools, flask, six, pyjnius, android, click==8.1.7, werkzeug==2.2.3, itsdangerous==2.1.2, markupsafe, jinja2==3.1.4, beautifulsoup4, requests)>]
+[1m[90m[DEBUG][39m[0m:   Dist matching ndk_api and recipe: [<Distribution: name frilanser with recipes (hostpython3, libffi, openssl, sqlite3, python3, genericndkbuild, setuptools, flask, six, pyjnius, android, click==8.1.7, werkzeug==2.2.3, itsdangerous==2.1.2, markupsafe, jinja2==3.1.4, beautifulsoup4, requests)>]
+[1m[INFO][0m:    Of the existing distributions, the following meet the given requirements:
+[1m[INFO][0m:    	[32m[1mfrilanser[0m: min API 24, includes recipes ([32mhostpython3, libffi, openssl, sqlite3, python3, genericndkbuild, setuptools, flask, six, pyjnius, android, click==8.1.7, werkzeug==2.2.3, itsdangerous==2.1.2, markupsafe, jinja2==3.1.4, beautifulsoup4, requests[0m), built for archs ([34marm64-v8a[0m)
+[1m[INFO][0m:    [1m[94mfrilanser has compatible recipes, using this one[0m
+[1m[INFO][0m:    [36m-> directory context /home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/build/bootstrap_builds/webview[39m
+[1m[INFO][0m:    [36m<- directory context /home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/python-for-android[39m
+[1m[INFO][0m:    [36m-> directory context /home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser[39m
+[1m[90m[DEBUG][39m[0m:   Remove directory and subdirectory src/main/assets
+[1m[90m[DEBUG][39m[0m:   Create directory src/main/assets
+Compiling '/home/runner/work/frilanser/frilanser/android/.buildozer/android/app/main.py'...
+Compiling '/home/runner/work/frilanser/frilanser/android/.buildozer/android/app/sitecustomize.py'...
+Compiling '/home/runner/work/frilanser/frilanser/android/.buildozer/android/app/p4a-recipes/flask/__init__.py'...
+Compiling '/home/runner/work/frilanser/frilanser/android/.buildozer/android/app/frilanser/cli.py'...
+Compiling '/home/runner/work/frilanser/frilanser/android/.buildozer/android/app/frilanser/pipeline.py'...
+Compiling '/home/runner/work/frilanser/frilanser/android/.buildozer/android/app/frilanser/demo_builder.py'...
+Compiling '/home/runner/work/frilanser/frilanser/android/.buildozer/android/app/frilanser/design_system.py'...
+Compiling '/home/runner/work/frilanser/frilanser/android/.buildozer/android/app/frilanser/__init__.py'...
+Compiling '/home/runner/work/frilanser/frilanser/android/.buildozer/android/app/frilanser/__main__.py'...
+Compiling '/home/runner/work/frilanser/frilanser/android/.buildozer/android/app/frilanser/normalize.py'...
+Compiling '/home/runner/work/frilanser/frilanser/android/.buildozer/android/app/frilanser/doctor.py'...
+Compiling '/home/runner/work/frilanser/frilanser/android/.buildozer/android/app/frilanser/pricing.py'...
+Compiling '/home/runner/work/frilanser/frilanser/android/.buildozer/android/app/frilanser/models.py'...
+Compiling '/home/runner/work/frilanser/frilanser/android/.buildozer/android/app/frilanser/version.py'...
+Compiling '/home/runner/work/frilanser/frilanser/android/.buildozer/android/app/frilanser/screening.py'...
+Compiling '/home/runner/work/frilanser/frilanser/android/.buildozer/android/app/frilanser/config.py'...
+Compiling '/home/runner/work/frilanser/frilanser/android/.buildozer/android/app/frilanser/react_builder.py'...
+Compiling '/home/runner/work/frilanser/frilanser/android/.buildozer/android/app/frilanser/updater.py'...
+Compiling '/home/runner/work/frilanser/frilanser/android/.buildozer/android/app/frilanser/store.py'...
+Compiling '/home/runner/work/frilanser/frilanser/android/.buildozer/android/app/frilanser/reporting.py'...
+Compiling '/home/runner/work/frilanser/frilanser/android/.buildozer/android/app/frilanser/tracking.py'...
+Compiling '/home/runner/work/frilanser/frilanser/android/.buildozer/android/app/frilanser/sources/registry.py'...
+Compiling '/home/runner/work/frilanser/frilanser/android/.buildozer/android/app/frilanser/sources/ponisha.py'...
+Compiling '/home/runner/work/frilanser/frilanser/android/.buildozer/android/app/frilanser/sources/karlancer.py'...
+Compiling '/home/runner/work/frilanser/frilanser/android/.buildozer/android/app/frilanser/sources/parscoders.py'...
+Compiling '/home/runner/work/frilanser/frilanser/android/.buildozer/android/app/frilanser/sources/base.py'...
+Compiling '/home/runner/work/frilanser/frilanser/android/.buildozer/android/app/frilanser/web/app.py'...
+Compiling '/home/runner/work/frilanser/frilanser/android/.buildozer/android/app/frilanser/web/__init__.py'...
+[1m[90m[DEBUG][39m[0m:   Remove directory and subdirectory /tmp/p4a-extra-env-1f_sudgw
+[1m[INFO][0m:    Detected highest available build tools version to be 37.0.0
+stty: 'standard input': Inappropriate ioctl for device
+[1m[90m[DEBUG][39m[0m:   [90m->[0m running gradlew clean assembleDebug[0m
+[1m[90m[DEBUG][39m[0m:   	Downloading https://services.gradle.org/distributions/gradle-8.0.2-all.zip
+[1m[90m[DEBUG][39m[0m:   	...............................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................
+[1m[90m[DEBUG][39m[0m:   	Unzipping /home/runner/.gradle/wrapper/dists/gradle-8.0.2-all/14bt34ptcsg1ikmfn78tdh1keu/gradle-8.0.2-all.zip to /home/runner/.gradle/wrapper/dists/gradle-8.0.2-all/14bt34ptcsg1ikmfn78tdh1keu
+[1m[90m[DEBUG][39m[0m:   	Set executable permissions for: /home/runner/.gradle/wrapper/dists/gradle-8.0.2-all/14bt34ptcsg1ikmfn78tdh1keu/gradle-8.0.2/bin/gradle
+[1m[90m[DEBUG][39m[0m:   	
+[1m[90m[DEBUG][39m[0m:   	Welcome to Gradle 8.0.2!
+[1m[90m[DEBUG][39m[0m:   	
+[1m[90m[DEBUG][39m[0m:   	Here are the highlights of this release:
+[1m[90m[DEBUG][39m[0m:   	 - Improvements to the Kotlin DSL
+[1m[90m[DEBUG][39m[0m:   	 - Fine-grained parallelism from the first build with configuration cache
+[1m[90m[DEBUG][39m[0m:   	 - Configurable Gradle user home cache cleanup
+[1m[90m[DEBUG][39m[0m:   	
+[1m[90m[DEBUG][39m[0m:   	For more details see https://docs.gradle.org/8.0.2/release-notes.html
+[1m[90m[DEBUG][39m[0m:   	
+[1m[90m[DEBUG][39m[0m:   	Starting a Gradle Daemon (subsequent builds will be faster)
+[1m[90m[DEBUG][39m[0m:   	> Task :clean UP-TO-DATE
+[1m[90m[DEBUG][39m[0m:   	> Task :preBuild UP-TO-DATE
+[1m[90m[DEBUG][39m[0m:   	> Task :preDebugBuild UP-TO-DATE
+[1m[90m[DEBUG][39m[0m:   	> Task :mergeDebugNativeDebugMetadata NO-SOURCE
+[1m[90m[DEBUG][39m[0m:   	> Task :javaPreCompileDebug
+[1m[90m[DEBUG][39m[0m:   	> Task :checkDebugAarMetadata
+[1m[90m[DEBUG][39m[0m:   	> Task :generateDebugResValues
+[1m[90m[DEBUG][39m[0m:   	> Task :mapDebugSourceSetPaths
+[1m[90m[DEBUG][39m[0m:   	> Task :generateDebugResources
+[1m[90m[DEBUG][39m[0m:   	> Task :packageDebugResources
+[1m[90m[DEBUG][39m[0m:   	> Task :mergeDebugResources
+[1m[90m[DEBUG][39m[0m:   	> Task :createDebugCompatibleScreenManifests
+[1m[90m[DEBUG][39m[0m:   	> Task :extractDeepLinksDebug
+[1m[90m[DEBUG][39m[0m:   	> Task :parseDebugLocalResources
+[1m[90m[DEBUG][39m[0m:   	
+[1m[90m[DEBUG][39m[0m:   	> Task :processDebugMainManifest
+[1m[90m[DEBUG][39m[0m:   	/home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/src/main/AndroidManifest.xml:55:18-50 Warning:
+[1m[90m[DEBUG][39m[0m:   		android:extractNativeLibs should not be specified in this source AndroidManifest.xml file. See https://d.android.com/guide/topics/manifest/application-element#extractNativeLibs for more information.
+[1m[90m[DEBUG][39m[0m:   	The AGP Upgrade Assistant can remove the attribute from the AndroidManifest.xml file and update the build file accordingly. See https://d.android.com/studio/build/agp-upgrade-assistant for more information.
+[1m[90m[DEBUG][39m[0m:   	/home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/src/main/AndroidManifest.xml:23:9-71 Warning:
+[1m[90m[DEBUG][39m[0m:   		Element uses-permission#android.permission.INTERNET at AndroidManifest.xml:23:9-71 duplicated with element declared at AndroidManifest.xml:21:5-67
+[1m[90m[DEBUG][39m[0m:   	
+[1m[90m[DEBUG][39m[0m:   	> Task :processDebugManifest
+[1m[90m[DEBUG][39m[0m:   	> Task :mergeDebugShaders
+[1m[90m[DEBUG][39m[0m:   	> Task :compileDebugShaders NO-SOURCE
+[1m[90m[DEBUG][39m[0m:   	> Task :generateDebugAssets UP-TO-DATE
+[1m[90m[DEBUG][39m[0m:   	> Task :mergeDebugAssets
+[1m[90m[DEBUG][39m[0m:   	> Task :processDebugJavaRes NO-SOURCE
+[1m[90m[DEBUG][39m[0m:   	> Task :processDebugManifestForPackage
+[1m[90m[DEBUG][39m[0m:   	> Task :checkDebugDuplicateClasses
+[1m[90m[DEBUG][39m[0m:   	> Task :compressDebugAssets
+[1m[90m[DEBUG][39m[0m:   	> Task :mergeDebugJavaResource
+[1m[90m[DEBUG][39m[0m:   	> Task :desugarDebugFileDependencies
+[1m[90m[DEBUG][39m[0m:   	> Task :mergeExtDexDebug
+[1m[90m[DEBUG][39m[0m:   	> Task :mergeLibDexDebug
+[1m[90m[DEBUG][39m[0m:   	> Task :mergeDebugJniLibFolders
+[1m[90m[DEBUG][39m[0m:   	> Task :processDebugResources
+[1m[90m[DEBUG][39m[0m:   	> Task :mergeDebugNativeLibs
+[1m[90m[DEBUG][39m[0m:   	> Task :validateSigningDebug
+[1m[90m[DEBUG][39m[0m:   	
+[1m[90m[DEBUG][39m[0m:   	> Task :compileDebugJavaWithJavac
+[1m[90m[DEBUG][39m[0m:   	Note: Some input files use or override a deprecated API.
+[1m[90m[DEBUG][39m[0m:   	Note: Recompile with -Xlint:deprecation for details.
+[1m[90m[DEBUG][39m[0m:   	
+[1m[90m[DEBUG][39m[0m:   	> Task :dexBuilderDebug
+[1m[90m[DEBUG][39m[0m:   	> Task :writeDebugAppMetadata
+[1m[90m[DEBUG][39m[0m:   	> Task :writeDebugSigningConfigVersions
+[1m[90m[DEBUG][39m[0m:   	> Task :mergeProjectDexDebug
+[1m[90m[DEBUG][39m[0m:   	> Task :stripDebugDebugSymbols
+[1m[90m[DEBUG][39m[0m:   	> Task :packageDebug
+[1m[90m[DEBUG][39m[0m:   	> Task :createDebugApkListingFileRedirect
+[1m[90m[DEBUG][39m[0m:   	> Task :assembleDebug
+[1m[90m[DEBUG][39m[0m:   	
+[1m[90m[DEBUG][39m[0m:   	Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+[1m[90m[DEBUG][39m[0m:   	
+[1m[90m[DEBUG][39m[0m:   	You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+[1m[90m[DEBUG][39m[0m:   	
+[1m[90m[DEBUG][39m[0m:   	See https://docs.gradle.org/8.0.2/userguide/command_line_interface.html#sec:command_line_warnings
+[1m[90m[DEBUG][39m[0m:   	
+[1m[90m[DEBUG][39m[0m:   	BUILD SUCCESSFUL in 41s
+[1m[90m[DEBUG][39m[0m:   	33 actionable tasks: 32 executed, 1 up-to-date
+[1m[INFO][0m:    [36m<- directory context /home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/python-for-android[39m
+[1m[90m[DEBUG][39m[0m:   All possible dists: [<Distribution: name frilanser with recipes (hostpython3, libffi, openssl, sqlite3, python3, genericndkbuild, setuptools, flask, six, pyjnius, android, click==8.1.7, werkzeug==2.2.3, itsdangerous==2.1.2, markupsafe, jinja2==3.1.4, beautifulsoup4, requests)>]
+[1m[90m[DEBUG][39m[0m:   Dist matching name and arch: [<Distribution: name frilanser with recipes (hostpython3, libffi, openssl, sqlite3, python3, genericndkbuild, setuptools, flask, six, pyjnius, android, click==8.1.7, werkzeug==2.2.3, itsdangerous==2.1.2, markupsafe, jinja2==3.1.4, beautifulsoup4, requests)>]
+[1m[90m[DEBUG][39m[0m:   Dist matching ndk_api and recipe: [<Distribution: name frilanser with recipes (hostpython3, libffi, openssl, sqlite3, python3, genericndkbuild, setuptools, flask, six, pyjnius, android, click==8.1.7, werkzeug==2.2.3, itsdangerous==2.1.2, markupsafe, jinja2==3.1.4, beautifulsoup4, requests)>]
+[1m[INFO][0m:    Of the existing distributions, the following meet the given requirements:
+[1m[INFO][0m:    	[32m[1mfrilanser[0m: min API 24, includes recipes ([32mhostpython3, libffi, openssl, sqlite3, python3, genericndkbuild, setuptools, flask, six, pyjnius, android, click==8.1.7, werkzeug==2.2.3, itsdangerous==2.1.2, markupsafe, jinja2==3.1.4, beautifulsoup4, requests[0m), built for archs ([34marm64-v8a[0m)
+[1m[INFO][0m:    [1m[94mfrilanser has compatible recipes, using this one[0m
+[1m[INFO][0m:    [1m[32m# Copying android package to current directory[0m[39m
+[1m[INFO][0m:    [1m[32m# Android package filename not found in build output. Guessing...[0m[39m
+[1m[INFO][0m:    [1m[32m# Found android package file: /home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/build/outputs/apk/debug/frilanser-debug.apk[0m[39m
+[1m[INFO][0m:    # Add version number to android package
+[1m[INFO][0m:    # Android package renamed to frilanser-debug-1.0.1.apk
+stty: 'standard input': Inappropriate ioctl for device
+[1m[90m[DEBUG][39m[0m:   [90m->[0m running cp /home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/build/outputs/apk/debug/frilanser-debug.apk frilanser-debug-1.0.1.apk[0m
+No setup.py/pyproject.toml used, copying full private data into .apk.
+[0m[1;34m# Android packaging done![0m
+[0m[1;34m# APK frilanser-1.0.1-arm64-v8a-debug.apk available in the bin directory[0m
+buildozer_exit=0
+=== خروجی‌های احتمالی ===
+total 15908
+drwxr-xr-x 2 runner runner     4096 Sep 29 19:58 .
+drwxr-xr-x 7 runner runner     4096 Sep 29 19:51 ..
+-rw-r--r-- 1 runner runner 16280451 Sep 29 19:58 frilanser-1.0.1-arm64-v8a-debug.apk
+16280451 بایت  ../android/bin/frilanser-1.0.1-arm64-v8a-debug.apk
+16280451 بایت  ../android/.buildozer/android/platform/python-for-android/frilanser-debug-1.0.1.apk
+16280451 بایت  ../android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/build/outputs/apk/debug/frilanser-debug.apk
+3 بایت  ../outbox/updates/frilanser.apk
+=== آخرین ۳۰ خطِ خلاصه ===
+=== نسخه‌ها و ریسپی‌های نصب‌شده ===
