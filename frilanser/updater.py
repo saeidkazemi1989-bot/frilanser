@@ -1,9 +1,5 @@
 """به‌روزرسانیِ درون‌برنامه‌ای (بدون نیاز به مراجعه‌ی دستی به گیت‌هاب).
 
-نکته: منبع پیش‌فرض، مانیفستِ `dist/updates/manifest.json` روی شاخه است و
-در صورت نبودن آن، آخرین انتشار گیت‌هاب خوانده می‌شود.
-"""
-
 گردش کار:
     ۱) برنامه یک «مانیفست نسخه» را از اینترنت می‌خواند (JSON ساده)
     ۲) نسخه‌ی خودش را با نسخه‌ی موجود مقایسه می‌کند
@@ -283,6 +279,35 @@ def install_android(apk: Path) -> dict:
         return {"ok": False, "error": f"{type(exc).__name__}: {exc}"}
 
 
+def install_via_download_manager(url: str, filename: str, title: str = "") -> dict:
+    """دانلود با «مدیر دانلود» اندروید و نمایش اعلان نصب.
+
+    این روش نیازی به FileProvider ندارد (برخلاف نصب مستقیم فایل محلی روی
+    اندروید ۷ به بالا) و روی همه‌ی گوشی‌ها کار می‌کند.
+    """
+    try:
+        from jnius import autoclass
+    except Exception as exc:  # noqa: BLE001
+        return {"ok": False, "error": f"jnius در دسترس نیست: {exc}"}
+    try:
+        Uri = autoclass("android.net.Uri")
+        Request = autoclass("android.app.DownloadManager$Request")
+        activity = autoclass("org.kivy.android.PythonActivity").mActivity
+        dm = activity.getSystemService("download")
+
+        req = Request(Uri.parse(url))
+        req.setTitle(title or "به‌روزرسانی فریلنس‌یار")
+        req.setDescription("پس از اتمام دانلود، روی اعلان بزنید و Install را انتخاب کنید")
+        req.setNotificationVisibility(Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
+        req.setDestinationInExternalPublicDir("Download", filename)
+        req.setMimeType("application/vnd.android.package-archive")
+        dm.enqueue(req)
+        return {"ok": True,
+                "message": "در حال دانلود؛ پس از اتمام، روی اعلان بزنید و Install را بزنید"}
+    except Exception as exc:  # noqa: BLE001
+        return {"ok": False, "error": f"{type(exc).__name__}: {exc}"}
+
+
 def install_windows(path: Path) -> dict:
     """اجرای نصب‌کننده‌ی ویندوزی (خودش جایگزین نسخه‌ی قبلی می‌شود)."""
     try:
@@ -323,6 +348,15 @@ def update(cfg, key: str | None = None, auto_install: bool = True,
     url = asset.get("url") or ""
     if not url:
         return {**info, "ok": False, "error": "آدرس فایل نصب در مانیفست نیست"}
+
+    if key == "android" and auto_install:
+        # روی اندروید، ساده‌ترین و مطمئن‌ترین راه: مدیر دانلودِ خود سیستم
+        dm_res = install_via_download_manager(
+            url, asset.get("file") or "frilanser.apk", title="به‌روزرسانی فریلنس‌یار")
+        if dm_res.get("ok"):
+            _write_state(cfg, downloading=False, message=dm_res["message"])
+            return {**info, **dm_res}
+        _write_state(cfg, downloading=True, message="مدیر دانلود در دسترس نبود؛ دانلود مستقیم…")
 
     dest = Path(cfg.outbox_dir) / "updates" / (asset.get("file") or
                                                ("frilanser.apk" if key == "android"

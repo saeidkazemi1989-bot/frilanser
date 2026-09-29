@@ -191,6 +191,18 @@ def create_app(cfg: Config, store: Store) -> Flask:
 
         return {"app_version": __version__, "app_platform": platform_key()}
 
+    @app.get("/crash-log")
+    def crash_log():
+        """نمایش آخرین خطای ثبت‌شده (برای ارسال به پشتیبانی)."""
+        from ..config import ROOT
+
+        path = Path(ROOT) / "crash.log"
+        if not path.exists():
+            return jsonify({"ok": True, "empty": True,
+                            "message": "هیچ خطایی ثبت نشده است"})
+        return jsonify({"ok": True, "empty": False, "path": str(path),
+                        "text": path.read_text(encoding="utf-8")[-8000:]})
+
     @app.get("/healthz")
     def healthz():
         return jsonify({"ok": True, "projects": len(store.projects)})
