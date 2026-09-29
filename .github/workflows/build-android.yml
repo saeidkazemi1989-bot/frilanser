@@ -94,9 +94,10 @@ jobs:
         if: always()
         run: |
           mkdir -p dist/updates
-          APK=$(find . -name "*.apk" -not -path "./android/.buildozer/*" -size +1M \
-                -printf "%s %p\n" 2>/dev/null | sort -rn | head -1 | cut -d' ' -f2- || true)
-          echo "نامزدها:"; find . -name "*.apk" -printf "%s %p\n" 2>/dev/null | sort -rn | head -5
+          # فقط خروجیِ همین بیلد (android/bin) — نه فایل‌های قدیمیِ مخزن
+          APK=$(find android/bin -name "*.apk" -size +1M -printf "%s %p\n" 2>/dev/null \
+                | sort -rn | head -1 | cut -d' ' -f2- || true)
+          echo "نامزدها:"; find android/bin -name "*.apk" -printf "%s %p\n" 2>/dev/null | sort -rn | head -5
           if [ -z "$APK" ]; then
             echo "! هیچ APKای ساخته نشد — لاگ در dist/android-build.log" >&2
             find . -maxdepth 3 -name "*.apk" 2>/dev/null | head -10 || true
