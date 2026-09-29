@@ -1,0 +1,90 @@
+iscc: C:/Program Files (x86)/Inno Setup 6/ISCC.exe
+exit: 0
+--- stdout ---
+Inno Setup 6 Command-Line Compiler
+Copyright (C) 1997-2026 Jordan Russell. All rights reserved.
+Portions Copyright (C) 2000-2026 Martijn Laan. All rights reserved.
+Portions Copyright (C) 2001-2004 Alex Yackimoff. All rights reserved.
+https://www.innosetup.com
+
+Compiler engine version: Inno Setup 6.7.1
+Non-commercial use only
+
+Preprocessing
+   Reading file: C:\Program Files (x86)\Inno Setup 6\ISPPBuiltins.iss
+Parsing [Setup] section, line 8
+Parsing [Setup] section, line 9
+Parsing [Setup] section, line 10
+Parsing [Setup] section, line 11
+Parsing [Setup] section, line 12
+Parsing [Setup] section, line 13
+Parsing [Setup] section, line 14
+Parsing [Setup] section, line 15
+Parsing [Setup] section, line 17
+Parsing [Setup] section, line 18
+Parsing [Setup] section, line 19
+Parsing [Setup] section, line 20
+Parsing [Setup] section, line 21
+Parsing [Setup] section, line 22
+Reading file (WizardImageFile)
+Reading file (WizardSmallImageFile)
+Preparing Setup program executable
+   Verification successful
+   Updating icons (Setup.e32)
+   Updating version info (Setup.e32)
+Determining language code pages
+Parsing [Languages] section, line 25
+   Reading file: C:\Program Files (x86)\Inno Setup 6\Default.isl
+   Messages in script file
+Reading default messages from Default.isl
+Parsing [Languages] section, line 25
+   Reading file: C:\Program Files (x86)\Inno Setup 6\Default.isl
+Parsing [LangOptions], [Messages], and [CustomMessages] sections
+   Messages in script file
+Reading [Code] section
+Parsing [Tasks] section, line 28
+Parsing [Icons] section, line 38
+Parsing [Icons] section, line 39
+Parsing [Icons] section, line 40
+Parsing [Icons] section, line 41
+Parsing [Run] section, line 44
+Parsing [Files] section, line 31
+Parsing [Files] section, line 32
+Parsing [Files] section, line 33
+Parsing [Files] section, line 34
+Parsing [Files] section, line 35
+Creating setup files
+   Verification successful
+   Updating icons (Setup.exe)
+   Compressing: D:\a\frilanser\frilanser\scripts\..\dist\frilanser-gui.exe
+   Compressing: D:\a\frilanser\frilanser\scripts\..\dist\frilanser.exe
+   Compressing: D:\a\frilanser\frilanser\scripts\..\config.toml
+   Compressing: D:\a\frilanser\frilanser\scripts\..\README.md
+   Compressing: D:\a\frilanser\frilanser\scripts\..\data\raw\karlancer-2026-09-28.json
+   Compressing: D:\a\frilanser\frilanser\scripts\..\data\raw\karlancer-2026-09-28.md
+   Compressing: D:\a\frilanser\frilanser\scripts\..\data\raw\karlancer_programming-2026-09-28.json
+   Compressing: D:\a\frilanser\frilanser\scripts\..\data\raw\karlancer_web_design-2026-09-28.json
+   Compressing: D:\a\frilanser\frilanser\scripts\..\data\raw\parscoders-2026-09-28.json
+   Compressing: D:\a\frilanser\frilanser\scripts\..\data\raw\parscoders-2026-09-28.md
+   Compressing: D:\a\frilanser\frilanser\scripts\..\data\raw\ponisha-2026-09-28.json
+   Compressing: D:\a\frilanser\frilanser\scripts\..\data\raw\ponisha-2026-09-28.md
+   Compressing Setup program executable
+   Updating version info (Setup.exe)
+   Updating manifest (Setup.exe)
+
+Warning: Architecture identifier "x64" is deprecated. Substituting "x64os", but note that "x64compatible" is preferred in most cases. See the "Architecture Identifiers" topic in help file for more information.
+
+Successful compile (5.625 sec). Resulting Setup program filename is:
+D:\a\frilanser\frilanser\dist\Frilanser-Setup.exe
+
+--- stderr ---
+
+--- محتوای dist ---
+android-build.log: 119380 بایت
+frilanser-gui.exe: 15462439 بایت
+frilanser-portable.zip: 27406078 بایت
+Frilanser-Setup.exe: 29363077 بایت
+frilanser.apk: 16250567 بایت
+frilanser.exe: 12430395 بایت
+installer.log: 0 بایت
+zip.log: 47 بایت
