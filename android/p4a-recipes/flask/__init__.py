@@ -8,8 +8,12 @@
 
 چون werkzeug ۳ تابع url_quote را حذف کرده و Flask قدیمی آن را وارد می‌کند.
 
-اینجا هر دو طرف را با نسخه‌های سازگار پین می‌کنیم (ترکیب تست‌شده):
+اینجا نسخه‌ی Flask و وابستگی‌ها را با ترکیبِ تست‌شده پین می‌کنیم:
     Flask 2.2.5 + Werkzeug 2.2.3 + Jinja2 3.1.4 + itsdangerous 2.1.2 + click 8.1.7
+
+نکته‌ی مهم: markupsafe را **بدون نسخه** می‌گذاریم تا p4a آن را با ریسپیِ خودش
+(که افزونه‌ی C را برای اندروید می‌سازد) نصب کند. نوشتنِ markupsafe==x باعث
+می‌شد pip بخواهد آن را نصب کند و در نهایت اصلاً نصب نشود.
 """
 
 from pythonforandroid.recipes.flask import FlaskRecipe as _BaseRecipe
@@ -24,6 +28,7 @@ class FlaskRecipe(_BaseRecipe):
     python_depends = [
         "jinja2==3.1.4",
         "werkzeug==2.2.3",
+        "markupsafe",      # بدون نسخه: ریسپیِ خودِ p4a آن را می‌سازد
         "itsdangerous==2.1.2",
         "click==8.1.7",
     ]

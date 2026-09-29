@@ -80,9 +80,11 @@ jobs:
           ls -la bin 2>&1 >> ../dist/android-build.log || true
           find .. -name "*.apk" -printf "%s بایت  %p\n" 2>/dev/null | sort -rn >> ../dist/android-build.log || true
           echo "=== آخرین ۳۰ خطِ خلاصه ===" >> ../dist/android-build.log
-          echo "=== نسخه‌های نصب‌شده ===" >> ../dist/android-build.log
-          grep -aiE "Successfully installed (flask|werkzeug|jinja2|click|itsdangerous)" \
+          echo "=== نسخه‌ها و ریسپی‌های نصب‌شده ===" >> ../dist/android-build.log
+          grep -aiE "Successfully installed (flask|werkzeug|jinja2|click|itsdangerous|markupsafe)" \
             ../dist/android-build.log > ../dist/android-versions.txt || true
+          grep -aiE "Building (markupsafe|flask) for|Installing (markupsafe|flask)" \
+            ../dist/android-build.log >> ../dist/android-versions.txt || true
           # فقط انتهای لاگ نگه داشته می‌شود (حجم فایل)
           tail -n 1200 ../dist/android-build.log > ../dist/android-build.tmp
           mv ../dist/android-build.tmp ../dist/android-build.log
