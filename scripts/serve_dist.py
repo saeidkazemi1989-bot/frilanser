@@ -92,9 +92,34 @@ def build_page() -> str:
 """
 
 
+def restore_from_git(name: str) -> bool:
+    """اگر محیط فایل را پاک کرده باشد، آن را از مخزن برمی‌گرداند."""
+    import subprocess
+
+    for ref in ("FETCH_HEAD", "origin/HEAD"):
+        try:
+            out = subprocess.run(
+                ["git", "show", f"{ref}:dist/{name}"],
+                cwd=str(ROOT), capture_output=True, timeout=300,
+            )
+            if out.returncode == 0 and len(out.stdout) > 100_000:
+                (DIST / name).write_bytes(out.stdout)
+                return True
+        except Exception:  # noqa: BLE001
+            continue
+    return False
+
+
 class Handler(SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, directory=str(DIST), **kwargs)
+
+    def translate_path(self, path):
+        target = super().translate_path(path)
+        rel = Path(target).name
+        if rel and rel not in ("", "dist") and not Path(target).exists():
+            restore_from_git(rel)
+        return target
 
     def do_GET(self):
         if self.path in ("/", "/index.html"):

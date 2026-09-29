@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
 
 from flask import (
@@ -161,16 +162,30 @@ def create_app(cfg: Config, store: Store) -> Flask:
     def api_summary():
         return jsonify(summarize())
 
+    def _api_guard(payload_fn):
+        """هر استثنای مسیرهای API را به JSON تبدیل می‌کند (نه صفحه‌ی HTML)."""
+        import traceback as _tb
+
+        try:
+            return jsonify(payload_fn())
+        except Exception as exc:  # noqa: BLE001
+            app.logger.exception("خطا در مسیر API")
+            return jsonify({"ok": False, "error": f"{type(exc).__name__}: {exc}",
+                            "trace": _tb.format_exc()}), 500
+
     @app.get("/api/update")
     def api_update():
         """وضعیت به‌روزرسانی (نسخه‌ی فعلی، آخرین نسخه، درصد پیشرفت)."""
         from .. import updater
         from ..version import __version__, platform_key
 
-        state = updater.read_state(cfg)
-        state.setdefault("current", __version__)
-        state.setdefault("platform", platform_key())
-        return jsonify(state)
+        def payload():
+            state = updater.read_state(cfg)
+            state.setdefault("current", __version__)
+            state.setdefault("platform", platform_key())
+            return state
+
+        return _api_guard(payload)
 
     @app.post("/api/update")
     def api_update_do():
@@ -179,9 +194,9 @@ def create_app(cfg: Config, store: Store) -> Flask:
 
         mode = (request.form.get("mode") or request.args.get("mode") or "check").strip()
         if mode == "check":
-            return jsonify(updater.check_update(cfg))
+            return _api_guard(lambda: updater.check_update(cfg))
         if mode == "install":
-            return jsonify(updater.update_async(cfg))
+            return _api_guard(lambda: updater.update_async(cfg))
         return jsonify({"ok": False, "error": "حالت نامعلوم"}), 400
 
     @app.context_processor
@@ -202,6 +217,36 @@ def create_app(cfg: Config, store: Store) -> Flask:
                             "message": "هیچ خطایی ثبت نشده است"})
         return jsonify({"ok": True, "empty": False, "path": str(path),
                         "text": path.read_text(encoding="utf-8")[-8000:]})
+
+    @app.get("/api/selftest")
+    def api_selftest():
+        """گزارش کاملِ وضعیت برنامه و مسیر به‌روزرسانی (برای ارسال به پشتیبانی)."""
+        import platform as _platform
+        import traceback as _tb
+
+        from .. import updater
+        from ..version import __version__, platform_key
+
+        report = {
+            "version": __version__, "platform": platform_key(),
+            "python": _platform.python_version(),
+            "home": str(cfg.root), "outbox": str(cfg.outbox_dir),
+            "writable": os.access(str(cfg.outbox_dir), os.W_OK),
+            "requests": False, "check": None, "trace": "",
+        }
+        try:
+            import requests  # noqa: F401
+
+            report["requests"] = True
+        except Exception as exc:  # noqa: BLE001
+            report["requests"] = f"{type(exc).__name__}: {exc}"
+        try:
+            report["check"] = updater.check_update(cfg, timeout=8)
+            report["manifest_urls"] = updater.manifest_urls(cfg)
+        except Exception as exc:  # noqa: BLE001
+            report["trace"] = _tb.format_exc()
+            report["check_error"] = f"{type(exc).__name__}: {exc}"
+        return jsonify(report)
 
     @app.get("/healthz")
     def healthz():

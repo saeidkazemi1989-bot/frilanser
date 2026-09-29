@@ -136,7 +136,27 @@ def _from_release_api(data: dict, key: str) -> dict | None:
     }
 
 
+def _safe_check(cfg, key: str, timeout: int) -> dict:
+    """بدنه‌ی بررسی نسخه — هر استثنایی به‌صورت پیام برگردانده می‌شود."""
+    import traceback
+
+    try:
+        return _check_update_inner(cfg, key, timeout)
+    except Exception as exc:  # noqa: BLE001
+        import traceback as _tb
+
+        return {"ok": False, "error": f"{type(exc).__name__}: {exc}",
+                "trace": _tb.format_exc(), "current": __version__, "platform": key,
+                "latest": __version__, "has_update": False, "notes": [], "asset": {},
+                "release_url": "", "source": ""}
+
+
 def check_update(cfg, key: str | None = None, timeout: int = 15) -> dict:
+    """بررسی نسخه — همیشه JSON برمی‌گرداند (هرگز استثنا نمی‌دهد)."""
+    return _safe_check(cfg, key or platform_key(), timeout)
+
+
+def _check_update_inner(cfg, key: str, timeout: int) -> dict:
     """نسخه‌ی موجود را بررسی می‌کند (بدون تغییر در برنامه)."""
     key = key or platform_key()
     requests = _request()

@@ -10,6 +10,8 @@
     </div>
     <button type="button" id="upd-check">بررسی نسخه‌ی جدید</button>
     <button type="button" id="upd-install" style="display:none">دریافت و نصب به‌روزرسانی</button>
+    <a class="muted" id="upd-debug" href="/api/selftest" target="_blank"
+       style="font-size:12px">گزارش عیب‌یابی</a>
   </div>
   <div id="upd-bar-wrap" style="display:none;margin-top:10px;height:8px;background:#e5e7eb;border-radius:99px;overflow:hidden">
     <div id="upd-bar" style="height:100%;width:0;background:#0f766e;transition:width .3s"></div>
@@ -126,9 +128,21 @@
   if(!msg || !btnCheck) return;
 
   function setMsg(t){ msg.textContent = t; }
+  function esc(t){ return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  function showTrace(t){
+    notes.innerHTML = t ? '<pre dir="ltr" style="text-align:left;background:#0f172a;color:#cbd5e1;'
+      + 'padding:10px;border-radius:10px;overflow:auto;font-size:11.5px;white-space:pre-wrap">'
+      + esc(t) + '</pre>' : '';
+  }
   async function call(mode){
     const fd = new FormData(); fd.append('mode', mode);
     const r = await fetch('/api/update', {method:'POST', body:fd});
+    const ct = (r.headers.get('content-type') || '').toLowerCase();
+    if (ct.indexOf('application/json') === -1) {
+      const txt = await r.text();
+      throw new Error('پاسخ سرور از نوع JSON نبود (کد ' + r.status + '): '
+        + txt.slice(0, 200));
+    }
     return await r.json();
   }
   function mb(n){ return n ? ' (' + Math.round(n/1048576) + ' مگابایت)' : ''; }
@@ -137,7 +151,11 @@
     setMsg('در حال بررسی…'); btnCheck.disabled = true;
     try {
       const j = await call('check');
-      if(!j.ok){ setMsg('بررسی ناموفق بود: ' + (j.error || 'خطای ناشناخته')); btnCheck.disabled = false; return; }
+      if(!j.ok){
+        setMsg('بررسی ناموفق بود: ' + (j.error || 'خطای ناشناخته'));
+        if(j.trace){ showTrace(j.trace); }
+        btnCheck.disabled = false; return;
+      }
       if(j.has_update){
         setMsg('نسخه‌ی جدید ' + j.latest + ' آماده است' + mb(j.asset && j.asset.size));
         btnInstall.style.display = '';
@@ -146,7 +164,7 @@
       } else {
         setMsg('برنامه به‌روز است (نسخه‌ی ' + j.latest + ')');
       }
-    } catch(e){ setMsg('خطا در ارتباط: ' + e); }
+    } catch(e){ setMsg('خطا در ارتباط: ' + e.message); showTrace(e.message); }
     btnCheck.disabled = false;
   };
 
