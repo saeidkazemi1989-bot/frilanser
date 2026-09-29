@@ -18,7 +18,7 @@ from flask import (
 )
 
 from ..config import Config
-from ..models import STATUS_LABELS, VERDICT_LABELS, Project
+from ..models import PROPOSAL_STATES, STATUS_LABELS, VERDICT_LABELS, Project
 from ..store import Store
 
 BUDGET_VERDICT_FA = {
@@ -93,7 +93,21 @@ def create_app(cfg: Config, store: Store) -> Flask:
         verdict = request.args.get("verdict", "")
         source = request.args.get("source", "")
         q = request.args.get("q", "")
+        state = request.args.get("state", "")
+        sort = request.args.get("sort", "")
         projects = filtered(verdict, q, source)
+
+        # فیلترِ وضعیتِ پیشنهاد (من روی کدام آگهی‌ها پیشنهاد داده‌ام؟)
+        if state:
+            projects = [p for p in projects if p.proposal_state == state]
+        # مرتب‌سازی بر اساس احتمالِ واگذاری به تازه‌کار
+        if sort == "beginner":
+            projects = sorted(
+                projects,
+                key=lambda p: (p.beginner.get("score", 0), p.score),
+                reverse=True,
+            )
+
         sources = sorted({(p.source, p.source_label) for p in store.all()})
         return render_template(
             "index.html",
@@ -102,9 +116,13 @@ def create_app(cfg: Config, store: Store) -> Flask:
             verdict=verdict,
             source=source,
             q=q,
+            state=state,
+            sort=sort,
             sources=sources,
             activity=store.activity(8),
             cfg=cfg,
+            prop_states=PROPOSAL_STATES,
+            tracking=tracking_summary(),
         )
 
     @app.get("/p/<path:pid>")
@@ -122,6 +140,25 @@ def create_app(cfg: Config, store: Store) -> Flask:
         project = pipeline.set_decision(store, pid, decision, note=note or None)
         if project:
             pipeline.notify(cfg, store)
+        return redirect(url_for("project_detail", pid=pid))
+
+    @app.post("/p/<path:pid>/proposal-state")
+    def project_proposal_state(pid: str):
+        """ثبت وضعیتِ پیشنهاد: داده‌ام / گرفتم / نگرفتم / بسته شد."""
+        state = (request.form.get("state") or "").strip()
+        price_raw = (request.form.get("price") or "").strip().replace(",", "")
+        note = (request.form.get("note") or "").strip()
+        price = None
+        if price_raw:
+            digits = "".join(ch for ch in price_raw if ch.isdigit())
+            price = int(digits) if digits else None
+        store.set_proposal_state(pid, state, price=price, note=note)
+        try:
+            from .. import pipeline
+
+            pipeline.notify(cfg, store)
+        except Exception:  # noqa: BLE001
+            pass
         return redirect(url_for("project_detail", pid=pid))
 
     @app.get("/needs")
@@ -204,7 +241,8 @@ def create_app(cfg: Config, store: Store) -> Flask:
         """نسخه و سکو را برای نمایش در همه‌ی صفحه‌ها در دسترس می‌گذارد."""
         from ..version import __version__, platform_key
 
-        return {"app_version": __version__, "app_platform": platform_key()}
+        return {"app_version": __version__, "app_platform": platform_key(),
+                "PROPOSAL_STATES": PROPOSAL_STATES}
 
     @app.get("/crash-log")
     def crash_log():
@@ -247,6 +285,15 @@ def create_app(cfg: Config, store: Store) -> Flask:
             report["trace"] = _tb.format_exc()
             report["check_error"] = f"{type(exc).__name__}: {exc}"
         return jsonify(report)
+
+    def tracking_summary() -> dict:
+        """خلاصه‌ی پیشنهادهای کاربر (برای نمایش بالای داشبورد)."""
+        counts = {"submitted": 0, "won": 0, "lost": 0, "closed": 0}
+        for p in store.all():
+            if p.proposal_state in counts:
+                counts[p.proposal_state] += 1
+        return {"counts": counts,
+                "open": counts["submitted"], "won": counts["won"]}
 
     @app.get("/healthz")
     def healthz():

@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="fa" dir="rtl"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>پیش‌نمایش طراحی — پژوهشی</title>
+<style>
+:root{
+--p:#22d3ee;--a:#f472b6;--ink:#e6faff;--mut:#8fa6bd;--line:#123243;
+--bg:#071018;--surface:#0c1a24;--grad:linear-gradient(135deg,#071018 0%,#0e7490 50%,#db2777 100%);
+--r:14px;--shadow:0 0 30px rgba(34,211,238,.22);--stroke:1px solid #123243;
+--alpha:1;
+--font-h:"Shabnam","Vazirmatn",Consolas,"Segoe UI",sans-serif;--font-b:"Shabnam","Vazirmatn","Segoe UI",Tahoma,sans-serif;
+}
+
+body{font-family:var(--font-b);background:var(--bg);color:var(--ink)}
+.btn{color:#0b1120}
+.btn.alt{color:#0b1120}
+h1,h2,h3,.t,.stat .v,.kpi .v{font-family:var(--font-h)}
+body:after{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:.35;background-image:linear-gradient(#22d3ee0f 1px,transparent 1px),linear-gradient(90deg,#22d3ee0f 1px,transparent 1px);background-size:44px 44px}
+.card,.card2,.prod,.quote,.kpi,.mockwin,.stat{background:transparent;border:var(--stroke)}
+.card,.card2,.prod,.quote{box-shadow:var(--shadow)}
+.btn,.kpi .v{box-shadow:0 0 26px #22d3ee55}.mockwin{box-shadow:0 24px 70px rgba(0,0,0,.5)}
+.hero{background:var(--grad)}
+a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--a);outline-offset:2px}
+@media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
+:root{--p:#3b5bdb;--a:#22b8cf;--ink:#161a2b;--mut:#6b7280;--line:#e6e9f2;--bg:#f6f7fc}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+font-family:"Vazirmatn","IRANSans","B Nazanin","Segoe UI",Tahoma,sans-serif;
+direction:rtl;line-height:1.9;font-size:15px;-webkit-user-select:none;user-select:none}
+img,svg{max-width:100%;display:block}
+a{color:var(--p);text-decoration:none;cursor:default}
+.wrap{max-width:1120px;margin:0 auto;padding:0 18px}
+h1,h2,h3{margin:0 0 10px;line-height:1.6}
+.muted{color:var(--mut);font-size:13.5px}
+.card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:20px;margin-bottom:16px;
+box-shadow:0 6px 22px rgba(21,32,70,.05)}
+.grid{display:grid;gap:14px}
+.g3{grid-template-columns:repeat(auto-fit,minmax(230px,1fr))}
+.g4{grid-template-columns:repeat(auto-fit,minmax(170px,1fr))}
+.btn{display:inline-block;background:var(--p);color:#fff;border:0;border-radius:12px;padding:11px 22px;
+font:inherit;cursor:default}
+.btn.ghost{background:#fff;color:var(--p);border:1px solid #ccd6f8}
+.btn.alt{background:var(--a)}
+.chip{display:inline-block;background:#eef2ff;border:1px solid #d9e1fb;color:#2b3f8f;
+border-radius:999px;padding:3px 12px;font-size:12px;margin-left:6px}
+.badge{display:inline-block;padding:2px 10px;border-radius:999px;font-size:11.5px;border:1px solid}
+.b-ok{background:#e7f8ef;color:#1a7f4b;border-color:#b7e6cd}
+.b-wait{background:#fff4e0;color:#8a5a00;border-color:#ffe0a8}
+.b-run{background:#e8f0ff;color:#2b4cb8;border-color:#c5d5ff}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th,td{padding:9px 10px;border-bottom:1px solid #eceff7;text-align:right}
+th{background:#f3f5fb;color:#4a5578;font-size:12.5px}
+input,select,textarea{font:inherit;padding:10px 12px;border:1px solid #dbe1ee;border-radius:11px;
+width:100%;background:#fbfcff;color:#8a91a6}
+input::placeholder,textarea::placeholder{color:#a9b0c3}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px}
+.kpi{background:linear-gradient(160deg,#fff,#f4f6fd);border:1px solid var(--line);border-radius:14px;padding:14px}
+.kpi .k{font-size:12.5px;color:var(--mut)}
+.kpi .v{font-size:23px;font-weight:800;margin-top:2px}
+.kpi .d{font-size:12px;color:#22a06b}
+.steps{counter-reset:s;margin-top:6px}
+.step{position:relative;padding:0 34px 16px 0;border-right:2px solid #e3e8f5}
+.step:last-child{border-right-color:transparent}
+.step:before{counter-increment:s;content:counter(s);position:absolute;right:-13px;top:0;width:24px;height:24px;
+border-radius:50%;background:var(--p);color:#fff;font-size:12px;display:flex;align-items:center;justify-content:center}
+.steps .t{font-weight:700}
+pre.json{background:#0f172a;color:#d7e3ff;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px;
+border-radius:12px;padding:14px;overflow:auto;max-height:260px;text-align:left;direction:ltr}
+.bar{background:linear-gradient(90deg,var(--p),var(--a));border-radius:4px 4px 0 0}
+.log{background:#111827;color:#c8f0d8;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;
+border-radius:12px;padding:12px;height:150px;overflow:auto;line-height:1.7}
+.progress{height:9px;background:#e9edf7;border-radius:999px;overflow:hidden;margin:10px 0}
+.progress i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--p),var(--a));transition:width .25s}
+@media(max-width:640px){.wrap{padding:0 12px}}
+
+.mockbar{background:#0f1730;color:#c7d2fe;font-size:12px;padding:7px 14px;display:flex;gap:10px;
+align-items:center;justify-content:center;flex-wrap:wrap;border-radius:0 0 14px 14px}
+.mockbar b{color:#fff}
+.mockwin{border:1px solid #dfe4f2;border-radius:16px;overflow:hidden;background:#fff;
+box-shadow:0 18px 50px rgba(19,30,66,.10)}
+.dots{display:flex;gap:6px;padding:9px 12px;background:#f3f5fb;border-bottom:1px solid #e6e9f2}
+.dots i{width:10px;height:10px;border-radius:50%;background:#d7dceb;display:block}
+.mh{position:sticky;top:0;z-index:5;background:rgba(255,255,255,.94);backdrop-filter:blur(8px);
+border-bottom:1px solid #eceff7}
+.mh .in{display:flex;align-items:center;justify-content:space-between;padding:12px 18px;gap:14px}
+.logo{display:flex;align-items:center;gap:9px;font-weight:800;font-size:16px}
+.logo span.m{width:32px;height:32px;border-radius:10px;background:linear-gradient(135deg,var(--p),var(--a));
+display:grid;place-items:center;color:#fff;font-size:15px}
+.nav{display:flex;gap:18px;font-size:14px;color:#4b5570}
+.hero{padding:44px 18px 34px;color:#fff;position:relative;overflow:hidden}
+.hero:after{content:"";position:absolute;inset:auto -10% -60% 40%;height:220px;background:rgba(255,255,255,.10);
+border-radius:50%}
+.hero .in{position:relative;z-index:2;display:grid;grid-template-columns:1.15fr .85fr;gap:26px;align-items:center}
+.hero h1{font-size:31px;line-height:1.45;margin:0 0 12px}
+.hero p{margin:0 0 20px;opacity:.93;font-size:15.5px}
+.hero .cta{display:flex;gap:10px;flex-wrap:wrap}
+.sect{padding:34px 18px}
+.sect.alt{background:#f8f9fe}
+.sect h2{text-align:center;font-size:22px}
+.sect .sub{text-align:center;color:var(--mut);margin-bottom:20px;font-size:14px}
+.card2{background:#fff;border:1px solid var(--line);border-radius:16px;padding:18px}
+.card2 .ic{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;margin-bottom:10px;
+background:linear-gradient(135deg,#eef2ff,#e6fbfd);font-size:20px}
+.card2 .t{font-weight:800;margin-bottom:4px}
+.card2 .d{color:var(--mut);font-size:13.5px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;text-align:center}
+.stat .v{font-size:26px;font-weight:800;color:var(--p)}
+.stat .k{font-size:13px;color:var(--mut)}
+.prod{background:#fff;border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.prod .ph{height:150px;display:grid;place-items:center}
+.prod .bd{padding:12px}
+.prod .n{font-weight:700;font-size:14px}
+.prod .pr{color:#1a7f4b;font-weight:800;margin-top:4px;font-size:14px}
+.prod .old{text-decoration:line-through;color:#a6adbd;font-size:12px;margin-right:6px}
+.quote{border:1px solid var(--line);border-radius:16px;padding:16px;background:#fff}
+.quote .txt{color:#4b5570;font-size:14px}
+.quote .who{display:flex;align-items:center;gap:10px;margin-top:12px}
+.quote .av{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--p),var(--a))}
+.formrow{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.field{margin-bottom:10px}
+.field label{display:block;font-size:13px;margin-bottom:5px;color:#4b5570}
+.mfoot{background:#0f1730;color:#aab6d8;padding:26px 18px;font-size:13.5px}
+.mfoot .cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:18px}
+.mfoot h4{color:#fff;margin:0 0 8px;font-size:14px}
+.mfoot .bt{border-top:1px solid #25304f;margin-top:18px;padding-top:12px;text-align:center;color:#7f8db4;font-size:12px}
+.langbar{display:flex;gap:6px;justify-content:center;margin:14px 0 0}
+.langbar button{background:#fff;border:1px solid #d7deef;border-radius:999px;padding:6px 16px;font:inherit;
+font-size:13px;color:#39405a}
+.langbar button.on{background:var(--p);border-color:var(--p);color:#fff}
+@media(max-width:760px){.hero .in{grid-template-columns:1fr}.formrow{grid-template-columns:1fr}.nav{display:none}}
+
+#wm{position:fixed;inset:0;z-index:9997;pointer-events:none;opacity:.13;
+background-repeat:repeat;background-size:340px 190px}
+#guard{position:fixed;inset:0;z-index:9998;cursor:not-allowed}
+#note{position:fixed;z-index:9999;left:50%;bottom:26px;transform:translateX(-50%);
+background:#111827;color:#fff;border-radius:14px;padding:12px 20px;font-size:14px;
+box-shadow:0 12px 40px rgba(0,0,0,.35);opacity:0;transition:opacity .2s;pointer-events:none;max-width:90vw}
+#note.on{opacity:1}
+#ribbon{position:fixed;top:0;left:0;right:0;z-index:9996;background:linear-gradient(90deg,#111827,#1f2b4d);
+color:#ffd9a8;font-size:12.5px;text-align:center;padding:5px 10px}
+body{padding-top:26px}
+</style></head>
+<body>
+
+<div id="wm" style="background-image:url('data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22340%22%20height%3D%22190%22%3E%3Ctext%20x%3D%220%22%20y%3D%22120%22%20transform%3D%22rotate%28-28%200%20120%29%22%20font-size%3D%2226%22%20font-family%3D%22Tahoma%2Csans-serif%22%20fill%3D%22%23111827%22%20opacity%3D%220.55%22%3E%D9%BE%DB%8C%D8%B4%E2%80%8C%D9%86%D9%85%D8%A7%DB%8C%D8%B4%20%E2%80%94%20%D9%86%D9%85%D9%88%D9%86%D9%87%20%D8%BA%DB%8C%D8%B1%D9%82%D8%A7%D8%A8%D9%84%20%D8%A7%D8%B3%D8%AA%D9%81%D8%A7%D8%AF%D9%87%3C/text%3E%3C/svg%3E')"></div>
+<div id="guard"></div>
+<div id="ribbon">پیش‌نمایش گرافیکیِ نمونه — فقط برای مشاهده؛ در این نسخه هیچ چیز قابل استفاده نیست</div>
+<div id="note"></div>
+
+<div class="mockbar">👁 <b>پیش‌نمایش گرافیکیِ نمونه</b> — این طرح برای نمایشِ خروجی پروژه ساخته شده و
+هیچ بخش آن قابل استفاده نیست</div>
+<div style="padding:16px 0 40px">
+<div class="wrap" style="max-width:1160px">
+  <div style="margin-bottom:14px">
+    <h1 style="font-size:22px;margin:0 0 6px">پیش‌نمایش طراحی — پژوهشی</h1>
+    <div class="muted">این یک پیش‌نمایش گرافیکیِ اختصاصی است؛ خروجی نهایی پس از تایید قرارداد تحویل می‌شود.</div>
+    <div style="margin-top:8px"><span class="chip">وب‌سایت شرکتی</span><span class="chip">پیش‌نمایش اختصاصی</span><span class="chip">غیرقابل استفاده (نمونه)</span></div>
+  </div>
+  
+<div class="card"><h2>پیش‌نمایش اختصاصیِ طراحیِ پروژه‌ی شما</h2>
+<div class="muted">این پیش‌نمایش بر اساس توضیحات آگهی شما طراحی شده تا پیش از شروع همکاری،
+ظاهر و امکاناتِ خروجی نهایی را ببینید. نسخه‌ی کامل و قابل استفاده بلافاصله پس از تایید،
+طبق زمان‌بندی زیر تحویل می‌شود.</div>
+<div class="grid g4" style="margin-top:14px">
+  <div class="kpi"><div class="k">مبلغ پیشنهادی</div><div class="v" style="font-size:19px">۶,۵۰۰,۰۰۰ تومان</div></div>
+  <div class="kpi"><div class="k">زمان تحویل</div><div class="v">3 روز کاری</div></div>
+  <div class="kpi"><div class="k">تعداد صفحات</div><div class="v">6 بخش اصلی</div></div>
+  <div class="kpi"><div class="k">طراحی</div><div class="v" style="font-size:17px">واکنش‌گرا (موبایل و دسکتاپ)</div></div>
+</div>
+</div>
+
+
+<div class="mockwin">
+  <div class="dots"><i></i><i></i><i></i><span class="muted" style="margin-right:8px;font-size:11.5px">
+  پیش‌نمایش صفحات — داشبورد و صفحات مدیریت</span></div>
+  <div style="display:grid;grid-template-columns:210px 1fr;min-height:430px">
+    <div style="background:#0f1730;color:#aab6d8;padding:16px 14px;font-size:13.5px">
+      <div style="color:#fff;font-weight:800;margin-bottom:14px">📊 پنل مدیریت</div>
+      <div style="padding:7px 10px;border-radius:9px;margin-bottom:4px;background:#1c2947;color:#fff">داشبورد</div><div style="padding:7px 10px;border-radius:9px;margin-bottom:4px">پروژه‌ها</div><div style="padding:7px 10px;border-radius:9px;margin-bottom:4px">درخواست‌ها</div><div style="padding:7px 10px;border-radius:9px;margin-bottom:4px">کاربران</div><div style="padding:7px 10px;border-radius:9px;margin-bottom:4px">گزارش‌ها</div><div style="padding:7px 10px;border-radius:9px;margin-bottom:4px">تنظیمات</div>
+    </div>
+    <div style="padding:16px">
+<div class="grid g4" style="grid-template-columns:repeat(auto-fit,minmax(150px,1fr));margin-bottom:14px"><div class="kpi"><div class="k">کاربران فعال</div><div class="v">۱,۲۴۸</div><div class="d">↑ ۱۲٪ این هفته</div></div><div class="kpi"><div class="k">درخواست‌های امروز</div><div class="v">۳۴۲</div><div class="d">↑ ۸٪</div></div><div class="kpi"><div class="k">زمان پاسخ</div><div class="v">۱.۲ ثانیه</div><div class="d">↓ بهتر شده</div></div><div class="kpi"><div class="k">نرخ موفقیت</div><div class="v">۹۶٪</div><div class="d">پایدار</div></div></div>
+<div class="card2" style="margin-bottom:14px"><div class="t" style="margin-bottom:8px">روند عملکرد ۳۰ روز اخیر</div>
+<div style="display:flex;align-items:end;gap:10px;height:180px;padding:10px 6px;border-bottom:1px solid #eceff7"><div style="text-align:center"><div style="height:34px" class="bar"></div><div class="muted" style="font-size:11px;margin-top:6px">۱</div></div><div style="text-align:center"><div style="height:51px" class="bar"></div><div class="muted" style="font-size:11px;margin-top:6px">۲</div></div><div style="text-align:center"><div style="height:25px" class="bar"></div><div class="muted" style="font-size:11px;margin-top:6px">۳</div></div><div style="text-align:center"><div style="height:69px" class="bar"></div><div class="muted" style="font-size:11px;margin-top:6px">۴</div></div><div style="text-align:center"><div style="height:86px" class="bar"></div><div class="muted" style="font-size:11px;margin-top:6px">۵</div></div><div style="text-align:center"><div style="height:63px" class="bar"></div><div class="muted" style="font-size:11px;margin-top:6px">۶</div></div><div style="text-align:center"><div style="height:100px" class="bar"></div><div class="muted" style="font-size:11px;margin-top:6px">۷</div></div><div style="text-align:center"><div style="height:80px" class="bar"></div><div class="muted" style="font-size:11px;margin-top:6px">۸</div></div><div style="text-align:center"><div style="height:118px" class="bar"></div><div class="muted" style="font-size:11px;margin-top:6px">۹</div></div><div style="text-align:center"><div style="height:109px" class="bar"></div><div class="muted" style="font-size:11px;margin-top:6px">۱۰</div></div><div style="text-align:center"><div style="height:132px" class="bar"></div><div class="muted" style="font-size:11px;margin-top:6px">۱۱</div></div><div style="text-align:center"><div style="height:150px" class="bar"></div><div class="muted" style="font-size:11px;margin-top:6px">۱۲</div></div></div>
+</div>
+<div class="card2"><div class="t" style="margin-bottom:8px">آخرین فعالیت‌ها</div>
+<table><thead><tr><th>#</th><th>مورد</th><th>وضعیت</th><th>پیشرفت</th></tr></thead><tbody><tr><td>۱</td><td>نیازمندی‌های پروژه از متن آگهی استخراج می‌شود</td><td><span class='badge b-run'>در حال اجرا</span></td><td>۰٪</td></tr></tbody></table></div>
+</div>
+  </div>
+</div>
+
+
+<div class="card" style="margin-top:16px"><h2>چه چیزی تحویل می‌گیرید</h2>
+<div class="grid g3"><div class="card2"><div class="t">✓ سورس کامل + فایل‌های آماده‌ی انتشار</div></div><div class="card2"><div class="t">✓ نسخه دموی آنلاین برای بازدید کارفرما</div></div><div class="card2"><div class="t">✓ راهنمای مدیریت محتوا</div></div><div class="card2"><div class="t">✓ چک‌لیست سئو پایه</div></div></div>
+<h2 style="margin-top:18px">برنامه‌ی تحویل و پرداخت</h2><div class="steps"><div class="step"><span class="t">پیش‌پرداخت</span> — 50٪<div class="muted">هنگام شروع پروژه (از طریق پلتفرم)</div></div><div class="step"><span class="t">تسویه نهایی</span> — 50٪<div class="muted">پس از تحویل و تایید</div></div></div>
+</div>
+
+<div class="card"><h2>مرحله‌ی بعد</h2>
+<div class="muted">برای شروع اجرا و دریافت نسخه‌ی قابل استفاده، کافی است از طریق همین آگهی پیام بدهید؛
+پس از تایید، طراحی نهایی، پیاده‌سازی، بارگذاری روی هاست و آموزش کار با سایت را انجام می‌دهم.</div>
+<div style="margin-top:12px"><span class="btn">درخواست شروع اجرا</span></div>
+</div>
+
+</div>
+</div>
+<script>
+(function(){
+  var t, note=document.getElementById('note');
+  function show(msg){
+    note.textContent=msg; note.classList.add('on');
+    clearTimeout(t); t=setTimeout(function(){note.classList.remove('on')},2600);
+  }
+  document.getElementById('guard').addEventListener('click',function(e){
+    e.preventDefault(); e.stopPropagation();
+    show('این فقط یک پیش‌نمایش گرافیکی است؛ نسخه‌ی قابل استفاده پس از تایید قرارداد تحویل می‌شود.');
+  },true);
+  document.addEventListener('contextmenu',function(e){e.preventDefault();show('کپی/ذخیره در نسخه‌ی نمایشی غیرفعال است.')});
+  document.addEventListener('keydown',function(e){
+    var k=(e.key||'').toLowerCase();
+    if((e.ctrlKey||e.metaKey) && ['s','u','p','c','x','a'].indexOf(k)>=0){e.preventDefault();show('در نسخه‌ی نمایشی غیرفعال است.')}
+  });
+  document.addEventListener('selectstart',function(e){e.preventDefault()});
+  document.addEventListener('dragstart',function(e){e.preventDefault()});
+  document.querySelectorAll('a').forEach(function(a){
+    a.setAttribute('href','#'); a.addEventListener('click',function(e){e.preventDefault()});
+  });
+  document.querySelectorAll('form').forEach(function(f){f.addEventListener('submit',function(e){e.preventDefault()})});
+  document.querySelectorAll('input,select,textarea,button').forEach(function(el){el.disabled=true});
+  window.addEventListener('beforeprint',function(e){e.preventDefault()});
+})();
+</script>
+</body></html>

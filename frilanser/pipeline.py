@@ -43,10 +43,19 @@ def collect(cfg: Config, store: Store, offline: bool = True, refresh: bool = Fal
 
     new, updated = store.upsert_many(projects)
     store.log("collect", "-", f"{new} جدید / {updated} به‌روزرسانی (offline={offline})")
-    return {"fetched": len(projects), "new": new, "updated": updated, "sources": list(sources)}
+    return {"fetched": len(projects), "new": new, "updated": updated,
+            "sources": list(sources), "ids": [p.id for p in projects]}
 
 
 # ------------------------------------------------------------------ screen
+def refresh_tracking(cfg: Config, store: Store, seen_ids) -> dict:
+    """به‌روزرسانیِ وضعیتِ پیشنهادها پس از هر اسکن (نگه‌داری + تشخیص واگذاری)."""
+    from .tracking import apply_scan_results
+
+    threshold = int(cfg.raw.get("tracking", {}).get("missed_scans_to_close", 2))
+    return apply_scan_results(store, seen_ids, threshold=threshold)
+
+
 def screen_projects(cfg: Config, store: Store, force: bool = False) -> dict:
     from .screening import screen
 
@@ -155,6 +164,16 @@ def run_all(cfg: Config, store: Store, offline: bool = True, refresh: bool = Fal
     collected = collect(cfg, store, offline=offline, refresh=refresh)
     print(f"  {collected['fetched']} آگهی ({collected['new']} جدید)")
 
+    # پیگیریِ پیشنهادها: وضعیت‌های شما حفظ می‌شود و پروژه‌های واگذارشده مشخص می‌گردند
+    try:
+        tracking = refresh_tracking(cfg, store, collected.get("ids") or [])
+        if tracking.get("closed_by_miss") or tracking.get("closed_by_text"):
+            print(f"  · {len(tracking['closed_by_miss'])} پروژه‌ی واگذار/بسته‌شده شناسایی شد")
+        if tracking.get("kept"):
+            print(f"  · {tracking['kept']} پیشنهادِ در جریان شما حفظ شد")
+    except Exception as exc:  # noqa: BLE001
+        tracking = {"closed_by_miss": [], "closed_by_text": [], "kept": 0, "error": str(exc)}
+
     print("— غربالگری (آیا در آرنا قابل اجراست؟)…")
     screened = screen_projects(cfg, store, force=force)
     print(f"  کاندیدا: {screened['counts'].get('candidate', 0)} | "
@@ -171,8 +190,8 @@ def run_all(cfg: Config, store: Store, offline: bool = True, refresh: bool = Fal
     print("— گزارش و اعلان‌ها…")
     notified = notify(cfg, store)
 
-    return {"collect": collected, "screen": screened, "demos": demos,
-            "price": priced, "notify": notified}
+    return {"collect": collected, "tracking": tracking, "screen": screened,
+            "demos": demos, "price": priced, "notify": notified}
 
 
 def set_decision(store: Store, pid: str, decision: str, note: str | None = None) -> Project | None:

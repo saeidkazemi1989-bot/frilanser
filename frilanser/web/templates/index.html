@@ -1,6 +1,16 @@
 {% extends "base.html" %}
 {% block title %}پروژه‌ها — فریلنس‌یار آرنا{% endblock %}
 {% block body %}
+<style>
+  .badge.prop-submitted { background:#dbeafe; color:#1e40af; }
+  .badge.prop-won       { background:#dcfce7; color:#166534; }
+  .badge.prop-lost      { background:#fee2e2; color:#991b1b; }
+  .badge.prop-closed    { background:#e5e7eb; color:#4b5563; }
+  .badge.beg-high       { background:#d1fae5; color:#065f46; }
+  .badge.beg-medium     { background:#fef3c7; color:#92400e; }
+  .badge.beg-low        { background:#f1f5f9; color:#475569; }
+</style>
+
 
 <div class="panel" id="upd-card" style="padding:12px 14px;margin-bottom:12px;border-color:#c7d2fe;background:#f5f8ff">
   <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
@@ -19,6 +29,19 @@
   <div class="muted" id="upd-notes" style="margin-top:8px;font-size:12.5px"></div>
 </div>
 
+<div class="panel" id="tracking-panel" style="padding:12px 14px;margin-bottom:12px">
+  <div style="display:flex;gap:16px;flex-wrap:wrap;align-items:center">
+    <div style="font-weight:700">📌 پیگیریِ پیشنهادها</div>
+    <div class="muted">پیشنهاد داده‌ام: <b>{{ tracking.counts.submitted }}</b></div>
+    <div class="muted">گرفتم: <b>{{ tracking.counts.won }}</b></div>
+    <div class="muted">نگرفتم: <b>{{ tracking.counts.lost }}</b></div>
+    <div class="muted">واگذار/بسته: <b>{{ tracking.counts.closed }}</b></div>
+    <div class="muted" style="font-size:12px">
+      وضعیت‌ها در به‌روزرسانی‌های بعدی حفظ می‌شوند و اگر پروژه‌ای واگذار شود خودکار مشخص می‌گردد.
+    </div>
+  </div>
+</div>
+
 <div class="stats">
   <div class="stat"><div class="k">کل آگهی‌های بررسی‌شده</div><div class="v">{{ stats.total }}</div></div>
   <div class="stat"><div class="k">کاندیدای خوب</div><div class="v">{{ stats.candidate }}</div></div>
@@ -35,6 +58,10 @@
   <a href="{{ url_for('index', verdict='candidate') }}" class="{{ 'active' if verdict=='candidate' else '' }}">کاندیدا ⭐</a>
   <a href="{{ url_for('index', verdict='review') }}" class="{{ 'active' if verdict=='review' else '' }}">نیاز به بررسی</a>
   <a href="{{ url_for('index', verdict='rejected') }}" class="{{ 'active' if verdict=='rejected' else '' }}">رد شده</a>
+  <a href="{{ url_for('index', state='submitted') }}" class="{{ 'active' if state=='submitted' else '' }}">✉️ پیشنهادهای من{% if tracking.counts.submitted %}<span class="pill">{{ tracking.counts.submitted }}</span>{% endif %}</a>
+  <a href="{{ url_for('index', state='won') }}" class="{{ 'active' if state=='won' else '' }}">🏆 گرفتم{% if tracking.counts.won %}<span class="pill">{{ tracking.counts.won }}</span>{% endif %}</a>
+  <a href="{{ url_for('index', state='closed') }}" class="{{ 'active' if state=='closed' else '' }}">🔒 واگذار/بسته</a>
+  <a href="{{ url_for('index', sort='beginner') }}" class="{{ 'active' if sort=='beginner' else '' }}">🌱 مناسب تازه‌کار</a>
   {% for src, label in sources %}
     <a href="{{ url_for('index', source=src, verdict=verdict) }}" class="{{ 'active' if source==src else '' }}">{{ label }}</a>
   {% endfor %}
@@ -80,6 +107,12 @@
     <div style="display:flex;justify-content:space-between;gap:8px;align-items:flex-start">
       <h3>{{ p.title }}</h3>
       {% if p.verdict %}<span class="badge {{ VERDICT_STYLE.get(p.verdict,'neutral') }}">{{ VERDICT_LABELS.get(p.verdict) }}</span>{% endif %}
+      {% if p.proposal_state %}<span class="badge prop-{{ p.proposal_state }}">{{ PROPOSAL_STATES.get(p.proposal_state) }}</span>{% endif %}
+      {% if p.beginner %}
+        <span class="badge beg-{{ p.beginner.level }}" title="احتمال اینکه کارفرما این پروژه را به یک تازه‌کار بسپارد">
+          🌱 {{ 'شانس بالا' if p.beginner.level=='high' else ('شانس متوسط' if p.beginner.level=='medium' else 'شانس کم') }} ({{ p.beginner.score }})
+        </span>
+      {% endif %}
     </div>
     <div class="desc">{{ (p.description or '')[:220] }}{% if (p.description or '')|length > 220 %}…{% endif %}</div>
     <div class="kv">

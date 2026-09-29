@@ -2,6 +2,70 @@
 {% block title %}{{ p.title }} — جزئیات{% endblock %}
 {% block body %}
 
+<div class="panel" style="border-color:#c7d2fe;background:#f8faff">
+  <h2 style="margin-top:0;font-size:17px">📌 وضعیتِ پیشنهادِ من</h2>
+  <div class="muted" style="margin-bottom:10px">
+    وضعیت فعلی: <b>{{ PROPOSAL_STATES.get(p.proposal_state) }}</b>
+    {% if p.submitted_price %} · مبلغ پیشنهادی شما: <b>{{ '{:,}'.format(p.submitted_price) }} تومان</b>{% endif %}
+    {% if p.missed_scans %} · {{ p.missed_scans }} اسکن پیاپی دیده نشده{% endif %}
+  </div>
+  <form method="post" action="{{ url_for('project_proposal_state', pid=p.id) }}"
+        style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+    <button type="submit" name="state" value="submitted">✉️ پیشنهاد دادم</button>
+    <input name="price" placeholder="مبلغ پیشنهادی (تومان)" value="{{ p.submitted_price or '' }}"
+           style="width:170px" inputmode="numeric">
+    <button type="submit" name="state" value="won">🏆 پروژه را گرفتم</button>
+    <button type="submit" name="state" value="lost">↩️ نگرفتم / رد شدم</button>
+    <button type="submit" name="state" value="closed">🔒 واگذار یا بسته شد</button>
+    <button type="submit" name="state" value="">🧹 پاک کردن وضعیت</button>
+  </form>
+  <div class="muted" style="font-size:12px;margin-top:8px">
+    این وضعیت در اسکن‌های بعدی حفظ می‌شود. اگر آگهی از فهرست سایت حذف شود یا نشانه‌ی
+    «واگذار شد» در آن پیدا شود، برنامه خودکار آن را «واگذار/بسته‌شده» علامت می‌زند.
+  </div>
+  {% if p.history %}
+    <div style="margin-top:12px">
+      <div class="muted" style="font-weight:700;margin-bottom:4px">رخدادها:</div>
+      <ul style="margin:0;padding-inline-start:18px" class="muted">
+        {% for line in p.history[-6:] %}<li>{{ line }}</li>{% endfor %}
+      </ul>
+    </div>
+  {% endif %}
+</div>
+
+{% if p.beginner %}
+<div class="panel" style="border-color:{% if p.beginner.level=='high' %}#86efac{% elif p.beginner.level=='medium' %}#fcd34d{% else %}#e2e8f0{% endif %}">
+  <h2 style="margin-top:0;font-size:17px">
+    🌱 احتمال اینکه کارفرما این پروژه را به یک تازه‌کار بسپارد:
+    <span style="color:{% if p.beginner.level=='high' %}#166534{% elif p.beginner.level=='medium' %}#92400e{% else %}#475569{% endif %}">
+      {{ p.beginner.score }} از ۱۰۰
+      ({{ 'شانس بالا' if p.beginner.level=='high' else ('شانس متوسط' if p.beginner.level=='medium' else 'شانس کم') }})
+    </span>
+  </h2>
+  <div style="display:flex;gap:10px;flex-wrap:wrap">
+    <div style="flex:1;min-width:260px">
+      <div class="muted" style="font-weight:700;margin-bottom:4px">چرا این امتیاز:</div>
+      <ul style="margin:0;padding-inline-start:18px" class="muted">
+        {% for r in p.beginner.reasons[:6] %}
+          <li>{{ r.text }}
+            <span style="color:{% if r.impact>0 %}#166534{% elif r.impact<0 %}#991b1b{% else %}#64748b{% endif %}">
+              ({{ '%+d' % r.impact if r.impact else '۰' }})
+            </span>
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+    <div style="flex:1;min-width:240px">
+      <div class="muted" style="font-weight:700;margin-bottom:4px">توصیه برایتان:</div>
+      <ul style="margin:0;padding-inline-start:18px">
+        {% for h in p.beginner.hints %}<li>{{ h }}</li>{% endfor %}
+      </ul>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+
 <div class="panel">
   <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:flex-start">
     <div>

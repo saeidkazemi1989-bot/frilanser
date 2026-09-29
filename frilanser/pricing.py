@@ -67,6 +67,13 @@ def propose(project: Project, screening: dict, cfg: Config, demo_url: str | None
     adjusted = base_price * (1 + cfg.commission + cfg.risk_buffer)
     price = max(cfg.min_price, _round_to(adjusted, cfg.round_to))
 
+    # ---------- حالتِ تازه‌کار: قیمت رقابتی‌تر برای ورود به بازار ----------
+    # تخفیف در انتها و روی «قیمت نهایی» اعمال می‌شود تا با بودجه‌ی کارفرما هم‌خوان بماند.
+    newcomer_mode = bool(cfg.pricing.get("newcomer_mode", False))
+    newcomer_notes: list[str] = []
+    if newcomer_mode:
+        newcomer_notes.extend((screening.get("beginner") or {}).get("hints") or [])
+
     budget = project.budget_toman
     ratio = (budget / price) if budget else None
     anchor_share = float(cfg.pricing.get("anchor_budget_share", 0.70))
@@ -111,6 +118,23 @@ def propose(project: Project, screening: dict, cfg: Config, demo_url: str | None
             )
     else:
         pricing_notes.append("بودجه اعلام نشده؛ قیمت بر اساس برآورد زمان اعلام می‌شود")
+
+    # ---------- تخفیفِ تازه‌کار روی قیمت نهایی (فقط یک‌بار) ----------
+    if newcomer_mode:
+        level = (screening.get("beginner") or {}).get("level", "medium")
+        discount = float(cfg.pricing.get(
+            f"newcomer_discount_{level}",
+            {"high": 0.15, "medium": 0.10, "low": 0.05}[level]))
+        floor_price = int(cfg.min_price * float(cfg.pricing.get("newcomer_floor_share", 0.85)))
+        discounted = max(floor_price, _round_to(final_price * (1 - discount), cfg.round_to))
+        if discounted < final_price:
+            pricing_notes.append(
+                f"حالت تازه‌کار: {discount:.0%} تخفیف برای جبرانِ سابقه‌ی کم "
+                f"({final_price:,} → {discounted:,} تومان)")
+            newcomer_notes.insert(
+                0, f"قیمت با {discount:.0%} تخفیفِ ورود به بازار تنظیم شد "
+                   f"({final_price:,} → {discounted:,} تومان)")
+            final_price = discounted
 
     # پیشنهاد جایگزین در صورت کم بودن بودجه
     alternative = None
@@ -161,6 +185,8 @@ def propose(project: Project, screening: dict, cfg: Config, demo_url: str | None
         "client_budget": budget,
         "budget_ratio": round(ratio, 2) if ratio else None,
         "budget_verdict": budget_verdict,
+        "newcomer_mode": newcomer_mode,
+        "newcomer_notes": newcomer_notes,
         "pricing_notes": pricing_notes,
         "alternative": alternative,
         "milestones": milestones,

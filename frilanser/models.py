@@ -19,6 +19,18 @@ STATUS_BUILT = "built"              # کار انجام شده، آماده تح
 STATUS_DELIVERED = "delivered"      # تحویل داده شده
 STATUS_REJECTED = "rejected"        # رد شده
 
+#: وضعیتِ پیشنهاد از نگاه کاربر (ثبت دستی یا تشخیص خودکار)
+PROPOSAL_STATES = {
+    "": "پیشنهاد نداده‌ام",
+    "submitted": "پیشنهاد داده‌ام",
+    "won": "پروژه را گرفتم",
+    "lost": "نگرفتم / رد شدم",
+    "closed": "واگذار یا بسته شد",
+}
+
+#: وضعیت‌هایی که باید در «پیشنهادهای من» نگه داشته شوند
+ACTIVE_STATES = ("submitted", "won")
+
 STATUS_LABELS = {
     STATUS_NEW: "جدید",
     STATUS_SCREENED: "غربال‌شده",
@@ -65,7 +77,27 @@ class Project:
     user_decision: str | None = None     # approved | rejected | pending
     notes: list[str] = field(default_factory=list)
 
+    # ---------- پیگیریِ پیشنهادها (توسط کاربر ثبت می‌شود، در به‌روزرسانی‌ها می‌ماند) ----------
+    proposal_state: str = ""       # "" | submitted | won | lost | closed
+    proposal_state_at: str = ""    # زمان آخرین تغییر
+    submitted_price: int | None = None   # مبلغی که واقعاً پیشنهاد داده شده
+    missed_scans: int = 0          # چند بار پیاپی در اسکن دیده نشده
+    history: list[str] = field(default_factory=list)   # رخدادها (متن فارسی)
+
     # ---------- helpers ----------
+    @property
+    def state_label(self) -> str:
+        return PROPOSAL_STATES.get(self.proposal_state, PROPOSAL_STATES[""])
+
+    @property
+    def is_mine(self) -> bool:
+        """آیا روی این آگهی پیشنهاد داده شده (و هنوز باز است)؟"""
+        return self.proposal_state in ("submitted", "won")
+
+    @property
+    def beginner(self) -> dict:
+        return (self.screening or {}).get("beginner") or {}
+
     @property
     def verdict(self) -> str | None:
         return (self.screening or {}).get("verdict")

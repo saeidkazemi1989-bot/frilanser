@@ -1090,5 +1090,245 @@
     "action": "demo",
     "project": "-",
     "detail": "1 دمو ساخته شد"
+  },
+  {
+    "at": "2026-09-29T19:41:38",
+    "action": "new",
+    "project": "ponisha:999",
+    "detail": "طراحی سایت فروشگاهی"
+  },
+  {
+    "at": "2026-09-29T19:41:38",
+    "action": "proposal_state",
+    "project": "ponisha:999",
+    "detail": "--- → submitted"
+  },
+  {
+    "at": "2026-09-29T19:41:38",
+    "action": "auto_close",
+    "project": "ponisha:760349",
+    "detail": "نشانه‌ی متنی: به روزرسانی اطلاعات ۶۰۰ مورد در فایل اکسل"
+  },
+  {
+    "at": "2026-09-29T19:41:38",
+    "action": "new",
+    "project": "karlancer:888",
+    "detail": "طراحی اپلیکیشن"
+  },
+  {
+    "at": "2026-09-29T19:41:38",
+    "action": "proposal_state",
+    "project": "karlancer:888",
+    "detail": "submitted → submitted"
+  },
+  {
+    "at": "2026-09-29T19:41:38",
+    "action": "auto_close",
+    "project": "karlancer:888",
+    "detail": "نشانه‌ی متنی: طراحی اپلیکیشن"
+  },
+  {
+    "at": "2026-09-29T19:43:28",
+    "action": "proposal_state",
+    "project": "ponisha:760397",
+    "detail": "--- → submitted"
+  },
+  {
+    "at": "2026-09-29T19:43:28",
+    "action": "report",
+    "project": "-",
+    "detail": "/home/user/frilanser/outbox/reports/2026-09-29.md"
+  },
+  {
+    "at": "2026-09-29T19:43:28",
+    "action": "proposal_state",
+    "project": "ponisha:760397",
+    "detail": "submitted → ---"
+  },
+  {
+    "at": "2026-09-29T19:43:28",
+    "action": "report",
+    "project": "-",
+    "detail": "/home/user/frilanser/outbox/reports/2026-09-29.md"
+  },
+  {
+    "at": "2026-09-29T19:44:00",
+    "action": "collect",
+    "project": "-",
+    "detail": "0 جدید / 49 به‌روزرسانی (offline=True)"
+  },
+  {
+    "at": "2026-09-29T19:44:00",
+    "action": "screen",
+    "project": "-",
+    "detail": "42 پروژه غربال شد: {'candidate': 10, 'review': 8, 'rejected': 24}"
+  },
+  {
+    "at": "2026-09-29T19:44:00",
+    "action": "demo",
+    "project": "-",
+    "detail": "10 دمو ساخته شد"
+  },
+  {
+    "at": "2026-09-29T19:44:00",
+    "action": "price",
+    "project": "-",
+    "detail": "42 قیمت‌گذاری"
+  },
+  {
+    "at": "2026-09-29T19:44:00",
+    "action": "report",
+    "project": "-",
+    "detail": "/home/user/frilanser/outbox/reports/2026-09-29.md"
+  },
+  {
+    "at": "2026-09-29T19:44:57",
+    "action": "collect",
+    "project": "-",
+    "detail": "0 جدید / 49 به‌روزرسانی (offline=True)"
+  },
+  {
+    "at": "2026-09-29T19:44:57",
+    "action": "screen",
+    "project": "-",
+    "detail": "42 پروژه غربال شد: {'candidate': 10, 'review': 8, 'rejected': 24}"
+  },
+  {
+    "at": "2026-09-29T19:44:57",
+    "action": "demo",
+    "project": "-",
+    "detail": "10 دمو ساخته شد"
+  },
+  {
+    "at": "2026-09-29T19:44:57",
+    "action": "price",
+    "project": "-",
+    "detail": "42 قیمت‌گذاری"
+  },
+  {
+    "at": "2026-09-29T19:44:57",
+    "action": "report",
+    "project": "-",
+    "detail": "/home/user/frilanser/outbox/reports/2026-09-29.md"
+  },
+  {
+    "at": "2026-09-29T19:45:30",
+    "action": "collect",
+    "project": "-",
+    "detail": "0 جدید / 49 به‌روزرسانی (offline=True)"
+  },
+  {
+    "at": "2026-09-29T19:45:30",
+    "action": "screen",
+    "project": "-",
+    "detail": "42 پروژه غربال شد: {'candidate': 10, 'review': 8, 'rejected': 24}"
+  },
+  {
+    "at": "2026-09-29T19:47:29",
+    "action": "collect",
+    "project": "-",
+    "detail": "0 جدید / 49 به‌روزرسانی (offline=True)"
+  },
+  {
+    "at": "2026-09-29T19:47:29",
+    "action": "screen",
+    "project": "-",
+    "detail": "42 پروژه غربال شد: {'candidate': 10, 'review': 8, 'rejected': 24}"
+  },
+  {
+    "at": "2026-09-29T19:47:29",
+    "action": "demo",
+    "project": "-",
+    "detail": "10 دمو ساخته شد"
+  },
+  {
+    "at": "2026-09-29T19:47:29",
+    "action": "price",
+    "project": "-",
+    "detail": "42 قیمت‌گذاری"
+  },
+  {
+    "at": "2026-09-29T19:47:29",
+    "action": "report",
+    "project": "-",
+    "detail": "/home/user/frilanser/outbox/reports/2026-09-29.md"
+  },
+  {
+    "at": "2026-09-29T19:49:22",
+    "action": "proposal_state",
+    "project": "ponisha:760397",
+    "detail": "--- → submitted"
+  },
+  {
+    "at": "2026-09-29T19:49:22",
+    "action": "report",
+    "project": "-",
+    "detail": "/home/user/frilanser/outbox/reports/2026-09-29.md"
+  },
+  {
+    "at": "2026-09-29T19:49:22",
+    "action": "proposal_state",
+    "project": "ponisha:760397",
+    "detail": "submitted → won"
+  },
+  {
+    "at": "2026-09-29T19:49:22",
+    "action": "report",
+    "project": "-",
+    "detail": "/home/user/frilanser/outbox/reports/2026-09-29.md"
+  },
+  {
+    "at": "2026-09-29T19:50:05",
+    "action": "collect",
+    "project": "-",
+    "detail": "0 جدید / 49 به‌روزرسانی (offline=True)"
+  },
+  {
+    "at": "2026-09-29T19:50:05",
+    "action": "screen",
+    "project": "-",
+    "detail": "42 پروژه غربال شد: {'candidate': 10, 'review': 8, 'rejected': 24}"
+  },
+  {
+    "at": "2026-09-29T19:50:05",
+    "action": "demo",
+    "project": "-",
+    "detail": "10 دمو ساخته شد"
+  },
+  {
+    "at": "2026-09-29T19:50:06",
+    "action": "price",
+    "project": "-",
+    "detail": "42 قیمت‌گذاری"
+  },
+  {
+    "at": "2026-09-29T19:50:06",
+    "action": "report",
+    "project": "-",
+    "detail": "/home/user/frilanser/outbox/reports/2026-09-29.md"
+  },
+  {
+    "at": "2026-09-29T19:50:06",
+    "action": "proposal_state",
+    "project": "ponisha:760397",
+    "detail": "won → ---"
+  },
+  {
+    "at": "2026-09-29T19:50:06",
+    "action": "proposal_state",
+    "project": "ponisha:999",
+    "detail": "closed → ---"
+  },
+  {
+    "at": "2026-09-29T19:50:06",
+    "action": "proposal_state",
+    "project": "karlancer:888",
+    "detail": "closed → ---"
+  },
+  {
+    "at": "2026-09-29T19:50:06",
+    "action": "proposal_state",
+    "project": "ponisha:760349",
+    "detail": "closed → ---"
   }
 ]

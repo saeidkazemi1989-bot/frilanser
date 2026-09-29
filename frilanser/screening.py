@@ -535,6 +535,9 @@ def screen(project: Project, cfg: Config) -> dict:
     return {
         "category": category,
         "category_label": rule["label"],
+        "beginner": beginner_chance(project, cfg, {
+            "est_hours": hours,
+        }),
         "arena_fit": fit,
         "fit_label": fit_label,
         "score": score,
@@ -553,6 +556,153 @@ def screen(project: Project, cfg: Config) -> dict:
         "features": extract_bullets(project.description or "")[:8],
         "deadline_pressure": bool(client_days and schedule_days > client_days),
     }
+
+
+# --------------------------------------------------------------------------- #
+# احتمال اینکه کارفرما این پروژه را به یک «تازه‌کار» بسپارد
+# --------------------------------------------------------------------------- #
+#: نشانه‌های مثبت: کارفرما به‌دنبال نتیجه‌ی ارزان/سریع است، سابقه نمی‌خواهد
+BEGINNER_PLUS = [
+    ("تازه‌کار", 12, "کارفرما به تازه‌کارها هم اشاره کرده"),
+    ("مبتدی", 12, "سطح مبتدی پذیرفته شده"),
+    ("بدون نیاز به سابقه", 14, "سابقه‌ی کار شرط نیست"),
+    ("نیاز به سابقه نیست", 14, "سابقه‌ی کار شرط نیست"),
+    ("نیاز به رزومه نیست", 12, "رزومه نمی‌خواهد"),
+    ("نمونه کار ندارم", 8, "نداشتن نمونه‌کار مانع نیست"),
+    ("نمونه‌کار ندارم", 8, "نداشتن نمونه‌کار مانع نیست"),
+    ("شروع کار", 6, "برای شروع کار مناسب است"),
+    ("اولین پروژه", 8, "پروژه‌ی اول هم پذیرفته است"),
+    ("قیمت مناسب", 8, "قیمت برای کارفرما مهم‌تر از سابقه است"),
+    ("ارزان", 6, "رویکرد کم‌هزینه"),
+    ("مقرون", 6, "رویکرد کم‌هزینه"),
+    ("ساده", 5, "کار ساده و کم‌ریسک"),
+    ("فوری", 5, "سرعت مهم است؛ سابقه در اولویت نیست"),
+    ("سریع", 4, "سرعت مهم است"),
+    ("دانشجو", 7, "دانشجوها را هم پذیرفته"),
+    ("آموزش", 4, "فضای آموزشی/همراهی"),
+]
+
+#: نشانه‌های منفی: کارفرما سابقه و رزومه می‌خواهد یا کار بزرگ/سازمانی است
+BEGINNER_MINUS = [
+    ("حداقل", -8, "شرط حداقلِ تجربه/سابقه"),
+    ("سال سابقه", -12, "سابقه‌ی چندساله شرط است"),
+    ("سال تجربه", -12, "تجربه‌ی چندساله شرط است"),
+    ("سابقه کار", -8, "سابقه‌ی کار می‌خواهد"),
+    ("با سابقه", -10, "فقط با‌سابقه‌ها"),
+    ("نمونه‌کار الزامی", -12, "نمونه‌کار اجباری"),
+    ("نمونه کار الزامی", -12, "نمونه‌کار اجباری"),
+    ("رزومه", -8, "رزومه می‌خواهد"),
+    ("حرفه‌ای", -6, "فرد حرفه‌ای می‌خواهد"),
+    ("متخصص", -6, "متخصص می‌خواهد"),
+    ("ارشد", -10, "سطح ارشد"),
+    ("تیم", -8, "کار تیمی/سازمانی"),
+    ("شرکت", -8, "همکاری با شرکت"),
+    ("سازمان", -8, "کارفرمای سازمانی"),
+    ("مناقصه", -10, "فرایند مناقصه"),
+    ("استعلام", -8, "فرایند استعلام"),
+    ("پروژه بزرگ", -10, "پروژه‌ی بزرگ"),
+    ("سطح بالا", -8, "سطح بالا می‌خواهد"),
+    ("بیش از", -5, "مرز تجربه‌ی بالا"),
+]
+
+
+def beginner_chance(project, cfg, screening: dict | None = None) -> dict:
+    """برآوردِ احتمال اینکه کارفرما این پروژه را به یک تازه‌کار بسپارد.
+
+    خروجی:
+        score  ۰ تا ۱۰۰
+        level  high | medium | low
+        reasons  فهرستِ (متن، امتیاز)
+        hints    توصیه‌های عملی برای تازه‌کار
+    """
+    text = f"{project.title or ''} {project.description or ''} {project.skills or ''}".lower()
+    text = " ".join(str(text).split())
+    reasons: list[tuple[str, int]] = []
+
+    # شروع از یک امتیازِ میانگین
+    score = 50
+
+    for needle, impact, why in BEGINNER_PLUS:
+        if needle in text:
+            score += impact
+            reasons.append((why, impact))
+    for needle, impact, why in BEGINNER_MINUS:
+        if needle in text:
+            score += impact          # impact خودش منفی است
+            reasons.append((why, impact))
+
+    # ۱) میزان رقابت (هرچه کمتر، شانس تازه‌کار بیشتر)
+    bids = project.bids
+    if bids is not None:
+        if bids <= 3:
+            score += 15
+            reasons.append((f"تنها {bids} پیشنهاد رسیده — رقابت کم", 15))
+        elif bids <= 8:
+            score += 7
+            reasons.append((f"{bids} پیشنهاد رسیده — رقابت متوسط", 7))
+        elif bids <= 20:
+            score -= 5
+            reasons.append((f"{bids} پیشنهاد رسیده — رقابت زیاد", -5))
+        else:
+            score -= 15
+            reasons.append((f"{bids} پیشنهاد رسیده — رقابتِ بسیار زیاد", -15))
+    else:
+        reasons.append(("تعداد پیشنهادها اعلام نشده", 0))
+
+    # ۲) اندازه‌ی کار (پروژه‌های کوچک‌تر راحت‌تر به تازه‌کار سپرده می‌شوند)
+    hours = float((screening or {}).get("est_hours") or 0)
+    if hours:
+        if hours <= 6:
+            score += 12
+            reasons.append((f"کار کوچک ({hours:g} ساعت) — ریسک کم برای کارفرما", 12))
+        elif hours <= 14:
+            score += 5
+            reasons.append((f"زمان اجرا ({hours:g} ساعت) متوسط و قابل دفاع", 5))
+        elif hours <= 24:
+            score -= 5
+            reasons.append((f"زمان اجرا ({hours:g} ساعت) نسبتاً زیاد", -5))
+        else:
+            score -= 15
+            reasons.append((f"پروژه بزرگ ({hours:g} ساعت) — معمولاً به با‌سابقه‌ها می‌رسد", -15))
+
+    # ۳) بودجه: مبلغ‌های خیلی بزرگ جذبِ حرفه‌ای‌ها، خیلی کوچک ارزش ندارد
+    budget = project.budget_toman or 0
+    floor = getattr(cfg, "min_price", 5_000_000) or 5_000_000
+    if budget:
+        if budget <= 3 * floor:
+            score += 8
+            reasons.append((f"بودجه‌ی متوسط ({budget:,} تومان) — برای کارفرما صرفه دارد", 8))
+        elif budget <= 10 * floor:
+            score -= 6
+            reasons.append((f"بودجه‌ی نسبتاً بالا ({budget:,} تومان) — رقابتِ حرفه‌ای‌ها", -6))
+        else:
+            score -= 14
+            reasons.append((f"بودجه‌ی بسیار بالا ({budget:,} تومان) — رقابتِ جدی", -14))
+
+    # ۴) تازگیِ آگهی (آگهیِ تازه یعنی هنوز شانس هست)
+    if getattr(project, "posted_at", None) and "ساعت" in str(project.posted_at):
+        score += 5
+        reasons.append(("آگهی تازه است (امروز/چند ساعت پیش)", 5))
+
+    score = max(0, min(100, int(round(score))))
+    level = "high" if score >= 65 else ("medium" if score >= 40 else "low")
+
+    hints: list[str] = []
+    if level == "high":
+        hints.append("شانس خوبی برای گرفتن کار داری؛ پیشنهاد را امروز بفرست و روی دمو تأکید کن.")
+        hints.append("قیمت را کمی پایین‌تر از حد معمول بده تا سابقه‌ی کم را جبران کند.")
+    elif level == "medium":
+        hints.append("رقابت وجود دارد؛ با ارسالِ پیش‌نمایش (دمو) و توضیحِ دقیقِ مراحل، متمایز شو.")
+        hints.append("پیشنهاد را کوتاه، مشخص و با زمان‌بندی روشن بنویس.")
+    else:
+        hints.append("این پروژه معمولاً به با‌سابقه‌ها می‌رسد؛ وقتِ اصلی را روی گزینه‌های سبز بگذار.")
+        hints.append("اگر اصرار داری، روی بخشی از کار (فاز اول) پیشنهاد بده تا اعتماد بسازی.")
+
+    reasons.sort(key=lambda r: abs(r[1]), reverse=True)
+    return {"score": score, "level": level,
+            "reasons": [{"text": t, "impact": i} for t, i in reasons],
+            "hints": hints}
+
 
 
 def screen_all(projects: list[Project], cfg: Config) -> None:

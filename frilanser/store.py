@@ -64,6 +64,7 @@ class Store:
         existing.location = project.location or existing.location
         existing.flags = project.flags or existing.flags
         existing.last_seen = now_iso()
+        existing.missed_scans = 0          # دوباره دیده شد
         if existing.status in (STATUS_NEW,):
             existing.status = project.status
         return existing, False
@@ -88,6 +89,74 @@ class Store:
 
     def by_verdict(self, verdict: str) -> list[Project]:
         return [p for p in self.all() if p.verdict == verdict]
+
+    # ---------- پیگیریِ پیشنهاد ----------
+    def set_proposal_state(self, pid: str, state: str, price: int | None = None,
+                           note: str = "") -> Project | None:
+        """ثبت وضعیتِ پیشنهاد (submitted / won / lost / closed / '').
+
+        این وضعیت در اسکن‌های بعدی **حفظ می‌شود**؛ یعنی با هر به‌روزرسانی از بین نمی‌رود.
+        """
+        p = self._projects.get(pid)
+        if p is None:
+            return None
+        from .models import PROPOSAL_STATES, now_iso
+
+        state = state or ""
+        if state and state not in PROPOSAL_STATES:
+            return None
+        old = p.proposal_state
+        p.proposal_state = state
+        p.proposal_state_at = now_iso()
+        if price:
+            p.submitted_price = int(price)
+        if state:
+            p.missed_scans = 0
+        label = PROPOSAL_STATES.get(state, state)
+        line = f"{p.proposal_state_at[:16] or ''} — {label}"
+        if state == "submitted" and p.submitted_price:
+            line += f" ({p.submitted_price:,} تومان)"
+        if note:
+            line += f" — {note}"
+        if old != state:
+            p.history = (p.history or []) + [line]
+        self.log("proposal_state", pid, f"{old or '---'} → {state or '---'}")
+        self.save()
+        return p
+
+    def mark_missed(self, seen_ids, threshold: int = 2) -> list:
+        """پروژه‌هایی که در این اسکن دیده نشدند را علامت می‌زند.
+
+        پروژه‌ای که پیشنهاد داده شده و چند بار پیاپی در فهرست نباشد، احتمالاً
+        واگذار یا بسته شده است؛ وضعیتش «closed» می‌شود تا در گزارش بیاید.
+        """
+        seen = set(seen_ids or ())
+        closed = []
+        for pid, p in self._projects.items():
+            if pid in seen:
+                p.missed_scans = 0
+                continue
+            p.missed_scans = int(p.missed_scans or 0) + 1
+            if (p.proposal_state in ("submitted",) and p.missed_scans >= threshold):
+                p.proposal_state = "closed"
+                p.proposal_state_at = p.proposal_state_at or ""
+                p.history = (p.history or []) + [
+                    f"{p.missed_scans} اسکن پیاپی دیده نشد — احتمالاً واگذار یا بسته شده"
+                ]
+                closed.append(p)
+        if any(p.missed_scans for p in self._projects.values()):
+            self.save()
+        return closed
+
+    def my_proposals(self) -> list:
+        """پروژه‌هایی که کاربر روی آن‌ها پیشنهاد داده (برای نگه‌داری در به‌روزرسانی‌ها)."""
+        from .models import ACTIVE_STATES
+
+        return sorted(
+            [p for p in self._projects.values() if p.proposal_state in ACTIVE_STATES],
+            key=lambda p: (0 if p.proposal_state == "won" else 1, p.score),
+            reverse=True,
+        )
 
     def set_status(self, pid: str, status: str, note: str | None = None) -> Project | None:
         p = self._projects.get(pid)

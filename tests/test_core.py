@@ -32,6 +32,19 @@ ROOT = Path(__file__).resolve().parent.parent
 
 
 # --------------------------------------------------------------- normalize
+import pytest as _pytest
+
+
+@_pytest.fixture
+def cfg_default():
+    """یک پیکربندیِ کمینه برای تست (بدون نیاز به config.toml واقعی)."""
+    from frilanser.config import Config
+    return Config({"app": {"outbox_dir": "outbox", "data_dir": "data", "demo_dir": "outbox/demos"},
+                   "pricing": {"hourly_rate_toman": 450000, "min_project_price_toman": 5000000,
+                               "round_to_toman": 500000, "platform_commission": 0.10,
+                               "risk_buffer": 0.15}}, Path("."))
+
+
 def _cfg(root: str):
     """یک پیکربندیِ کمینه برای تست (بدون نیاز به config.toml واقعی)."""
     from frilanser.config import Config
@@ -810,3 +823,112 @@ def test_config_honours_frilanser_home(monkeypatch, tmp_path):
     finally:
         monkeypatch.delenv("FRILANSER_HOME", raising=False)
         importlib.reload(config_mod)
+
+
+# ------------------------------------------------ پیگیریِ پیشنهادها (ثبت و حفظ)
+def test_proposal_state_persists_across_rescan(tmp_path):
+    """وضعیتِ کاربر با اسکنِ دوباره از بین نمی‌رود."""
+    from frilanser.store import Store
+
+    store = Store(tmp_path)
+    p = Project.from_scrape("ponisha", "1", "طراحی سایت فروشگاهی", "https://x")
+    store.upsert_many([p])
+    store.set_proposal_state(p.id, "submitted", price=7_000_000)
+    assert store.get(p.id).proposal_state == "submitted"
+    assert store.get(p.id).submitted_price == 7_000_000
+
+    # اسکنِ مشابه (همان آگهی با متن/قیمتِ به‌روزشده)
+    again = Project.from_scrape("ponisha", "1", "طراحی سایت فروشگاهی (به‌روزشده)",
+                                "https://x", description="توضیح جدید")
+    store.upsert_many([again])
+    kept = store.get(p.id)
+    assert kept.proposal_state == "submitted"          # وضعیت حفظ شد
+    assert kept.submitted_price == 7_000_000           # مبلغ حفظ شد
+    assert "روزشد" in kept.title                     # متن به‌روز شد
+    assert kept.history                                # رخداد ثبت شد
+
+
+def test_missing_project_is_closed_after_two_scans(tmp_path):
+    """اگر آگهی دو بار پیاپی در اسکن نباشد، «واگذار/بسته‌شده» می‌شود."""
+    from frilanser.store import Store
+    from frilanser.tracking import apply_scan_results
+
+    store = Store(tmp_path)
+    p = Project.from_scrape("karlancer", "2", "اپلیکیشن اندروید", "https://y")
+    store.upsert_many([p])
+    store.set_proposal_state(p.id, "submitted")
+
+    apply_scan_results(store, seen_ids=[])             # بار اول: فقط شمارنده
+    assert store.get(p.id).proposal_state == "submitted"
+    assert store.get(p.id).missed_scans == 1
+
+    res = apply_scan_results(store, seen_ids=[])       # بار دوم: بسته می‌شود
+    assert store.get(p.id).proposal_state == "closed"
+    assert res["closed_by_miss"] == [p.id]
+
+    # وضعیتِ دستیِ کاربر دست‌نخورده می‌ماند
+    store.set_proposal_state(p.id, "won")
+    apply_scan_results(store, seen_ids=[])
+    assert store.get(p.id).proposal_state == "won"
+
+
+def test_closed_marker_in_text_is_detected(tmp_path):
+    """نشانه‌ی متنیِ «واگذار شد» به‌تنهایی کافی است."""
+    from frilanser.store import Store
+    from frilanser.tracking import apply_scan_results
+
+    store = Store(tmp_path)
+    p = Project.from_scrape("parscoders", "3", "طراحی پنل مدیریت", "https://z",
+                            description="این پروژه واگذار شد")
+    store.upsert_many([p])
+    store.set_proposal_state(p.id, "submitted")
+    res = apply_scan_results(store, seen_ids=[p.id])
+    assert store.get(p.id).proposal_state == "closed"
+    assert res["closed_by_text"] == [p.id]
+
+
+# ---------------------------------------------- احتمالِ واگذاری به تازه‌کار
+def _beginner(cfg, title, desc, bids=None, hours=10):
+    from frilanser.screening import beginner_chance
+
+    p = Project.from_scrape("karlancer", "b", title, "https://x", description=desc)
+    p.bids = bids
+    return beginner_chance(p, cfg, {"est_hours": hours})
+
+
+def test_beginner_chance_prefers_open_ads(cfg_default):
+    easy = _beginner(cfg_default, "سایت ساده برای کافه",
+                     "کار ساده و فوری؛ تازه‌کار هم باشد اشکالی ندارد، قیمت مناسب مهم‌تر است",
+                     bids=2, hours=5)
+    hard = _beginner(cfg_default, "پلتفرم سازمانی بزرگ",
+                     "تیم حرفه‌ای با حداقل ۵ سال سابقه کار و نمونه‌کار الزامی",
+                     bids=45, hours=30)
+    assert easy["score"] > hard["score"] + 25
+    assert easy["level"] == "high"
+    assert hard["level"] == "low"
+    assert easy["hints"] and hard["hints"]
+
+
+def test_beginner_chance_respects_bids(cfg_default):
+    few = _beginner(cfg_default, "طراحی سایت", "سایت شرکتی", bids=2)
+    many = _beginner(cfg_default, "طراحی سایت", "سایت شرکتی", bids=40)
+    assert few["score"] > many["score"]
+
+
+def test_newcomer_mode_lowers_price(cfg_default):
+    """در حالت تازه‌کار، قیمت نهایی کمتر از حالت عادی است."""
+    from frilanser.pricing import propose
+
+    p = Project.from_scrape("karlancer", "n1", "طراحی سایت فروشگاهی کوچک", "https://x",
+                            description="فروشگاه ساده")
+    screening = {"category": "web_app", "est_hours": 12,
+                 "beginner": {"score": 80, "level": "high",
+                              "reasons": [], "hints": ["زود بفرست"]}}
+    cfg_default.raw.setdefault("pricing", {})["newcomer_mode"] = True
+    with_new = propose(p, screening, cfg_default)
+    cfg_default.raw["pricing"]["newcomer_mode"] = False
+    without = propose(p, screening, cfg_default)
+
+    assert with_new["price"] < without["price"]
+    assert with_new.get("newcomer_notes")
+    assert any("تازه‌کار" in n for n in with_new["pricing_notes"])

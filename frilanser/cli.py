@@ -222,6 +222,73 @@ def cmd_react(args):
     return 0
 
 
+def cmd_track(args):
+    """فهرستِ پیشنهادهای شما و وضعیت هر کدام (در به‌روزرسانی‌ها حفظ می‌شود)."""
+    cfg, store = get_context(args)
+    from .models import PROPOSAL_STATES
+
+    mine = [p for p in store.all() if p.proposal_state]
+    if not mine:
+        print("هیچ پیشنهادی ثبت نشده است.")
+        print("برای ثبت: frilanser state <شناسه> submitted --price 7000000")
+        print("یا از داشبورد، صفحه‌ی هر پروژه، دکمه‌ی «پیشنهاد دادم» را بزنید.")
+        return 0
+
+    order = {"won": 0, "submitted": 1, "lost": 2, "closed": 3}
+    mine.sort(key=lambda p: (order.get(p.proposal_state, 9), -(p.score or 0)))
+
+    counts: dict[str, int] = {}
+    for p in mine:
+        counts[p.proposal_state] = counts.get(p.proposal_state, 0) + 1
+    print("خلاصه: " + " | ".join(
+        f"{PROPOSAL_STATES.get(k, k)}: {v}" for k, v in sorted(counts.items(),
+                                                                key=lambda kv: order.get(kv[0], 9))))
+    print()
+    print(f"{'وضعیت':18} {'امتیاز':>6} {'تازه‌کار':>8} {'مبلغ شما':>12}  عنوان")
+    print("-" * 96)
+    for p in mine:
+        beg = (p.screening or {}).get("beginner") or {}
+        price = f"{p.submitted_price:,}" if p.submitted_price else "—"
+        print(f"{PROPOSAL_STATES.get(p.proposal_state, ''):18} {p.score or 0:6} "
+              f"{beg.get('score', 0):8} {price:>12}  {p.title[:44]}")
+    print()
+    print("نکته: اگر پروژه‌ای از فهرست سایت حذف شود، پس از دو اسکنِ پیاپی")
+    print("خودکار «واگذار/بسته‌شده» علامت می‌خورد و در گزارش می‌آید.")
+    return 0
+
+
+def cmd_state(args):
+    """ثبت یا پاک کردنِ وضعیتِ پیشنهاد برای یک پروژه."""
+    cfg, store = get_context(args)
+    from .models import PROPOSAL_STATES
+
+    state = (args.state or "").strip().lower()
+    aliases = {"submitted": "submitted", "submit": "submitted", "sent": "submitted",
+               "won": "won", "win": "won",
+               "lost": "lost", "lose": "lost", "rejected": "lost",
+               "closed": "closed", "close": "closed", "done": "closed",
+               "": "", "clear": "", "none": ""}
+    if state not in aliases:
+        print(f"وضعیت نامعلوم: {state}")
+        print("گزینه‌ها: submitted | won | lost | closed | clear")
+        return 1
+    state = aliases[state]
+
+    project = store.set_proposal_state(args.project_id, state, price=args.price)
+    if project is None:
+        print(f"پروژه‌ای با این شناسه پیدا نشد: {args.project_id}")
+        print("شناسه‌ها را با: frilanser list  ببینید.")
+        return 1
+    from . import pipeline
+
+    pipeline.notify(cfg, store)
+    print(f"✓ {project.title[:56]}")
+    print(f"  وضعیت: {PROPOSAL_STATES.get(state, 'بدون وضعیت')}")
+    if project.submitted_price:
+        print(f"  مبلغ پیشنهادی شما: {project.submitted_price:,} تومان")
+    return 0
+
+
 def cmd_update(args):
     """بررسی/دریافت/نصب نسخه‌ی جدید برنامه."""
     cfg, store = get_context(args)
@@ -399,6 +466,15 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--out", default="", help="پوشه‌ی خروجی (پیش‌فرض outbox/react)")
     p.add_argument("--limit", type=int, default=0, help="حداکثر تعداد پروژه")
     p.set_defaults(func=cmd_react)
+
+    p = sub.add_parser("track", help="فهرستِ پیشنهادهای شما و وضعیت هر کدام")
+    p.set_defaults(func=cmd_track)
+
+    p = sub.add_parser("state", help="ثبت وضعیتِ پیشنهاد (داده‌ام/گرفتم/نگرفتم/بسته شد)")
+    p.add_argument("project_id", help="شناسه‌ی پروژه (مثل ponisha:760397)")
+    p.add_argument("state", help="submitted | won | lost | closed | clear")
+    p.add_argument("--price", type=int, default=None, help="مبلغی که پیشنهاد داده‌اید (تومان)")
+    p.set_defaults(func=cmd_state)
 
     p = sub.add_parser("update", help="به‌روزرسانی برنامه به آخرین نسخه")
     p.add_argument("--check-only", action="store_true", help="فقط بررسی کن، چیزی نصب نکن")
