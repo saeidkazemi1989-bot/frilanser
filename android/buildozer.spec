@@ -23,9 +23,7 @@ source.exclude_patterns = */__pycache__/*,*/.pytest_cache/*
 version = 1.0.1
 
 # (list) نیازمندی‌ها: وب‌سرور Flask + کتابخانه‌های دریافت داده + پل جاوا برای نصب به‌روزرسانی
-# نسخه‌ها عمداً پین شده‌اند: ترکیبِ Flask 2.2 با Werkzeug 3 بالا نمی‌آید
-# (خطای معروف: cannot import name 'url_quote' from 'werkzeug.urls')
-requirements = python3,flask==2.2.5,werkzeug==2.2.3,jinja2==3.1.4,itsdangerous==2.1.2,click==8.1.7,requests,beautifulsoup4,pyjnius
+requirements = python3,flask,requests,beautifulsoup4,pyjnius
 
 # (str) جهت صفحه
 orientation = portrait
@@ -54,6 +52,9 @@ p4a.port = 5000
 
 # (str) نسخه‌ی پایدار python-for-android (شاخه‌ی develop در حال حاضر بسته‌ی android را ندارد)
 p4a.branch = v2024.01.21
+
+# (str) ریسپی‌های محلی — ریسپیِ flask اینجا نسخه‌های سازگار را پین می‌کند
+p4a.local_recipes = %(source.dir)s/p4a-recipes
 
 # (bool) در حالت اشکال‌زدایی ساخته شود (بدون نیاز به امضای توسعه‌دهنده)
 android.debug = 1
