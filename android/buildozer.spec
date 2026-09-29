@@ -20,10 +20,12 @@ source.exclude_dirs = tests,.github,.git,dist,outbox,node_modules,__pycache__,.p
 source.exclude_patterns = */__pycache__/*,*/.pytest_cache/*
 
 # (str) نسخه‌ی برنامه (با frilanser/version.py هماهنگ نگه دارید)
-version = 1.0.0
+version = 1.0.1
 
 # (list) نیازمندی‌ها: وب‌سرور Flask + کتابخانه‌های دریافت داده + پل جاوا برای نصب به‌روزرسانی
-requirements = python3,flask,requests,beautifulsoup4,pyjnius
+# نسخه‌ها عمداً پین شده‌اند: ترکیبِ Flask 2.2 با Werkzeug 3 بالا نمی‌آید
+# (خطای معروف: cannot import name 'url_quote' from 'werkzeug.urls')
+requirements = python3,flask==2.2.5,werkzeug==2.2.3,jinja2==3.1.4,itsdangerous==2.1.2,click==8.1.7,requests,beautifulsoup4,pyjnius
 
 # (str) جهت صفحه
 orientation = portrait
