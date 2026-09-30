@@ -47,10 +47,22 @@ def cfg_default():
 
 
 def _cfg(root: str):
-    """یک پیکربندیِ کمینه برای تست (بدون نیاز به config.toml واقعی)."""
+    """یک پیکربندیِ کمینه برای تست (بدون نیاز به config.toml واقعی).
+
+    همه‌ی مسیرها زیر ``root`` (معمولاً tmp_path) می‌روند تا چیزی در outbox و data
+    واقعیِ ریپو نوشته نشود (مثل وضعیتِ ساختگیِ به‌روزرسانی).
+    """
     from frilanser.config import Config
-    return Config({"app": {"outbox_dir": "outbox", "data_dir": "data", "demo_dir": "outbox/demos"}},
-                  Path(root))
+    base = Path(root)
+    return Config({"app": {
+        "outbox_dir": str(base / "outbox"),
+        "data_dir": str(base / "data"),
+        "demo_dir": str(base / "outbox" / "demos"),
+        "report_dir": str(base / "outbox" / "reports"),
+        "react_dir": str(base / "outbox" / "react"),
+        "raw_dir": str(base / "data" / "raw"),
+        "cache_dir": str(base / "data" / "cache"),
+    }}, base / "config.toml")
 
 
 def test_parse_numbers():
@@ -1137,7 +1149,7 @@ def test_manifest_repairs_conflict_markers(tmp_path, monkeypatch):
     assert mm.cmd_verify(type("A", (), {})()) == 0
 
 
-def test_updater_tolerates_broken_manifest():
+def test_updater_tolerates_broken_manifest(tmp_path):
     """اگر مانیفست JSONِ سالمی نباشد، برنامه به‌جای خطا پیام می‌دهد (نه کرش)."""
     from frilanser import updater
 
@@ -1159,7 +1171,7 @@ def test_updater_tolerates_broken_manifest():
     original = up._request
     up._request = lambda: FakeRequests
     try:
-        info = up.check_update(_cfg_manifest_only(), timeout=1)
+        info = up.check_update(_cfg_manifest_only(tmp_path), timeout=1)
     finally:
         up._request = original
     assert info["ok"] is False
@@ -1167,7 +1179,9 @@ def test_updater_tolerates_broken_manifest():
     assert info["error"]
 
 
-def _cfg_manifest_only():
+def _cfg_manifest_only(root: Path):
     from frilanser.config import Config
 
-    return Config({"update": {"manifest_url": "https://example.invalid/m.json"}}, Path("."))
+    return Config({"update": {"manifest_url": "https://example.invalid/m.json"},
+                   "app": {"outbox_dir": str(root / "outbox"),
+                           "data_dir": str(root / "data")}}, root / "config.toml")

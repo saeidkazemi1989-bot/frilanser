@@ -13,3 +13,9 @@ data/cache/
 outbox/react/*/node_modules/
 outbox/react/*/dist/
 outbox/react/*/package-lock.json
+
+# خروجی‌های موقت: وضعیتِ به‌روزرسانی، اسکنِ زنده و لاگ خطاها (نباید در گیت بروند)
+outbox/updates/
+outbox/live-state.json
+outbox/update-status.json
+outbox/web-error.log
