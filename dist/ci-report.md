@@ -5,13 +5,13 @@
 ## frilanser.exe --help
 ```
 usage: frilanser [-h] [--config CONFIG]
-                 {run,scan,screen,propose,demo,report,list,show,needs,decide,react,track,state,update,styles,doctor,paths,serve}
+                 {run,scan,screen,propose,demo,report,list,show,needs,decide,react,track,state,update,styles,doctor,paths,serve,live}
                  ...
 
 فریلنس‌یار آرنا — پیدا کردن و غربال کردن پروژه‌های فریلنسری ایرانی
 
 positional arguments:
-  {run,scan,screen,propose,demo,report,list,show,needs,decide,react,track,state,update,styles,doctor,paths,serve}
+  {run,scan,screen,propose,demo,report,list,show,needs,decide,react,track,state,update,styles,doctor,paths,serve,live}
     run                 اجرای کامل خط لوله
     scan                جمع‌آوری آگهی‌ها
     screen              غربالگری پروژه‌ها
@@ -53,7 +53,7 @@ positional arguments:
 
 ======================================================================
 آگهی‌های بررسی‌شده: 49 | کاندیدا: 10 | پیش‌نمایش ساخته‌شده: 1
-گزارش: D:\a\_temp\exetest\outbox\reports\2026-09-29.md
+گزارش: D:\a\_temp\exetest\outbox\reports\2026-09-30.md
 کارهایی که باید خودتان انجام دهید: 22 مورد
   • [ثبت پیشنهاد در سایت] طراحی و پیاده سازی وب سایت کلینیک تخصصی درمانی
   • [ثبت پیشنهاد در سایت] استخراج ساختاریافته محتوای حدود ۱۵۰ کتاب
