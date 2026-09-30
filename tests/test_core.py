@@ -932,3 +932,171 @@ def test_newcomer_mode_lowers_price(cfg_default):
     assert with_new["price"] < without["price"]
     assert with_new.get("newcomer_notes")
     assert any("تازه‌کار" in n for n in with_new["pricing_notes"])
+
+
+# ---------------------------------------------- سرویسِ زنده (اسکن/نسخه خودکار)
+def _live_cfg(tmp_path: Path, **live_over):
+    """پیکربندیِ ایمن برای تستِ سرویس زنده (همه‌چیز زیر tmp_path)."""
+    from frilanser.config import Config
+
+    raw = {
+        "app": {
+            "outbox_dir": str(tmp_path / "outbox"),
+            "data_dir": str(tmp_path / "data"),
+            "raw_dir": str(tmp_path / "data" / "raw"),
+            "cache_dir": str(tmp_path / "data" / "cache"),
+            "demo_dir": str(tmp_path / "outbox" / "demos"),
+            "report_dir": str(tmp_path / "outbox" / "reports"),
+            "react_dir": str(tmp_path / "outbox" / "react"),
+        },
+        "pricing": {
+            "hourly_rate_toman": 450000, "min_project_price_toman": 5000000,
+            "round_to_toman": 500000, "platform_commission": 0.10,
+            "risk_buffer": 0.15, "max_hours": 24,
+        },
+        "live": {"auto_scan_minutes": 0, "update_check_hours": 0,
+                 "auto_scan_offline": True, "auto_scan_demo_limit": 0,
+                 **live_over},
+    }
+    return Config(raw, tmp_path / "config.toml")
+
+
+def test_live_scan_records_status(tmp_path):
+    """اسکنِ فوری وضعیت را پر می‌کند و سرویس آن را به خاطر می‌سپارد."""
+    from frilanser.live import LiveService
+    from frilanser.store import Store
+
+    cfg = _live_cfg(tmp_path)
+    store = Store(cfg.data_dir)
+    store.upsert_many([
+        Project.from_scrape("karlancer", "L1", "طراحی سایت شرکتی", "https://x",
+                            description="یک سایت شرکتی ساده با وردپرس و قالب آماده"),
+        Project.from_scrape("karlancer", "L2", "ربات تلگرام", "https://y",
+                            description="ربات ساده برای پاسخ خودکار به کاربران"),
+    ])
+
+    svc = LiveService(cfg, store)
+    res = svc.scan_now(trigger="test", offline=True, wait=True)
+
+    assert res["ok"] is True
+    snap = svc.snapshot()
+    assert snap["last_scan"]["ok"] is True
+    assert snap["last_scan"]["trigger"] == "test"
+    assert snap["counts"]["total"] == 2
+    assert snap["stamp"]
+    assert snap["version"]
+    assert snap["update"]["current"] == snap["version"]
+
+
+def test_live_stamp_changes_with_data(tmp_path):
+    """نشانه‌ی داده با تغییرِ وضعیت عوض می‌شود (رابط کاربری می‌فهمد تازه کند)."""
+    from frilanser.live import LiveService
+    from frilanser.store import Store
+
+    cfg = _live_cfg(tmp_path)
+    store = Store(cfg.data_dir)
+    p = Project.from_scrape("karlancer", "S1", "اپلیکیشن اندروید", "https://x")
+    store.upsert_many([p])
+
+    svc = LiveService(cfg, store)
+    first = svc.snapshot()["stamp"]
+    store.set_proposal_state(p.id, "submitted")
+    assert svc.refresh_stamp() != first
+
+
+def test_live_auto_toggle_persists(tmp_path):
+    """خاموش کردنِ اسکنِ خودکار ذخیره می‌شود و در اجرای بعدی هم خاموش می‌ماند."""
+    from frilanser.live import LiveService
+    from frilanser.store import Store
+
+    cfg = _live_cfg(tmp_path, auto_scan_minutes=30)
+    store = Store(cfg.data_dir)
+
+    svc = LiveService(cfg, store)
+    assert svc.snapshot()["auto"] is True
+    svc.set_auto(False)
+    assert svc.snapshot()["auto"] is False
+    assert svc.snapshot()["next_scan_in"] is None
+
+    again = LiveService(cfg, store)
+    assert again.snapshot()["auto"] is False
+
+
+def test_web_live_endpoints(tmp_path):
+    """مسیرهای زنده‌ی وب: /api/live، /fragment و نوارِ زنده در صفحه."""
+    from frilanser.store import Store
+    from frilanser.web.app import create_app
+
+    cfg = _live_cfg(tmp_path)
+    store = Store(cfg.data_dir)
+    store.upsert_many([
+        Project.from_scrape("karlancer", "W1", "سایت فروشگاهی", "https://x",
+                            description="فروشگاه اینترنتی با وردپرس و ووکامرس"),
+    ])
+
+    off = create_app(cfg, store, live=False).test_client()
+    assert off.get("/api/live").status_code == 503
+    page = off.get("/")
+    assert page.status_code == 200
+    text = page.get_data(as_text=True)
+    assert "livebar" in text and "الان اسکن کن" in text
+    frag = off.get("/fragment?verdict=candidate")
+    assert frag.status_code == 200
+    assert "livebar" not in frag.get_data(as_text=True)
+
+    on = create_app(cfg, store, live=True).test_client()
+    data = on.get("/api/live").get_json()
+    assert data["ok"] is True
+    assert data["counts"]["total"] == 1
+    assert data["scanning"] is False
+    assert data["poll_seconds"] >= 5
+
+
+def test_web_live_scan_endpoint(tmp_path):
+    """درخواستِ اسکن از رابط وب، اسکنِ پس‌زمینه را آغاز می‌کند."""
+    from frilanser.store import Store
+    from frilanser.web.app import create_app
+
+    cfg = _live_cfg(tmp_path)
+    store = Store(cfg.data_dir)
+    client = create_app(cfg, store, live=True).test_client()
+
+    res = client.post("/api/live/scan", data={"offline": "1"}).get_json()
+    assert res["ok"] is True and res["started"] is True
+
+    snap = client.get("/api/live").get_json()
+    assert snap["last_scan"] is None or snap["scanning"] is True
+
+    toggled = client.post("/api/live/auto", data={"enabled": "0"}).get_json()
+    assert toggled["ok"] is True and toggled["auto"] is False
+    assert client.get("/api/live").get_json()["auto"] is False
+
+
+def test_live_scan_falls_back_to_snapshots(tmp_path, monkeypatch):
+    """اگر دریافتِ زنده شکست خورد، سرویس خودش از اسنپ‌شات‌ها می‌خواند."""
+    import frilanser.pipeline as pipeline
+    from frilanser.live import LiveService
+    from frilanser.store import Store
+
+    calls: list = []
+
+    def fake_run_all(cfg, store, offline=True, demo_limit=0, base_url="", **_kw):
+        calls.append(offline)
+        if not offline:
+            raise RuntimeError("شبکه در دسترس نیست")
+        return {"collect": {"fetched": 3, "new": 1, "updated": 0},
+                "tracking": {"closed_by_miss": [], "closed_by_text": [], "kept": 0},
+                "screen": {"counts": {}}, "demos": {"built": 0},
+                "price": {"priced": 0}, "notify": {"open_items": []}}
+
+    monkeypatch.setattr(pipeline, "run_all", fake_run_all)
+
+    cfg = _live_cfg(tmp_path)
+    svc = LiveService(cfg, Store(cfg.data_dir))
+    svc.scan_now(trigger="test", offline=False, wait=True)
+
+    assert calls == [False, True]          # تلاشِ زنده، سپس تلاشِ آفلاین
+    snap = svc.snapshot()
+    assert snap["last_scan"]["ok"] is True
+    assert snap["last_scan"]["fell_back"] is True
+    assert snap["last_scan"]["fetched"] == 3

@@ -1,0 +1,122 @@
+{# تکه‌ی زنده‌ی داشبورد — هم در صفحه‌ی اصلی قرار می‌گیرد و هم با /fragment
+   برای نوسازیِ خودکار (بدون بارگذاریِ دوباره‌ی صفحه) بازخوانی می‌شود. #}
+
+<div class="panel" id="tracking-panel" style="padding:12px 14px;margin-bottom:12px">
+  <div style="display:flex;gap:16px;flex-wrap:wrap;align-items:center">
+    <div style="font-weight:700">📌 پیگیریِ پیشنهادها</div>
+    <div class="muted">پیشنهاد داده‌ام: <b>{{ tracking.counts.submitted }}</b></div>
+    <div class="muted">گرفتم: <b>{{ tracking.counts.won }}</b></div>
+    <div class="muted">نگرفتم: <b>{{ tracking.counts.lost }}</b></div>
+    <div class="muted">واگذار/بسته: <b>{{ tracking.counts.closed }}</b></div>
+    <div class="muted" style="font-size:12px">
+      وضعیت‌ها در به‌روزرسانی‌های بعدی حفظ می‌شوند و اگر پروژه‌ای واگذار شود خودکار مشخص می‌گردد.
+    </div>
+  </div>
+</div>
+
+<div class="stats">
+  <div class="stat"><div class="k">کل آگهی‌های بررسی‌شده</div><div class="v">{{ stats.total }}</div></div>
+  <div class="stat"><div class="k">کاندیدای خوب</div><div class="v">{{ stats.candidate }}</div></div>
+  <div class="stat"><div class="k">نیاز به بررسی</div><div class="v">{{ stats.review }}</div></div>
+  <div class="stat"><div class="k">رد شده</div><div class="v">{{ stats.rejected }}</div></div>
+  <div class="stat"><div class="k">دموهای ساخته‌شده</div><div class="v">{{ stats.demos }}</div></div>
+  <div class="stat"><div class="k">بودجه‌ی کاندیداها (تومان)</div><div class="v">{{ '{:,}'.format(stats.budget_sum) }}</div></div>
+  <div class="stat"><div class="k">قیمت پیشنهادی ما (تومان)</div><div class="v">{{ '{:,}'.format(stats.price_sum) }}</div></div>
+  <div class="stat"><div class="k">زمان کل (ساعت)</div><div class="v">{{ stats.hours_sum }}</div></div>
+</div>
+
+<div class="toolbar">
+  <a href="{{ url_for('index') }}" class="{{ 'active' if not verdict else '' }}">همه</a>
+  <a href="{{ url_for('index', verdict='candidate') }}" class="{{ 'active' if verdict=='candidate' else '' }}">کاندیدا ⭐</a>
+  <a href="{{ url_for('index', verdict='review') }}" class="{{ 'active' if verdict=='review' else '' }}">نیاز به بررسی</a>
+  <a href="{{ url_for('index', verdict='rejected') }}" class="{{ 'active' if verdict=='rejected' else '' }}">رد شده</a>
+  <a href="{{ url_for('index', state='submitted') }}" class="{{ 'active' if state=='submitted' else '' }}">✉️ پیشنهادهای من{% if tracking.counts.submitted %}<span class="pill">{{ tracking.counts.submitted }}</span>{% endif %}</a>
+  <a href="{{ url_for('index', state='won') }}" class="{{ 'active' if state=='won' else '' }}">🏆 گرفتم{% if tracking.counts.won %}<span class="pill">{{ tracking.counts.won }}</span>{% endif %}</a>
+  <a href="{{ url_for('index', state='closed') }}" class="{{ 'active' if state=='closed' else '' }}">🔒 واگذار/بسته</a>
+  <a href="{{ url_for('index', sort='beginner') }}" class="{{ 'active' if sort=='beginner' else '' }}">🌱 مناسب تازه‌کار</a>
+  {% for src, label in sources %}
+    <a href="{{ url_for('index', source=src, verdict=verdict) }}" class="{{ 'active' if source==src else '' }}">{{ label }}</a>
+  {% endfor %}
+  <form method="get" action="{{ url_for('index') }}">
+    <input type="hidden" name="verdict" value="{{ verdict }}">
+    <input name="q" value="{{ q }}" placeholder="جستجو در عنوان/توضیحات/مهارت‌ها…">
+    <button type="submit">جستجو</button>
+  </form>
+</div>
+
+<div class="panel" style="padding:12px 14px">
+  <form method="post" action="{{ url_for('rescan') }}" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+    <button type="submit">🔄 اسکن دوباره (از اسنپ‌شات‌ها)</button>
+    <label class="muted"><input type="checkbox" name="online" value="1"> دریافت زنده از سایت‌ها (نیاز به اینترنت)</label>
+    <label class="muted">تعداد دمو: <input type="number" name="demos" value="3" min="0" max="10" style="width:70px"></label>
+  </form>
+</div>
+
+{% if not projects %}
+<div class="panel" style="border-color:#ffe08a;background:#fff8e6">
+  <h2>هنوز هیچ آگهی‌ای در برنامه نیست</h2>
+  <p class="muted">
+    برای اینکه داده بیاید یکی از این دو کار را انجام دهید:
+  </p>
+  <ol style="line-height:2">
+    <li>در پنجره‌ی برنامه روی <b>«اجرای کامل»</b> کلیک کنید
+        (بدون اینترنت هم از اسنپ‌شات‌های داخل برنامه می‌خواند).</li>
+    <li>اگر می‌خواهید از سایت‌ها زنده بخواند، در برنامه <b>«دریافت زنده از سایت‌ها»</b> را بزنید؛
+        اگر سایت‌ها روی شبکه‌ی شما بسته باشند، خودکار به اسنپ‌شات برمی‌گردد.</li>
+  </ol>
+  <p class="muted">اگر باز هم چیزی نیامد، دکمه‌ی <b>«عیب‌یابی»</b> را در برنامه بزنید؛
+  علت دقیق را می‌گوید و فایل <code>outbox/doctor.txt</code> را می‌سازد.</p>
+  <div style="margin-top:10px">
+    <form method="post" action="{{ url_for('rescan') }}">
+      <button type="submit">🔄 همین حالا اسکن کن (آفلاین)</button>
+    </form>
+  </div>
+</div>
+{% else %}
+<div class="cards">
+{% for p in projects %}
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;gap:8px;align-items:flex-start">
+      <h3>{{ p.title }}</h3>
+      {% if p.verdict %}<span class="badge {{ VERDICT_STYLE.get(p.verdict,'neutral') }}">{{ VERDICT_LABELS.get(p.verdict) }}</span>{% endif %}
+      {% if p.proposal_state %}<span class="badge prop-{{ p.proposal_state }}">{{ PROPOSAL_STATES.get(p.proposal_state) }}</span>{% endif %}
+      {% if p.beginner %}
+        <span class="badge beg-{{ p.beginner.level }}" title="احتمال اینکه کارفرما این پروژه را به یک تازه‌کار بسپارد">
+          🌱 {{ 'شانس بالا' if p.beginner.level=='high' else ('شانس متوسط' if p.beginner.level=='medium' else 'شانس کم') }} ({{ p.beginner.score }})
+        </span>
+      {% endif %}
+    </div>
+    <div class="desc">{{ (p.description or '')[:220] }}{% if (p.description or '')|length > 220 %}…{% endif %}</div>
+    <div class="kv">
+      <span>{{ p.source_label }}</span>
+      {% if p.screening %}<span>{{ p.screening.category_label }}</span>{% endif %}
+      {% if p.screening %}<span class="score">{{ p.screening.score }}/۱۰۰</span>{% endif %}
+      {% if p.screening %}<span>{{ p.screening.est_hours }} ساعت ≈ {{ p.screening.schedule_days }} روز</span>{% endif %}
+      {% if p.budget_toman %}<span>بودجه: {{ '{:,}'.format(p.budget_toman) }}</span>{% else %}<span>بودجه: —</span>{% endif %}
+      {% if p.proposal %}<span style="background:#e7f8ef;border-color:#b7e6cd;color:#16794a">ق پیشنهادی: {{ '{:,}'.format(p.proposal.price) }}</span>{% endif %}
+      {% if p.bids is not none %}<span>{{ p.bids }} پیشنهاد</span>{% endif %}
+      {% if p.user_decision %}<span class="badge {{ 'ok' if p.user_decision=='approved' else 'bad' }}">{{ 'تایید شما' if p.user_decision=='approved' else 'رد شما' }}</span>{% endif %}
+    </div>
+    {% if p.screening and p.screening.blockers %}
+      <div class="muted">🚧 {{ p.screening.blockers|join(' / ') }}</div>
+    {% endif %}
+    <div class="actions">
+      <a href="{{ url_for('project_detail', pid=p.id) }}">جزئیات و تصمیم</a>
+      {% if p.demo %}<a href="{{ url_for('serve_demo', filename=p.demo.rel) }}" target="_blank">دیدن دمو ↗</a>{% endif %}
+      <a href="{{ p.url }}" target="_blank" rel="noopener">آگهی اصلی ↗</a>
+    </div>
+  </div>
+{% endfor %}
+</div>
+{% endif %}
+
+{% if activity %}
+<div class="panel" style="margin-top:18px">
+  <h2>آخرین فعالیت‌ها</h2>
+  <table>
+    {% for a in activity %}
+      <tr><td style="width:150px">{{ a.at }}</td><td style="width:130px">{{ a.action }}</td><td>{{ a.detail }}</td></tr>
+    {% endfor %}
+  </table>
+</div>
+{% endif %}

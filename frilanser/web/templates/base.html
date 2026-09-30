@@ -25,6 +25,21 @@
   </div>
 </header>
 
+{# نوارِ «زنده»: وضعیتِ اسکنِ خودکار، زمانِ به‌روزرسانیِ بعدی و نسخه‌ی جدید #}
+<div class="livebar" id="livebar" data-poll="8">
+  <div class="livebar-inner">
+    <span class="livedot idle" id="live-dot"></span>
+    <span id="live-status">در حال اتصال به برنامه…</span>
+    <span class="muted" id="live-next"></span>
+    <span class="spacer"></span>
+    <label class="live-toggle"><input type="checkbox" id="live-auto" checked> به‌روزرسانیِ خودکار</label>
+    <button type="button" id="live-scan">🔄 الان اسکن کن</button>
+    <button type="button" id="live-upd" style="display:none">نسخه‌ی جدید</button>
+    <span class="live-ver" id="live-ver">نسخه {{ app_version }}</span>
+  </div>
+</div>
+<div class="live-toast" id="live-toast" style="display:none"></div>
+
 <main class="inner">
 {% block body %}{% endblock %}
 </main>
@@ -44,6 +59,7 @@ document.querySelectorAll('[data-copy]').forEach(btn=>{
   };
 });
 </script>
+<script src="{{ url_for('static', filename='live.js') }}"></script>
 {% block scripts %}{% endblock %}
 </body>
 </html>

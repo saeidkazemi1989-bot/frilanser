@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import sys
+import time
 from pathlib import Path
 
 from .config import Config, load_config
@@ -384,15 +385,63 @@ def cmd_paths(args):
 def cmd_serve(args):
     cfg, store = get_context(args)
     from .web.app import create_app
-    app = create_app(cfg, store)
+    app = create_app(cfg, store, live=not args.no_live)
     url = f"http://127.0.0.1:{args.port}"
     print(f"داشبورد روی http://{args.host}:{args.port} در دسترس است ({url})")
+    live_ok = bool((app.extensions or {}).get("live"))
+    print("به‌روزرسانیِ خودکار: " + ("روشن (طبق بخش [live] در config.toml)" if live_ok else "خاموش"))
     if args.open:
         import threading
         import webbrowser
 
         threading.Timer(1.5, lambda: webbrowser.open(url)).start()
     app.run(host=args.host, port=args.port, debug=args.debug, threaded=True)
+    return 0
+
+
+def cmd_live(args):
+    """گزارشِ وضعیتِ «زنده»: آخرین اسکن، اسکنِ بعدی، نسخه‌ی جدید."""
+    import json as _json
+
+    cfg, store = get_context(args)
+    from .live import LiveService
+
+    snap = LiveService(cfg, store).snapshot()
+    if args.json:
+        print(_json.dumps(snap, ensure_ascii=False, indent=2))
+        return 0
+
+    ls = snap["last_scan"]
+    print("—— به‌روزرسانیِ خودکار ——")
+    print(f"اسکنِ خودکار        : {'روشن' if snap['auto'] else 'خاموش'}"
+          + (f" (هر {snap['interval_minutes']} دقیقه)" if snap["auto"] else ""))
+    if ls:
+        when = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(ls["at"]))
+        state = "موفق" if ls["ok"] else "ناموفق"
+        print(f"آخرین اسکن         : {when} ({ls['age_text']}) — {state}")
+        if ls["ok"]:
+            print(f"  · {ls['fetched']} آگهی بررسی شد، {ls['new']} جدید، {ls['closed']} واگذار/بسته")
+        if ls["error"]:
+            print(f"  ! {ls['error']}")
+    else:
+        print("آخرین اسکن         : هنوز انجام نشده")
+    if snap["next_scan_in"] is not None:
+        print(f"اسکنِ بعدی          : {snap['next_scan_in'] // 60} دقیقه دیگر")
+    c = snap["counts"]
+    print(f"داده‌ها             : {c['total']} آگهی ({c['candidate']} کاندیدا، {c['review']} نیاز به بررسی)")
+    u = snap["update"]
+    print("—— نسخه‌ی برنامه ——")
+    print(f"نسخه‌ی فعلی        : {u['current']}")
+    if u.get("latest") and u["latest"] != u["current"]:
+        print(f"نسخه‌ی موجود       : {u['latest']}" + ("  ✨ آماده است" if u["has_update"] else ""))
+        for note in (u.get("notes") or [])[:5]:
+            print(f"  · {note}")
+    elif u.get("latest"):
+        print(f"نسخه‌ی موجود       : {u['latest']} (به‌روز است)")
+    else:
+        print("نسخه‌ی موجود       : نامشخص (آخرین بررسی موفق نبود)")
+        if u.get("error"):
+            print(f"  ! {u['error']}")
     return 0
 
 
@@ -497,7 +546,13 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--port", type=int, default=5000)
     p.add_argument("--open", action="store_true", help="باز کردن خودکار مرورگر")
     p.add_argument("--debug", action="store_true")
+    p.add_argument("--no-live", action="store_true",
+                   help="خاموش کردنِ اسکن/بررسیِ خودکار در پس‌زمینه")
     p.set_defaults(func=cmd_serve)
+
+    p = sub.add_parser("live", help="وضعیتِ به‌روزرسانیِ خودکار (داده و نسخه)")
+    p.add_argument("--json", action="store_true", help="خروجیِ خام JSON")
+    p.set_defaults(func=cmd_live)
 
     return parser
 

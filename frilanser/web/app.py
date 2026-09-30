@@ -44,7 +44,14 @@ def _resource_dir(name: str) -> str:
     return str(Path(__file__).parent / name)
 
 
-def create_app(cfg: Config, store: Store) -> Flask:
+def create_app(cfg: Config, store: Store, live: bool | None = None) -> Flask:
+    """ساخت اپلیکیشن.
+
+    ``live``=True سرویسِ «زنده» (اسکن خودکار + بررسی نسخه) را روشن می‌کند؛
+    مقدار None یعنی «طبق متغیر محیطی FRILANSER_NO_LIVE» (پیش‌فرضِ برنامه واقعی).
+    """
+    if live is None:
+        live = os.environ.get("FRILANSER_NO_LIVE", "") not in ("1", "true", "yes")
     app = Flask(__name__, template_folder=_resource_dir("templates"),
                 static_folder=_resource_dir("static"))
     app.config["JSON_AS_ASCII"] = False
@@ -87,9 +94,9 @@ def create_app(cfg: Config, store: Store) -> Flask:
                         or ql in " ".join(p.skills).lower()]
         return projects
 
-    # -------------------------------------------------------------- routes
-    @app.get("/")
-    def index():
+    # --------------------------------------------------- متنِ داشبورد (مشترک)
+    def dashboard_context() -> dict:
+        """ورودی‌های قالبِ داشبورد — هم برای صفحه‌ی کامل، هم برای نوسازیِ زنده."""
         verdict = request.args.get("verdict", "")
         source = request.args.get("source", "")
         q = request.args.get("q", "")
@@ -109,21 +116,30 @@ def create_app(cfg: Config, store: Store) -> Flask:
             )
 
         sources = sorted({(p.source, p.source_label) for p in store.all()})
-        return render_template(
-            "index.html",
-            projects=projects,
-            stats=summarize(),
-            verdict=verdict,
-            source=source,
-            q=q,
-            state=state,
-            sort=sort,
-            sources=sources,
-            activity=store.activity(8),
-            cfg=cfg,
-            prop_states=PROPOSAL_STATES,
-            tracking=tracking_summary(),
-        )
+        return {
+            "projects": projects,
+            "stats": summarize(),
+            "verdict": verdict,
+            "source": source,
+            "q": q,
+            "state": state,
+            "sort": sort,
+            "sources": sources,
+            "activity": store.activity(8),
+            "cfg": cfg,
+            "prop_states": PROPOSAL_STATES,
+            "tracking": tracking_summary(),
+        }
+
+    # -------------------------------------------------------------- routes
+    @app.get("/")
+    def index():
+        return render_template("index.html", **dashboard_context())
+
+    @app.get("/fragment")
+    def fragment():
+        """تکه‌ی داشبورد برای نوسازیِ زنده (بدون بارگذاریِ دوباره‌ی صفحه)."""
+        return render_template("dashboard.html", **dashboard_context())
 
     @app.get("/p/<path:pid>")
     def project_detail(pid: str):
@@ -298,6 +314,92 @@ def create_app(cfg: Config, store: Store) -> Flask:
     @app.get("/healthz")
     def healthz():
         return jsonify({"ok": True, "projects": len(store.projects)})
+
+    # -------------------------------------------------- «زنده»: اسکن و بروزرسانی
+    live_service = None
+    if live:
+        try:
+            from ..live import LiveService
+
+            live_service = LiveService(cfg, store)
+            live_service.start()
+        except Exception as exc:  # noqa: BLE001 - داشبورد بدون سرویسِ زنده هم کار می‌کند
+            app.logger.warning("سرویس زنده فعال نشد: %s", exc)
+            live_service = None
+    app.extensions["live"] = live_service
+
+    @app.before_request
+    def _live_base_url():
+        """آدرسِ فعلی را به سرویسِ زنده می‌دهیم (برای لینک دمو در اسکنِ خودکار)."""
+        svc = app.extensions.get("live")
+        if svc is not None:
+            try:
+                svc.set_base_url(request.host_url)
+            except Exception:  # noqa: BLE001
+                pass
+
+    def _live_error(message: str, code: int = 503):
+        return jsonify({"ok": False, "error": message, "enabled": False}), code
+
+    @app.get("/api/live")
+    def api_live():
+        """نگاهِ کامل به وضعیتِ زنده: اسکن، داده، نسخه."""
+        svc = app.extensions.get("live")
+        if svc is None:
+            return _live_error("سرویسِ به‌روزرسانیِ خودکار در این اجرا خاموش است")
+        return _api_guard(svc.snapshot)
+
+    @app.post("/api/live/scan")
+    def api_live_scan():
+        """اسکنِ فوری (در پس‌زمینه؛ جواب فوراً برمی‌گردد)."""
+        svc = app.extensions.get("live")
+        if svc is None:
+            return _live_error("سرویسِ به‌روزرسانیِ خودکار در این اجرا خاموش است")
+
+        def payload():
+            offline = request.form.get("offline") or request.args.get("offline")
+            offline_flag = None if offline is None else offline in ("1", "true", "yes")
+            return svc.scan_now(trigger="manual", offline=offline_flag)
+
+        return _api_guard(payload)
+
+    @app.post("/api/live/auto")
+    def api_live_auto():
+        """روشن/خاموش کردنِ اسکنِ خودکار."""
+        svc = app.extensions.get("live")
+        if svc is None:
+            return _live_error("سرویسِ به‌روزرسانیِ خودکار در این اجرا خاموش است")
+
+        def payload():
+            raw = request.form.get("enabled", request.args.get("enabled", "1"))
+            enabled = str(raw).strip().lower() in ("1", "true", "yes", "on")
+            return {"ok": True, "auto": svc.set_auto(enabled)}
+
+        return _api_guard(payload)
+
+    @app.post("/api/live/update-check")
+    def api_live_update_check():
+        """بررسیِ نسخه‌ی جدید (در پس‌زمینه)."""
+        svc = app.extensions.get("live")
+        if svc is not None:
+            return _api_guard(svc.check_update_now)
+
+        def payload():
+            from .. import updater
+
+            return updater.check_update(cfg)
+
+        return _api_guard(payload)
+
+    @app.post("/api/live/update-install")
+    def api_live_update_install():
+        """دریافت و نصبِ نسخه‌ی جدید (فقط آغاز می‌شود؛ پیشرفت با /api/update)."""
+        def payload():
+            from .. import updater
+
+            return updater.update_async(cfg)
+
+        return _api_guard(payload)
 
     # ------------------------------------------------ خطاها: هرگز بی‌توضیح نماند
     @app.errorhandler(Exception)
