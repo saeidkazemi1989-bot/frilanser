@@ -1,6 +1,6 @@
 {
   "version": "1.0.2",
-  "generated_at": "2026-09-30T08:55:33+00:00",
+  "generated_at": "2026-09-30T08:59:06+00:00",
   "release_url": "https://github.com/saeidkazemi1989-bot/frilanser/releases/tag/latest",
   "notes": [
     "داشبوردِ زنده: اسکنِ خودکار هر ۲۰ دقیقه + بررسیِ خودکارِ نسخه‌ی جدید"
@@ -16,11 +16,11 @@
     },
     "windows": {
       "file": "Frilanser-Setup.exe",
-      "size": 29462036,
-      "sha256": "682dc5658612a5b5378585de2d96b7f976dc4bc2a12656505c87385c52909e42",
+      "size": 29463511,
+      "sha256": "e043925e6dd685d2bafd8ee738001c5d07dfe19fb9d7221f35eb69564efb7ce1",
       "url": "https://github.com/saeidkazemi1989-bot/frilanser/releases/download/latest/Frilanser-Setup.exe",
       "mirror": "https://raw.githubusercontent.com/saeidkazemi1989-bot/frilanser/arena/01a0e651-frilanser/dist/updates/Frilanser-Setup.exe",
-      "built_at": "2026-09-30T08:55:33+00:00"
+      "built_at": "2026-09-30T08:59:06+00:00"
     }
   }
 }
