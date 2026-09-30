@@ -23,6 +23,13 @@ env:
   PYTHONUTF8: "1"            # پشتیبانی از متن فارسی در خروجی ویندوز
   PYTHONIOENCODING: "utf-8"
 
+# فقط یک workflow در هر لحظه اجازه‌ی کامیت dist را دارد؛
+# چون هر دو workflow یک مانیفست را به‌روزرسانی می‌کنند، اجرای هم‌زمان
+# باعث تداخل (conflict) در dist/updates/manifest.json می‌شد.
+concurrency:
+  group: frilanser-dist-commit
+  cancel-in-progress: false
+
 jobs:
   build:
     runs-on: windows-latest
@@ -199,22 +206,45 @@ jobs:
       - name: کامیت فایل اجرایی و گزارش در شاخه‌ی جاری
         if: always()
         shell: bash
+        env:
+          BRANCH: ${{ github.ref_name }}
         run: |
+          set -u
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git pull --rebase origin "${GITHUB_REF_NAME}" 2>/dev/null || true
-          git add -f dist/frilanser.exe
-          for f in frilanser-gui.exe frilanser-portable.zip Frilanser-Setup.exe installer.log zip.log updates/manifest.json updates/Frilanser-Setup.exe; do
-            if [ -f "dist/$f" ]; then git add -f "dist/$f"; fi
+          git config --global --add safe.directory "$GITHUB_WORKSPACE" || true
+          VERSION=$(grep -oP '^__version__ = "\K[^"]+' frilanser/version.py)
+          echo "نسخه: $VERSION"
+          files=""
+          for f in frilanser.exe frilanser-gui.exe frilanser-portable.zip \
+                   Frilanser-Setup.exe installer.log zip.log ci-report.md \
+                   updates/manifest.json updates/Frilanser-Setup.exe; do
+            if [ -f "dist/$f" ]; then files="$files dist/$f"; fi
           done
-          for f in ci-report.md; do
-            if [ -f "dist/$f" ]; then
-              git add -f "dist/$f"
+          echo "فایل‌ها برای کامیت:$files"
+          for attempt in 1 2 3 4 5; do
+            echo "--- تلاش $attempt ---"
+            # ۱) نمایه را روی وضعیتِ راه‌دور می‌گذاریم (فایل‌های ساخته‌شده‌ی ما سر جایشان می‌مانند)
+            git fetch origin "$BRANCH" >/dev/null 2>&1 || true
+            git rebase --abort >/dev/null 2>&1 || true
+            git reset --mixed "origin/$BRANCH" >/dev/null 2>&1 || true
+            # ۲) مانیفستِ راه‌دور را پایه می‌گیریم و خروجیِ ویندوز را در آن ادغام می‌کنیم
+            if git cat-file -e "origin/$BRANCH:dist/updates/manifest.json" 2>/dev/null; then
+              git show "origin/$BRANCH:dist/updates/manifest.json" > dist/updates/manifest.json 2>/dev/null || true
             fi
-          done
-          if git diff --cached --quiet; then
-            echo "تغییری برای کامیت نیست"
-          else
+            if [ -f dist/Frilanser-Setup.exe ]; then
+              python scripts/make_manifest.py set windows dist/Frilanser-Setup.exe --version "$VERSION" || true
+            fi
+            # ۳) اعتبارسنجی: مانیفست باید JSON سالم باشد
+            python scripts/make_manifest.py verify || true
+            # ۴) کامیت و ارسال؛ اگر اندرویدی زودتر فرستاد، از نو تلاش می‌کنیم
+            [ -n "$files" ] && git add -f $files
+            if git diff --cached --quiet; then
+              echo "تغییری برای کامیت نیست"; break
+            fi
             git commit -m "ساخت خودکار: dist/frilanser.exe (ویندوز) + گزارش تست"
-            git push origin "HEAD:${GITHUB_REF_NAME}"
-          fi
+            if git push origin "HEAD:$BRANCH"; then
+              echo "کامیت و ارسال موفق ✓"; break
+            fi
+            sleep 12
+          done

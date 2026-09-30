@@ -46,13 +46,50 @@ def release_url(filename: str) -> str:
     return f"https://github.com/{REPO}/releases/download/{RELEASE_TAG}/{filename}"
 
 
+CONFLICT_MARKERS = ("<<<<<<<", "=======", ">>>>>>>")
+
+
+def _strip_conflict_markers(text: str) -> str:
+    """نشانه‌های تداخلِ گیت را بیرون می‌کشد (اگر مانیفست خراب کامیت شده باشد)."""
+    if not any(marker in text for marker in CONFLICT_MARKERS):
+        return text
+    keep: list[str] = []
+    for line in text.splitlines():
+        stripped = line.strip()
+        if stripped.startswith("<<<<<<<") or stripped.startswith(">>>>>>>"):
+            continue
+        if stripped == "=======":
+            continue
+        keep.append(line)
+    return "\n".join(keep)
+
+
 def load() -> dict:
-    if MANIFEST.exists():
+    """مانیفست را می‌خواند؛ اگر خراب یا آمیخته به نشانه‌ی تداخل بود، ترمیم می‌کند."""
+    empty = {"version": "", "generated_at": "", "release_url": "", "notes": [],
+             "assets": {}}
+    if not MANIFEST.exists():
+        return empty
+    raw = MANIFEST.read_text(encoding="utf-8", errors="replace")
+    for candidate in (raw, _strip_conflict_markers(raw)):
         try:
-            return json.loads(MANIFEST.read_text(encoding="utf-8"))
+            data = json.loads(candidate)
         except Exception:  # noqa: BLE001
-            pass
-    return {"version": "", "generated_at": "", "release_url": "", "notes": [], "assets": {}}
+            continue
+        if isinstance(data, dict):
+            data.setdefault("assets", {})
+            data.setdefault("notes", [])
+            return data
+    # آخرین تلاش: هر ورودیِ سالمِ «version» را از متن بیرون می‌کشیم
+    for line in raw.splitlines():
+        if '"version"' in line:
+            try:
+                empty["version"] = json.loads("{" + line.strip().rstrip(",") + "}")["version"]
+                break
+            except Exception:  # noqa: BLE001
+                continue
+    print("! مانیفستِ قبلی خراب بود و از نو ساخته می‌شود", file=sys.stderr)
+    return empty
 
 
 def save(data: dict) -> None:
@@ -103,6 +140,28 @@ def cmd_show(args) -> int:
     return 0
 
 
+def cmd_verify(args) -> int:
+    """بررسیِ سلامتِ مانیفست؛ اگر JSON سالم نباشد با کدِ خطا خارج می‌شود."""
+    if not MANIFEST.exists():
+        print(f"! مانیفست وجود ندارد: {MANIFEST}", file=sys.stderr)
+        return 1
+    raw = MANIFEST.read_text(encoding="utf-8", errors="replace")
+    try:
+        data = json.loads(raw)
+    except Exception as exc:  # noqa: BLE001
+        print(f"! مانیفست JSON سالمی نیست: {exc}", file=sys.stderr)
+        return 1
+    if any(marker in raw for marker in CONFLICT_MARKERS):
+        print("! مانیفست هنوز نشانه‌ی تداخل (conflict) دارد", file=sys.stderr)
+        return 1
+    if not isinstance(data, dict) or not str(data.get("version") or "").strip():
+        print("! مانیفست نسخه (version) ندارد", file=sys.stderr)
+        return 1
+    print(f"✓ مانیفست سالم است: نسخه {data['version']} | "
+          f"دارایی‌ها: {', '.join(sorted((data.get('assets') or {})))}")
+    return 0
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description="ساخت مانیفست به‌روزرسانی")
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -116,6 +175,9 @@ def main() -> int:
 
     p = sub.add_parser("show", help="نمایش مانیفست")
     p.set_defaults(func=cmd_show)
+
+    p = sub.add_parser("verify", help="بررسیِ سلامتِ مانیفست (برای CI)")
+    p.set_defaults(func=cmd_verify)
 
     args = ap.parse_args()
     return args.func(args)

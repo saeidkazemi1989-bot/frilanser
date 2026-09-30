@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import types
 from pathlib import Path
 
 import pytest
@@ -1100,3 +1101,73 @@ def test_live_scan_falls_back_to_snapshots(tmp_path, monkeypatch):
     assert snap["last_scan"]["ok"] is True
     assert snap["last_scan"]["fell_back"] is True
     assert snap["last_scan"]["fetched"] == 3
+
+
+def test_manifest_repairs_conflict_markers(tmp_path, monkeypatch):
+    """مانیفستی که با نشانه‌ی تداخلِ گیت کامیت شده باشد، خراب نمی‌ماند."""
+    from frilanser import updater
+    import scripts.make_manifest as mm
+
+    manifest = tmp_path / "manifest.json"
+    manifest.write_text(
+        '{\n  "version": "1.0.2",\n<<<<<<< HEAD\n  "notes": ["ویندوز"],\n'
+        '  "assets": {"windows": {"file": "a.exe", "size": 3,\n=======\n'
+        '  "notes": ["اندروید"],\n  "assets": {"android": {"file": "a.apk", "size": 5,\n'
+        '>>>>>>> abc123 (ساخت خودکار)\n    "sha256": "", "url": "https://x/a"}\n  }\n}\n',
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(mm, "MANIFEST", manifest)
+
+    data = mm.load()
+    assert isinstance(data, dict)
+    assert data["version"] == "1.0.2"
+    assert data["assets"] == {} or "windows" in data["assets"] or "android" in data["assets"]
+
+    # و بعد از یک ثبتِ سالم، مانیفست دوباره JSONِ معتبر می‌شود
+    src = tmp_path / "a.apk"
+    src.write_bytes(b"12345")
+    monkeypatch.setattr(mm, "MANIFEST", manifest)
+    args = types.SimpleNamespace(key="android", file=str(src),
+                                 version="1.0.2", notes="")
+    assert mm.cmd_set(args) == 0
+    assert json.loads(manifest.read_text(encoding="utf-8"))["assets"]["android"]["size"] == 5
+
+    # برنامه هم باید بتواند چنین مانیفستی را بخواند (بدون از کار افتادن)
+    monkeypatch.setattr(mm, "MANIFEST", manifest)
+    assert mm.cmd_verify(type("A", (), {})()) == 0
+
+
+def test_updater_tolerates_broken_manifest():
+    """اگر مانیفست JSONِ سالمی نباشد، برنامه به‌جای خطا پیام می‌دهد (نه کرش)."""
+    from frilanser import updater
+
+    def boom(url, **_kw):
+        class R:
+            status_code = 200
+
+            def json(self):
+                raise ValueError("not json")
+        return R()
+
+    class FakeRequests:
+        @staticmethod
+        def get(url, **kw):
+            return boom(url, **kw)
+
+    import frilanser.updater as up
+
+    original = up._request
+    up._request = lambda: FakeRequests
+    try:
+        info = up.check_update(_cfg_manifest_only(), timeout=1)
+    finally:
+        up._request = original
+    assert info["ok"] is False
+    assert info["has_update"] is False
+    assert info["error"]
+
+
+def _cfg_manifest_only():
+    from frilanser.config import Config
+
+    return Config({"update": {"manifest_url": "https://example.invalid/m.json"}}, Path("."))

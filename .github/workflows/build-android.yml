@@ -20,6 +20,13 @@ on:
 permissions:
   contents: write
 
+# فقط یک workflow در هر لحظه اجازه‌ی کامیت dist را دارد؛
+# چون هر دو workflow یک مانیفست را به‌روزرسانی می‌کنند، اجرای هم‌زمان
+# باعث تداخل (conflict) در dist/updates/manifest.json می‌شد.
+concurrency:
+  group: frilanser-dist-commit
+  cancel-in-progress: false
+
 jobs:
   build:
     runs-on: ubuntu-22.04
@@ -155,24 +162,43 @@ jobs:
 
       - name: کامیت APK و مانیفست در شاخه‌ی جاری
         if: always()
+        env:
+          BRANCH: ${{ github.ref_name }}
+          VERSION: ${{ steps.build.outputs.version }}
         run: |
+          set -u
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global --add safe.directory "$GITHUB_WORKSPACE" || true
+          VERSION="${VERSION:-$(grep -oP '^__version__ = "\K[^"]+' frilanser/version.py)}"
+          NOTES_ARR=("نسخه‌ی اندروید: داشبورد داخلی روی خود گوشی + به‌روزرسانی درون‌برنامه‌ای")
           files=""
           for f in dist/frilanser.apk dist/updates/manifest.json dist/updates/frilanser.apk dist/android-build.log dist/android-versions.txt; do
             if [ -f "$f" ]; then files="$files $f"; fi
           done
           echo "فایل‌ها برای کامیت:$files"
-          for attempt in 1 2 3 4; do
+          for attempt in 1 2 3 4 5; do
             echo "--- تلاش $attempt ---"
-            git pull --rebase origin "${GITHUB_REF_NAME}" >/dev/null 2>&1 || true
+            # ۱) نمایه را دقیقاً روی وضعیتِ راه‌دور می‌گذاریم (فایل‌های ساخته‌شده‌ی ما سر جایشان می‌مانند)
+            git fetch origin "$BRANCH" >/dev/null 2>&1 || true
+            git rebase --abort >/dev/null 2>&1 || true
+            git reset --mixed "origin/$BRANCH" >/dev/null 2>&1 || true
+            # ۲) مانیفستِ راه‌دور را پایه می‌گیریم و خروجیِ خودمان را در آن ادغام می‌کنیم
+            if git cat-file -e "origin/$BRANCH:dist/updates/manifest.json" 2>/dev/null; then
+              git show "origin/$BRANCH:dist/updates/manifest.json" > dist/updates/manifest.json 2>/dev/null || true
+            fi
+            python scripts/make_manifest.py set android dist/frilanser.apk \
+              --version "$VERSION" --notes "${NOTES_ARR[0]}" || true
+            # ۳) اعتبارسنجی: مانیفست باید JSON سالم باشد
+            python scripts/make_manifest.py verify
+            # ۴) کامیت و ارسال؛ اگر کس دیگری زودتر فرستاد، از نو تلاش می‌کنیم
             [ -n "$files" ] && git add -f $files
             if git diff --cached --quiet; then
               echo "تغییری برای کامیت نیست"; break
             fi
             git commit -m "ساخت خودکار: dist/frilanser.apk (اندروید) + مانیفست نسخه"
-            if git push origin "HEAD:${GITHUB_REF_NAME}"; then
+            if git push origin "HEAD:$BRANCH"; then
               echo "کامیت و ارسال موفق ✓"; break
             fi
-            sleep 15
+            sleep 12
           done
