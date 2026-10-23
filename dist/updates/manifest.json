@@ -1,6 +1,6 @@
 {
   "version": "1.0.4",
-  "generated_at": "2026-10-23T16:45:26+00:00",
+  "generated_at": "2026-10-23T16:47:35+00:00",
   "release_url": "https://github.com/saeidkazemi1989-bot/frilanser/releases/tag/latest",
   "notes": [
     "سازگاریِ به‌روزرسانی با شبکه‌هایی که گیت‌هاب روی آن‌ها بسته است (CDN + آدرسِ دلخواه)"
@@ -17,12 +17,12 @@
     },
     "windows": {
       "file": "Frilanser-Setup.exe",
-      "size": 29488980,
-      "sha256": "52166ea0a2a3055662a40bc4800ccebe61f9f4880712f6765da985780e94a642",
+      "size": 29496864,
+      "sha256": "c6f909d48eb31262c28cd60e841f0ee1f336807d055abc4732f63675bca7f055",
       "url": "https://github.com/saeidkazemi1989-bot/frilanser/releases/download/latest/Frilanser-Setup.exe",
       "mirror": "https://raw.githubusercontent.com/saeidkazemi1989-bot/frilanser/arena/01a0e651-frilanser/dist/updates/Frilanser-Setup.exe",
       "cdn": "https://cdn.jsdelivr.net/gh/saeidkazemi1989-bot/frilanser@arena/01a0e651-frilanser/dist/updates/Frilanser-Setup.exe",
-      "built_at": "2026-10-23T16:45:26+00:00"
+      "built_at": "2026-10-23T16:47:35+00:00"
     }
   }
 }
