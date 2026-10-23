@@ -1339,7 +1339,9 @@ def test_asset_urls_order_cdn_then_mirror_then_release():
     asset = {"url": "https://github.com/x/y.apk",
              "mirror": "https://raw.githubusercontent.com/x/y.apk",
              "cdn": "https://cdn.jsdelivr.net/gh/x/y.apk"}
-    assert asset_urls(asset) == [asset["cdn"], asset["mirror"], asset["url"]]
+    urls = asset_urls(asset)
+    assert urls[:3] == [asset["cdn"], asset["cdn"].replace("cdn.", "gcore."), asset["mirror"]]
+    assert asset["url"] in urls
     assert asset_urls({"url": "https://only/x.apk"}) == ["https://only/x.apk"]
     assert asset_urls({}) == []
 

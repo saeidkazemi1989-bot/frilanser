@@ -91,17 +91,37 @@ def save_update_config(cfg, **fields) -> dict:
     return data
 
 
+def _cdn_alternatives(url: str) -> list[str]:
+    """هم‌زادهای همان آدرس روی CDNهای دیگر (هر کدام در دسترس بود استفاده می‌شود)."""
+    alts = []
+    if "cdn.jsdelivr.net" in url:
+        alts.append(url.replace("cdn.jsdelivr.net", "gcore.jsdelivr.net"))
+    return alts
+
+
 def asset_urls(asset: dict) -> list[str]:
     """همه‌ی آدرس‌های ممکن برای یک فایل نصب، به ترتیبِ اولویت.
 
-    ترتیب: CDN عمومی → آینه‌ی روی شاخه (raw) → لینکِ انتشارِ گیت‌هاب.
+    ترتیب: CDN عمومی (و هم‌زادهایش) → آینه‌ی روی شاخه (raw) → لینکِ انتشارِ گیت‌هاب.
     """
-    urls = []
+    urls: list[str] = []
     for key in ("cdn", "mirror", "url"):
         value = str((asset or {}).get(key) or "").strip()
-        if value and value not in urls:
-            urls.append(value)
+        if not value:
+            continue
+        for candidate in [value, *_cdn_alternatives(value)]:
+            if candidate not in urls:
+                urls.append(candidate)
     return urls
+
+
+def _cdn_manifest_urls() -> list[str]:
+    """چند CDN عمومی که فایل‌های مخزن را مستقیم سرو می‌کنند."""
+    return [
+        f"https://cdn.jsdelivr.net/gh/{REPO_OWNER}/{REPO_NAME}@{DEFAULT_BRANCH}/{MANIFEST_REL}",
+        f"https://gcore.jsdelivr.net/gh/{REPO_OWNER}/{REPO_NAME}@{DEFAULT_BRANCH}/{MANIFEST_REL}",
+        f"https://raw.githack.com/{REPO_OWNER}/{REPO_NAME}/{DEFAULT_BRANCH}/{MANIFEST_REL}",
+    ]
 
 
 def manifest_urls(cfg) -> list[str]:
@@ -115,7 +135,7 @@ def manifest_urls(cfg) -> list[str]:
     if isinstance(cfg_list, str):
         cfg_list = [cfg_list]
     urls = [saved, cfg_single, *[str(u) for u in cfg_list],
-            DEFAULT_CDN_MANIFEST, DEFAULT_MANIFEST_URL]
+            *_cdn_manifest_urls(), DEFAULT_MANIFEST_URL]
     return [u for u in dict.fromkeys(u for u in urls if u)]
 
 
