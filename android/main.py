@@ -175,6 +175,42 @@ def _serve_error(error_text: str, home: str) -> None:
 # --------------------------------------------------------------------------- #
 # راه‌اندازی
 # --------------------------------------------------------------------------- #
+def _tune_webview() -> None:
+    """تنظیمِ WebView برای نمایشِ درست روی گوشی.
+
+    پیش‌فرضِ WebView «نمای پهن» (wide viewport) است: اگر بخشی از صفحه عریض‌تر از
+    عرضِ گوشی باشد، کل صفحه کوچک می‌شود و متن‌ها ریز و ناخوانا می‌شوند. با خاموش
+    کردنِ آن و روشن کردنِ «نمای کلی»، چیدمان دقیقاً به عرضِ گوشی است و قواعدِ
+    واکنش‌گرای (responsive) برنامه درست اعمال می‌شوند.
+    """
+    try:
+        from jnius import autoclass
+
+        activity = autoclass("org.kivy.android.PythonActivity").mActivity
+        content_id = autoclass("android.R$id").content
+        view = activity.findViewById(content_id)
+        if view is None:
+            _log("تنظیم WebView: view پیدا نشد")
+            return
+        name = view.getClass().getName()
+        if "WebView" not in name:
+            _log(f"تنظیم WebView: view از نوع {name} است")
+            return
+
+        settings = view.getSettings()
+        settings.setUseWideViewPort(False)      # چیدمان = عرضِ واقعیِ گوشی
+        settings.setLoadWithOverviewMode(True)
+        settings.setSupportZoom(True)
+        settings.setBuiltInZoomControls(True)
+        settings.setDisplayZoomControls(False)
+        settings.setJavaScriptEnabled(True)
+        settings.setDomStorageEnabled(True)
+        settings.setTextZoom(100)               # بزرگ‌نماییِ فونتِ سیستم اعمال نشود
+        _log(f"تنظیم WebView انجام شد ({name})")
+    except Exception as exc:  # noqa: BLE001 - هرگز نباید مانع اجرا شود
+        _log(f"تنظیم WebView انجام نشد: {exc!r}")
+
+
 def _first_run_scan(cfg, store) -> None:
     """اگر هیچ آگهی‌ای نیست، از اسنپ‌شات‌های همراه برنامه می‌خوانیم."""
     try:
@@ -242,6 +278,7 @@ def main() -> None:
         return
 
     _log(f"سرور روی http://{HOST}:{PORT} — پوشه‌ی داده: {home}")
+    _tune_webview()
     try:
         app.run(host=HOST, port=PORT, debug=False, threaded=True, use_reloader=False)
     except OSError as exc:

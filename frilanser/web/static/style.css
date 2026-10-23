@@ -142,3 +142,10 @@ details summary{cursor:pointer;font-size:13.5px;color:#3b5bdb}
   .stats{grid-template-columns:1fr}
   .kv span{font-size:12px}
 }
+/* ضدِ بیرون‌زدگی در گوشی: هیچ عنصری عرضِ صفحه را زیاد نکند */
+@media (max-width:640px){
+  img,video,iframe,pre,table{max-width:100%}
+  a,.desc,.card h3{word-break:break-word;overflow-wrap:anywhere}
+  pre{white-space:pre-wrap;word-break:break-word}
+  .kv{max-width:100%}
+}
