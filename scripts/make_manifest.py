@@ -46,6 +46,17 @@ def release_url(filename: str) -> str:
     return f"https://github.com/{REPO}/releases/download/{RELEASE_TAG}/{filename}"
 
 
+def cdn_url(filename: str) -> str:
+    """آدرسِ جایگزین روی یک CDN عمومی.
+
+    در بعضی شبکه‌ها (از جمله ایران) دسترسی به raw.githubusercontent.com و لینکِ
+    انتشارِ گیت‌هاب بسته است؛ jsDelivr معمولاً در دسترس است، پس آن را هم کنارِ
+    بقیه می‌گذاریم تا برنامه هر کدام که جواب داد همان را بگیرد.
+    """
+    return (f"https://cdn.jsdelivr.net/gh/{REPO}@{BRANCH}/"
+            f"dist/updates/{filename}")
+
+
 CONFLICT_MARKERS = ("<<<<<<<", "=======", ">>>>>>>")
 
 
@@ -126,6 +137,7 @@ def cmd_set(args) -> int:
         "sha256": sha256_of(src),
         "url": release_url(src.name),
         "mirror": file_url(src.name),
+        "cdn": cdn_url(src.name),
         "built_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
     }
     save(data)

@@ -294,6 +294,16 @@ def create_app(cfg: Config, store: Store, live: bool | None = None) -> Flask:
             return _api_guard(lambda: updater.check_update(cfg))
         if mode == "install":
             return _api_guard(lambda: updater.update_async(cfg))
+        if mode == "set-url":
+            def _save():
+                url = (request.form.get("url") or "").strip()
+                saved = updater.save_update_config(cfg, manifest_url=url)
+                info = updater.check_update(cfg, timeout=12)
+                info["saved_url"] = saved.get("manifest_url", "")
+                info["manifest_urls"] = updater.manifest_urls(cfg)
+                return info
+
+            return _api_guard(_save)
         return jsonify({"ok": False, "error": "حالت نامعلوم"}), 400
 
     @app.context_processor

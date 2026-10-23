@@ -17,6 +17,20 @@
     <div id="upd-bar" style="height:100%;width:0;background:#0f766e;transition:width .3s"></div>
   </div>
   <div class="muted" id="upd-notes" style="margin-top:8px;font-size:12.5px"></div>
+  <div id="upd-links" style="margin-top:8px;font-size:12.5px"></div>
+  <details style="margin-top:10px">
+    <summary style="cursor:pointer;font-size:12.5px;color:#3b5bdb">
+      اگر بررسیِ نسخه خطا می‌دهد (مثل بسته بودنِ گیت‌هاب روی اینترنت شما)، اینجا آدرسِ دیگری بدهید
+    </summary>
+    <form id="upd-url-form" onsubmit="return false;" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">
+      <input id="upd-url" type="text" dir="ltr" placeholder="https://.../manifest.json"
+             style="flex:1;min-width:220px;border:1px solid #d9deeb;border-radius:10px;padding:6px 10px;font:inherit;font-size:12.5px">
+      <button type="button" id="upd-url-save">ذخیره و دوباره بررسی کن</button>
+    </form>
+    <div class="muted" style="font-size:12px;margin-top:6px">
+      آدرس باید فایلی شبیه <code dir="ltr">dist/updates/manifest.json</code> را بدهد. خالی گذاشتن یعنی برگشت به آدرس‌های خودِ برنامه.
+    </div>
+  </details>
 </div>
 
 {# این بخش («لایه‌ی زنده») با هر تغییرِ داده خودکار و بی‌نیاز از بارگذاریِ صفحه عوض می‌شود #}
@@ -90,6 +104,17 @@
     }, 1500);
   };
 
+  // لینک‌های دانلودِ دستی: اگر نصبِ خودکار نشد (مثلاً گیت‌هاب روی اینترنت شما بسته است)
+  function showLinks(j){
+    const box = document.getElementById('upd-links');
+    if(!box) return;
+    const urls = (j && j.asset && j.asset.urls) || [];
+    if(!urls.length){ box.innerHTML = ''; return; }
+    box.innerHTML = '<div class="muted">اگر نصبِ خودکار کار نکرد، مستقیم دانلود کنید:</div>' +
+      urls.map(u => '<a href="' + u + '" target="_blank" rel="noopener" dir="ltr" ' +
+        'style="display:inline-block;margin:4px 0;word-break:break-all;font-size:12px">' + u + '</a>').join('<br>');
+  }
+
   // تابع مشترک: سرویسِ زنده هم از همین برای نمایش نسخه‌ی جدید استفاده می‌کند
   window.__frilanserShowUpdate = function(j){
     if(!j || !j.has_update || !btnInstall) return;
@@ -100,7 +125,30 @@
     if(j.notes && j.notes.length){
       notes.innerHTML = j.notes.map(n => '• ' + n).join('<br>');
     }
+    showLinks(j);
   };
+
+  // آدرسِ دلخواه برای مانیفست (وقتی دسترسی به گیت‌هاب ممکن نیست)
+  const urlInput = document.getElementById('upd-url');
+  const urlSave = document.getElementById('upd-url-save');
+  if(urlSave && urlInput){
+    urlSave.onclick = async () => {
+      urlSave.disabled = true; setMsg('در حال ذخیره و بررسی…');
+      try {
+        const fd = new FormData(); fd.append('mode', 'set-url'); fd.append('url', urlInput.value.trim());
+        const r = await fetch('/api/update', {method:'POST', body:fd});
+        const j = await r.json();
+        if(!j.ok){
+          setMsg('بررسی با این آدرس هم ناموفق بود: ' + (j.error || 'خطای ناشناخته'));
+        } else if(j.has_update){
+          window.__frilanserShowUpdate(j);
+        } else {
+          setMsg((j.saved_url ? 'آدرس ذخیره شد. ' : '') + 'برنامه به‌روز است (نسخه‌ی ' + j.latest + ')');
+        }
+      } catch(e){ setMsg('خطا در ارتباط: ' + e.message); }
+      urlSave.disabled = false;
+    };
+  }
 })();
 </script>
 {% endblock %}

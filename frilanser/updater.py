@@ -59,9 +59,63 @@ def _cfg_value(cfg, key: str, default: str = "") -> str:
         return default
 
 
+# مانیفست روی یک CDN عمومی: در شبکه‌هایی که دسترسی به raw.githubusercontent.com
+# بسته است (مثل ایران)، این آدرس معمولاً در دسترس است.
+DEFAULT_CDN_MANIFEST = (
+    f"https://cdn.jsdelivr.net/gh/{REPO_OWNER}/{REPO_NAME}@{DEFAULT_BRANCH}/{MANIFEST_REL}"
+)
+UPDATE_CONFIG_FILE = "update-config.json"
+
+
+def _config_path(cfg) -> Path:
+    return Path(cfg.outbox_dir) / UPDATE_CONFIG_FILE
+
+
+def load_update_config(cfg) -> dict:
+    """تنظیماتِ به‌روزرسانی که کاربر در برنامه تغییر داده است (مثل آدرسِ دلخواه)."""
+    try:
+        return json.loads(_config_path(cfg).read_text(encoding="utf-8")) or {}
+    except (OSError, json.JSONDecodeError):
+        return {}
+
+
+def save_update_config(cfg, **fields) -> dict:
+    data = load_update_config(cfg)
+    data.update({k: v for k, v in fields.items()})
+    try:
+        _config_path(cfg).parent.mkdir(parents=True, exist_ok=True)
+        _config_path(cfg).write_text(json.dumps(data, ensure_ascii=False, indent=2),
+                                     encoding="utf-8")
+    except OSError:
+        pass
+    return data
+
+
+def asset_urls(asset: dict) -> list[str]:
+    """همه‌ی آدرس‌های ممکن برای یک فایل نصب، به ترتیبِ اولویت.
+
+    ترتیب: CDN عمومی → آینه‌ی روی شاخه (raw) → لینکِ انتشارِ گیت‌هاب.
+    """
+    urls = []
+    for key in ("cdn", "mirror", "url"):
+        value = str((asset or {}).get(key) or "").strip()
+        if value and value not in urls:
+            urls.append(value)
+    return urls
+
+
 def manifest_urls(cfg) -> list[str]:
-    """فهرست آدرس‌هایی که برای یافتن مانیفست امتحان می‌شوند."""
-    urls = [_cfg_value(cfg, "manifest_url", ""), DEFAULT_MANIFEST_URL]
+    """فهرست آدرس‌هایی که برای یافتن مانیفست امتحان می‌شوند.
+
+    اولویت: آدرسِ دستیِ کاربر ← آدرس‌های config.toml ← CDN ← شاخه (raw).
+    """
+    saved = str(load_update_config(cfg).get("manifest_url") or "").strip()
+    cfg_single = _cfg_value(cfg, "manifest_url", "")
+    cfg_list = (cfg.raw.get("update", {}) or {}).get("manifest_urls") or []
+    if isinstance(cfg_list, str):
+        cfg_list = [cfg_list]
+    urls = [saved, cfg_single, *[str(u) for u in cfg_list],
+            DEFAULT_CDN_MANIFEST, DEFAULT_MANIFEST_URL]
     return [u for u in dict.fromkeys(u for u in urls if u)]
 
 
@@ -107,8 +161,11 @@ def _from_manifest(data: dict, key: str) -> dict | None:
         "asset": {
             "file": asset.get("file", ""),
             "url": asset.get("url", ""),
+            "mirror": asset.get("mirror", ""),
+            "cdn": asset.get("cdn", ""),
             "size": int(asset.get("size") or 0),
             "sha256": asset.get("sha256") or "",
+            "urls": asset_urls(asset),
         },
         "release_url": data.get("release_url", ""),
     }
@@ -220,7 +277,23 @@ def sha256_of(path: Path, chunk: int = 1 << 20) -> str:
     return digest.hexdigest()
 
 
-def download(cfg, url: str, dest: Path, sha256: str = "") -> dict:
+def download(cfg, url, dest: Path, sha256: str = "") -> dict:
+    """دانلود فایل از یکی از آدرس‌های ممکن (هر کدام جواب داد همان)."""
+    urls = [url] if isinstance(url, str) else list(url or [])
+    urls = [u for u in urls if u]
+    if not urls:
+        return {"ok": False, "error": "هیچ آدرسی برای دانلود مشخص نشده"}
+    errors: list[str] = []
+    for candidate in urls:
+        result = _download_one(cfg, candidate, Path(dest), sha256)
+        if result.get("ok"):
+            return {**result, "url": candidate}
+        errors.append(f"{candidate} → {result.get('error')}")
+        print(f"  ! دانلود از {candidate} ناموفق بود: {result.get('error')}")
+    return {"ok": False, "error": " | ".join(errors), "tried": urls}
+
+
+def _download_one(cfg, url: str, dest: Path, sha256: str = "") -> dict:
     """دانلود فایل با ذخیره‌ی وضعیت پیشرفت (برای نمایش در رابط کاربری)."""
     requests = _request()
     if requests is None:
@@ -365,14 +438,15 @@ def update(cfg, key: str | None = None, auto_install: bool = True,
         return {**info, "message": "برنامه به‌روز است"}
 
     asset = info.get("asset") or {}
-    url = asset.get("url") or ""
+    candidates = asset_urls(asset)
+    url = candidates[0] if candidates else ""
     if not url:
         return {**info, "ok": False, "error": "آدرس فایل نصب در مانیفست نیست"}
 
     if key == "android" and auto_install:
         # روی اندروید، ساده‌ترین و مطمئن‌ترین راه: مدیر دانلودِ خود سیستم
         dm_res = install_via_download_manager(
-            url, asset.get("file") or "frilanser.apk", title="به‌روزرسانی فریلنس‌یار")
+            url, asset.get("file") or "frilanser.apk", title="به‌روزرسانی فریلنس‌یار")  # noqa: E501
         if dm_res.get("ok"):
             _write_state(cfg, downloading=False, message=dm_res["message"])
             return {**info, **dm_res}
@@ -381,7 +455,7 @@ def update(cfg, key: str | None = None, auto_install: bool = True,
     dest = Path(cfg.outbox_dir) / "updates" / (asset.get("file") or
                                                ("frilanser.apk" if key == "android"
                                                 else "Frilanser-Setup.exe"))
-    res = download(cfg, url, dest, asset.get("sha256") or "")
+    res = download(cfg, candidates, dest, asset.get("sha256") or "")
     if not res["ok"]:
         return {**info, **res}
 

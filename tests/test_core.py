@@ -1313,3 +1313,59 @@ def test_mobile_responsive_css_exists():
     assert "@media (max-width:900px)" in css
     base = (ROOT / "frilanser" / "web" / "templates" / "base.html").read_text(encoding="utf-8")
     assert "width=device-width" in base and "viewport-fit=cover" in base
+
+
+# ---------------------------------------------- دسترسی‌پذیریِ به‌روزرسانی
+def test_manifest_urls_try_cdn_and_custom_first(tmp_path):
+    """آدرسِ مانیفست: ابتدا انتخابِ کاربر، بعد CDN، بعد شاخه‌ی گیت‌هاب."""
+    from frilanser import updater
+
+    cfg = _cfg(str(tmp_path))
+    urls = updater.manifest_urls(cfg)
+    assert any("cdn.jsdelivr.net" in u for u in urls), urls
+    assert any("raw.githubusercontent.com" in u for u in urls)
+    assert urls.index([u for u in urls if "jsdelivr" in u][0]) < \
+           urls.index([u for u in urls if "raw.githubusercontent" in u][0])
+
+    updater.save_update_config(cfg, manifest_url="https://example.invalid/m.json")
+    assert updater.manifest_urls(cfg)[0] == "https://example.invalid/m.json"
+    assert updater.load_update_config(cfg)["manifest_url"] == "https://example.invalid/m.json"
+
+
+def test_asset_urls_order_cdn_then_mirror_then_release():
+    """ترتیبِ تلاش برای دانلود: CDN ← آینه‌ی شاخه ← لینکِ انتشار."""
+    from frilanser.updater import asset_urls
+
+    asset = {"url": "https://github.com/x/y.apk",
+             "mirror": "https://raw.githubusercontent.com/x/y.apk",
+             "cdn": "https://cdn.jsdelivr.net/gh/x/y.apk"}
+    assert asset_urls(asset) == [asset["cdn"], asset["mirror"], asset["url"]]
+    assert asset_urls({"url": "https://only/x.apk"}) == ["https://only/x.apk"]
+    assert asset_urls({}) == []
+
+
+def test_download_falls_back_to_next_url(tmp_path, monkeypatch):
+    """اگر یک آدرس کار نکرد، آدرسِ بعدی امتحان می‌شود (نه اینکه کلِ به‌روزرسانی شکست بخورد)."""
+    from frilanser import updater
+
+    tried: list = []
+
+    def fake_one(cfg, url, dest, sha256=""):
+        tried.append(url)
+        if url.startswith("https://cdn."):
+            return {"ok": False, "error": "شبکه در دسترس نیست"}
+        return {"ok": True, "path": str(dest)}
+
+    monkeypatch.setattr(updater, "_download_one", fake_one)
+    cfg = _cfg(str(tmp_path))
+    res = updater.download(cfg, ["https://cdn.jsdelivr.net/a.apk",
+                                 "https://raw.githubusercontent.com/a.apk"],
+                           tmp_path / "a.apk")
+    assert res["ok"] is True
+    assert tried[0].startswith("https://cdn.")
+    assert res["url"].startswith("https://raw.")
+
+    monkeypatch.setattr(updater, "_download_one",
+                        lambda *a, **k: {"ok": False, "error": "همه بسته‌اند"})
+    res2 = updater.download(cfg, ["https://a/x", "https://b/x"], tmp_path / "b.apk")
+    assert res2["ok"] is False and "tried" in res2

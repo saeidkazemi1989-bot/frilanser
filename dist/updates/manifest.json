@@ -1,9 +1,9 @@
 {
-  "version": "1.0.3",
-  "generated_at": "2026-10-23T16:19:38+00:00",
+  "version": "1.0.4",
+  "generated_at": "2026-10-23T16:45:26+00:00",
   "release_url": "https://github.com/saeidkazemi1989-bot/frilanser/releases/tag/latest",
   "notes": [
-    "نسخه‌ی اندروید: داشبورد داخلی روی خود گوشی + به‌روزرسانی درون‌برنامه‌ای"
+    "سازگاریِ به‌روزرسانی با شبکه‌هایی که گیت‌هاب روی آن‌ها بسته است (CDN + آدرسِ دلخواه)"
   ],
   "assets": {
     "android": {
@@ -12,7 +12,8 @@
       "sha256": "5c940d75b3eac963b95c357c7c9186e212bbd31f74b476493c2105afaadccd99",
       "url": "https://github.com/saeidkazemi1989-bot/frilanser/releases/download/latest/frilanser.apk",
       "mirror": "https://raw.githubusercontent.com/saeidkazemi1989-bot/frilanser/arena/01a0e651-frilanser/dist/updates/frilanser.apk",
-      "built_at": "2026-10-23T16:19:38+00:00"
+      "cdn": "https://cdn.jsdelivr.net/gh/saeidkazemi1989-bot/frilanser@arena/01a0e651-frilanser/dist/updates/frilanser.apk",
+      "built_at": "2026-10-23T16:45:26+00:00"
     },
     "windows": {
       "file": "Frilanser-Setup.exe",
@@ -20,7 +21,8 @@
       "sha256": "52166ea0a2a3055662a40bc4800ccebe61f9f4880712f6765da985780e94a642",
       "url": "https://github.com/saeidkazemi1989-bot/frilanser/releases/download/latest/Frilanser-Setup.exe",
       "mirror": "https://raw.githubusercontent.com/saeidkazemi1989-bot/frilanser/arena/01a0e651-frilanser/dist/updates/Frilanser-Setup.exe",
-      "built_at": "2026-10-23T16:13:48+00:00"
+      "cdn": "https://cdn.jsdelivr.net/gh/saeidkazemi1989-bot/frilanser@arena/01a0e651-frilanser/dist/updates/Frilanser-Setup.exe",
+      "built_at": "2026-10-23T16:45:26+00:00"
     }
   }
 }
