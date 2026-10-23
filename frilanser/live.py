@@ -151,18 +151,24 @@ class LiveService:
             self.base_url = str(url).rstrip("/")
 
     def scan_now(self, trigger: str = "manual", offline: bool | None = None,
-                 wait: bool = False) -> dict:
-        """اجرای فوریِ اسکن. اگر اسکنی در جریان باشد، پیام می‌دهد (نه خطا)."""
+                 wait: bool = False, refresh: bool | None = None) -> dict:
+        """اجرای فوریِ اسکن. اگر اسکنی در جریان باشد، پیام می‌دهد (نه خطا).
+
+        ``refresh``=True یعنی بی‌توجه به کش، صفحه‌ها دوباره از سایت گرفته شوند
+        (پیش‌فرض برای اسکنِ دستی؛ اسکنِ خودکار از ``[fetch] cache_ttl_hours`` پیروی می‌کند).
+        """
         if self.scanning:
             return {"ok": False, "error": "یک اسکن در حال اجراست؛ چند لحظه دیگر دوباره ببینید",
                     "scanning": True}
+        force = (trigger == "manual") if refresh is None else bool(refresh)
         if wait:
-            self._run_scan(trigger, offline)
+            self._run_scan(trigger, offline, refresh=force)
             return {"ok": True, "started": True, "finished": True, "scan": self.last_scan}
         self._scan_thread = threading.Thread(
-            target=self._run_scan, args=(trigger, offline), daemon=True)
+            target=self._run_scan, args=(trigger, offline), kwargs={"refresh": force},
+            daemon=True)
         self._scan_thread.start()
-        return {"ok": True, "started": True, "finished": False,
+        return {"ok": True, "started": True, "finished": False, "force": force,
                 "message": "اسکن در پس‌زمینه شروع شد"}
 
     def _record_ok(self, record: dict, result: dict, fell_back: bool = False) -> None:
@@ -181,10 +187,12 @@ class LiveService:
             "closed": len(tracking.get("closed_by_miss") or [])
             + len(tracking.get("closed_by_text") or []),
             "kept": int(tracking.get("kept", 0) or 0),
+            "sources": collect.get("per_source") or {},
         })
         self.last_result = result
 
-    def _run_scan(self, trigger: str, offline: bool | None = None) -> None:
+    def _run_scan(self, trigger: str, offline: bool | None = None,
+                  refresh: bool = False) -> None:
         from . import pipeline
 
         self.scanning = True
@@ -200,7 +208,7 @@ class LiveService:
                 result = pipeline.run_all(
                     self.cfg, self.store, offline=use_offline,
                     demo_limit=self.demo_limit, base_url=self.base_url,
-                    refresh=False,
+                    refresh=refresh and not use_offline,
                 )
                 self._record_ok(record, result)
             except Exception as exc:  # noqa: BLE001 - هر خطا فقط ثبت می‌شود
@@ -385,6 +393,7 @@ class LiveService:
                 "kept": last.get("kept", 0),
                 "duration": last.get("duration", 0),
                 "error": last.get("error", ""),
+                "sources": last.get("sources") or {},
             } if last else None,
             "next_scan_in": seconds_to_next,
             "next_scan_text": _minutes_text(seconds_to_next) if seconds_to_next else "",

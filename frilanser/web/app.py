@@ -94,6 +94,30 @@ def create_app(cfg: Config, store: Store, live: bool | None = None) -> Flask:
                         or ql in " ".join(p.skills).lower()]
         return projects
 
+    # --------------------------------------------- منابع (کدام سایت‌ها اسکن شوند)
+    def source_info() -> list[dict]:
+        """وضعیتِ هر سایت: انتخاب شده؟ چند آگهی دارد؟ در آخرین اسکن چه شد؟"""
+        from ..sources.registry import source_states
+
+        states = source_states(cfg)
+        counts: dict[str, int] = {}
+        for project in store.all():
+            counts[project.source] = counts.get(project.source, 0) + 1
+        svc = app.extensions.get("live")
+        last_sources = ((svc.last_scan or {}) if svc else {}).get("sources") or {}
+
+        items: list[dict] = []
+        for key, scfg in (cfg.sources or {}).items():
+            items.append({
+                "key": key,
+                "label": scfg.get("label", key) if isinstance(scfg, dict) else key,
+                "enabled": bool(states.get(key, True)),
+                "count": counts.get(key, 0),
+                "last": last_sources.get(key),
+                "listing_url": scfg.get("listing_url", "") if isinstance(scfg, dict) else "",
+            })
+        return items
+
     # --------------------------------------------------- متنِ داشبورد (مشترک)
     def dashboard_context() -> dict:
         """ورودی‌های قالبِ داشبورد — هم برای صفحه‌ی کامل، هم برای نوسازیِ زنده."""
@@ -117,6 +141,7 @@ def create_app(cfg: Config, store: Store, live: bool | None = None) -> Flask:
 
         sources = sorted({(p.source, p.source_label) for p in store.all()})
         return {
+            "source_info": source_info(),
             "projects": projects,
             "stats": summarize(),
             "verdict": verdict,
@@ -195,7 +220,26 @@ def create_app(cfg: Config, store: Store, live: bool | None = None) -> Flask:
         offline = request.form.get("online") != "1"
         limit = int(request.form.get("demos", 3) or 3)
         base_url = request.host_url.rstrip("/")
-        pipeline.run_all(cfg, store, offline=offline, demo_limit=limit, base_url=base_url)
+        # وقتی کاربر می‌خواهد از سایت‌ها بخواند، کش را دور می‌زنیم تا آگهی‌های
+        # تازه واقعاً بیایند (در غیر این صورت همان صفحه‌ی ذخیره‌شده خوانده می‌شد)
+        pipeline.run_all(cfg, store, offline=offline, demo_limit=limit,
+                         base_url=base_url, refresh=not offline)
+        return redirect(url_for("index"))
+
+    @app.post("/sources")
+    def save_sources():
+        """انتخابِ کاربر: کدام سایت‌ها اسکن شوند (در فایلِ جداگانه ذخیره می‌شود)."""
+        from ..sources.registry import save_source_prefs
+
+        chosen = set(request.form.getlist("source"))
+        enabled = {key: (key in chosen) for key in (cfg.sources or {})}
+        saved = save_source_prefs(cfg, enabled)
+        if request.form.get("scan") == "1" and saved:
+            svc = app.extensions.get("live")
+            if svc is not None:
+                svc.scan_now(trigger="manual", refresh=True)
+        if request.headers.get("X-Requested-With") == "live":
+            return jsonify({"ok": True, "saved": saved})
         return redirect(url_for("index"))
 
     @app.get("/demos")

@@ -52,6 +52,39 @@
   </form>
 </div>
 
+<div class="panel" id="sources-panel" style="padding:12px 14px">
+  <form method="post" action="{{ url_for('save_sources') }}">
+    <div style="font-weight:700;margin-bottom:6px">🌐 کدام سایت‌ها اسکن شوند؟</div>
+    <div class="muted" style="margin-bottom:10px">
+      فقط سایت‌هایی را تیک بزنید که در آن‌ها اکانت دارید (یا می‌خواهید آگهی‌هایشان را ببینید)؛
+      انتخاب شما ذخیره می‌شود و در به‌روزرسانی‌های بعدی هم می‌ماند.
+    </div>
+    <div class="src-list">
+      {% for s in source_info %}
+      <label class="src-item">
+        <input type="checkbox" name="source" value="{{ s.key }}" {% if s.enabled %}checked{% endif %}>
+        <span class="src-name">{{ s.label }}</span>
+        <span class="src-meta">
+          <span class="muted">{{ s.count }} آگهی در برنامه</span>
+          {% if s.last %}
+            {% if s.last.ok %}
+              <span class="badge ok">آخرین اسکن: {{ s.last.fetched }} آگهی</span>
+            {% else %}
+              <span class="badge bad">{{ (s.last.error or 'ناموفق')[:70] }}</span>
+            {% endif %}
+          {% endif %}
+          {% if s.listing_url %}<a class="muted" href="{{ s.listing_url }}" target="_blank" rel="noopener">صفحه‌ی سایت ↗</a>{% endif %}
+        </span>
+      </label>
+      {% endfor %}
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
+      <button type="submit">💾 ذخیره</button>
+      <button type="submit" name="scan" value="1">💾 ذخیره و همین حالا تازه اسکن کن</button>
+    </div>
+  </form>
+</div>
+
 {% if not projects %}
 <div class="panel" style="border-color:#ffe08a;background:#fff8e6">
   <h2>هنوز هیچ آگهی‌ای در برنامه نیست</h2>

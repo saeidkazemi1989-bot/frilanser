@@ -18,11 +18,52 @@ SOURCE_CLASSES: dict[str, type[BaseSource]] = {
     "parscoders": ParsCodersSource,
 }
 
+# فایلِ انتخابِ کاربر (کدام سایت‌ها اسکن شوند) — کنار خروجی‌ها نوشته می‌شود
+PREFS_FILE = "source-prefs.json"
+
+
+def load_source_prefs(cfg: Config) -> dict[str, bool]:
+    """انتخابِ کاربر: کدام سایت‌ها اسکن شوند؟
+
+    در یک فایلِ جداگانه (کنار خروجی‌ها) ذخیره می‌شود تا تنظیماتِ اصلی دست‌نخورده
+    بماند و در به‌روزرسانی برنامه هم از بین نرود.
+    """
+    path = Path(cfg.outbox_dir) / PREFS_FILE
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return {}
+    prefs = data.get("enabled") if isinstance(data, dict) else None
+    return {str(k): bool(v) for k, v in (prefs or {}).items()} if isinstance(prefs, dict) else {}
+
+
+def save_source_prefs(cfg: Config, enabled: dict[str, bool]) -> dict[str, bool]:
+    """ذخیره‌ی انتخابِ کاربر؛ فقط کلیدهایی که در config.toml هستند نگه داشته می‌شوند."""
+    known = set(cfg.sources)
+    clean = {k: bool(v) for k, v in (enabled or {}).items() if k in known}
+    path = Path(cfg.outbox_dir) / PREFS_FILE
+    try:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(json.dumps({"enabled": clean}, ensure_ascii=False, indent=2),
+                        encoding="utf-8")
+    except OSError:
+        pass
+    return clean
+
+
+def source_states(cfg: Config) -> dict[str, bool]:
+    """وضعیتِ فعلیِ هر سایت (پیش‌فرض از config.toml + انتخابِ کاربر)."""
+    prefs = load_source_prefs(cfg)
+    return {key: bool(prefs.get(key, scfg.get("enabled", True)))
+            for key, scfg in cfg.sources.items()}
+
 
 def build_sources(cfg: Config) -> dict[str, BaseSource]:
+    """ساخت منابعِ فعال: طبق config.toml **و** انتخابی که کاربر در برنامه کرده است."""
+    states = source_states(cfg)
     sources: dict[str, BaseSource] = {}
     for key, scfg in cfg.sources.items():
-        if not scfg.get("enabled", True):
+        if not states.get(key, True):
             continue
         cls = SOURCE_CLASSES.get(scfg.get("kind", key))
         if not cls:

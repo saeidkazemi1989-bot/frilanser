@@ -445,6 +445,40 @@ def cmd_live(args):
     return 0
 
 
+def cmd_sources(args):
+    """نمایش/تغییرِ سایت‌هایی که اسکن می‌شوند."""
+    cfg, store = get_context(args)
+    from .sources.registry import save_source_prefs, source_states
+
+    if args.enable or args.disable:
+        states = source_states(cfg)
+        for key in args.enable:
+            if key in cfg.sources:
+                states[key] = True
+            else:
+                print(f"! سایتی با این کلید نیست: {key}")
+        for key in args.disable:
+            if key in cfg.sources:
+                states[key] = False
+            else:
+                print(f"! سایتی با این کلید نیست: {key}")
+        save_source_prefs(cfg, states)
+        print("✓ انتخابِ سایت‌ها ذخیره شد")
+
+    states = source_states(cfg)
+    counts: dict = {}
+    for project in store.all():
+        counts[project.source] = counts.get(project.source, 0) + 1
+    print("—— سایت‌ها ————————————————————————————")
+    for key, scfg in cfg.sources.items():
+        mark = "✓" if states.get(key, True) else "✗"
+        label = scfg.get("label", key) if isinstance(scfg, dict) else key
+        print(f"  {mark} {key:<24} {label:<28} {counts.get(key, 0)} آگهی")
+    print("———————————————————————————————————————")
+    print("برای تغییر: python -m frilanser sources --disable ponisha --enable karlancer")
+    return 0
+
+
 # ------------------------------------------------------------------ parser
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
@@ -553,6 +587,13 @@ def build_parser() -> argparse.ArgumentParser:
     p = sub.add_parser("live", help="وضعیتِ به‌روزرسانیِ خودکار (داده و نسخه)")
     p.add_argument("--json", action="store_true", help="خروجیِ خام JSON")
     p.set_defaults(func=cmd_live)
+
+    p = sub.add_parser("sources", help="انتخابِ سایت‌هایی که اسکن می‌شوند")
+    p.add_argument("--enable", action="append", default=[],
+                   help="روشن کردنِ یک سایت (مثل karlancer)")
+    p.add_argument("--disable", action="append", default=[],
+                   help="خاموش کردنِ یک سایت (مثل ponisha)")
+    p.set_defaults(func=cmd_sources)
 
     return parser
 

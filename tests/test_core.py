@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import json
+import os
+import time
 import types
 from pathlib import Path
 
@@ -1185,3 +1187,129 @@ def _cfg_manifest_only(root: Path):
     return Config({"update": {"manifest_url": "https://example.invalid/m.json"},
                    "app": {"outbox_dir": str(root / "outbox"),
                            "data_dir": str(root / "data")}}, root / "config.toml")
+
+
+# ---------------------------------------------- انتخابِ سایت‌ها و تازگیِ داده
+def _sources_cfg(tmp_path, **extra):
+    from frilanser.config import Config
+
+    raw = {
+        "app": {"outbox_dir": str(tmp_path / "outbox"), "data_dir": str(tmp_path / "data"),
+                "raw_dir": str(tmp_path / "data" / "raw"), "cache_dir": str(tmp_path / "data" / "cache"),
+                "demo_dir": str(tmp_path / "outbox" / "demos"), "report_dir": str(tmp_path / "outbox" / "reports")},
+        "sources": {
+            "karlancer": {"enabled": True, "label": "کارلنسر", "kind": "karlancer",
+                          "listing_url": "https://example.invalid/jobs"},
+            "ponisha": {"enabled": True, "label": "پونیشا", "kind": "ponisha",
+                        "listing_url": "https://example.invalid/p"},
+        },
+    }
+    raw.update(extra)
+    return Config(raw, tmp_path / "config.toml")
+
+
+def test_source_prefs_disable_and_persist(tmp_path):
+    """کاربر می‌تواند فقط سایتی را که در آن اکانت دارد روشن بگذارد."""
+    from frilanser.sources.registry import (
+        build_sources,
+        load_source_prefs,
+        save_source_prefs,
+        source_states,
+    )
+
+    cfg = _sources_cfg(tmp_path)
+    assert set(build_sources(cfg)) == {"karlancer", "ponisha"}
+
+    save_source_prefs(cfg, {"karlancer": True, "ponisha": False})
+    assert set(build_sources(cfg)) == {"karlancer"}
+    assert source_states(cfg)["ponisha"] is False
+    assert load_source_prefs(cfg)["ponisha"] is False
+
+    # انتخاب در اجرای بعدی هم می‌ماند
+    cfg2 = _sources_cfg(tmp_path)
+    assert set(build_sources(cfg2)) == {"karlancer"}
+
+
+def test_collect_reports_per_source(tmp_path):
+    """نتیجه‌ی هر سایت جداگانه گزارش می‌شود (تا بدانیم کدام سایت جواب نداد)."""
+    from frilanser.pipeline import collect
+    from frilanser.store import Store
+
+    cfg = _sources_cfg(tmp_path)
+    (cfg.raw_dir).mkdir(parents=True, exist_ok=True)
+    (cfg.raw_dir / "karlancer-test.json").write_text(
+        json.dumps([{"id": "1", "title": "طراحی سایت فروشگاهی", "url": "https://x/1",
+                     "description": "توضیح کافی برای این پروژه تستی", "budget": "5,000,000"}]),
+        encoding="utf-8")
+
+    store = Store(cfg.data_dir)
+    result = collect(cfg, store, offline=True)
+
+    assert result["per_source"]["karlancer"]["fetched"] == 1
+    assert result["per_source"]["karlancer"]["ok"] is True
+    # سایتی که اسنپ‌شاتی ندارد هم در گزارش هست (با صفر آگهی)، نه اینکه نادیده گرفته شود
+    assert result["per_source"]["ponisha"]["fetched"] == 0
+
+
+def test_cache_ttl_lets_new_pages_in(tmp_path):
+    """کشِ صفحه‌ها دیگر ابدی نیست: بعد از TTL دوباره از سایت گرفته می‌شود."""
+    from frilanser.sources.base import BaseSource
+
+    cfg = _sources_cfg(tmp_path, fetch={"cache_ttl_hours": 2})
+    (cfg.cache_dir).mkdir(parents=True, exist_ok=True)
+    cache = cfg.cache_dir / "x.txt"
+    cache.write_text("old", encoding="utf-8")
+
+    src = BaseSource(cfg, "karlancer")
+    assert src._cache_is_fresh(cache) is True          # تازه است → از کش
+
+    cfg.raw["fetch"]["cache_ttl_hours"] = 0             # همیشه تازه بگیر
+    assert src._cache_is_fresh(cache) is False
+
+    cfg.raw["fetch"]["cache_ttl_hours"] = 2
+    old = time.time() - 5 * 3600
+    os.utime(cache, (old, old))                         # کشِ کهنه
+    assert src._cache_is_fresh(cache) is False
+
+
+def test_tracking_not_closed_when_scan_returns_nothing(tmp_path):
+    """اگر اسکن هیچ آگهی‌ای نیاورد، پیشنهادهای کاربر بسته فرض نمی‌شوند."""
+    from frilanser.pipeline import refresh_tracking
+    from frilanser.store import Store
+
+    cfg = _sources_cfg(tmp_path)
+    store = Store(cfg.data_dir)
+    p = Project.from_scrape("karlancer", "T1", "طراحی سایت", "https://x")
+    store.upsert_many([p])
+    store.set_proposal_state(p.id, "submitted")
+
+    for _ in range(3):
+        res = refresh_tracking(cfg, store, seen_ids=[])
+    assert res.get("skipped") is True
+    assert store.get(p.id).proposal_state == "submitted"
+
+
+def test_web_sources_route_saves_choice(tmp_path):
+    """فرمِ انتخابِ سایت در داشبورد، انتخاب را ذخیره می‌کند."""
+    from frilanser.sources.registry import build_sources
+    from frilanser.store import Store
+    from frilanser.web.app import create_app
+
+    cfg = _sources_cfg(tmp_path)
+    client = create_app(cfg, Store(cfg.data_dir), live=False).test_client()
+
+    page = client.get("/").get_data(as_text=True)
+    assert "کدام سایت‌ها اسکن شوند" in page
+
+    res = client.post("/sources", data={"source": ["karlancer"]})
+    assert res.status_code == 302
+    assert set(build_sources(_sources_cfg(tmp_path))) == {"karlancer"}
+
+
+def test_mobile_responsive_css_exists():
+    """داشبورد باید در عرضِ گوشی هم درست نمایش داده شود."""
+    css = (ROOT / "frilanser" / "web" / "static" / "style.css").read_text(encoding="utf-8")
+    assert "@media (max-width:640px)" in css
+    assert "@media (max-width:900px)" in css
+    base = (ROOT / "frilanser" / "web" / "templates" / "base.html").read_text(encoding="utf-8")
+    assert "width=device-width" in base and "viewport-fit=cover" in base

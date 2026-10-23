@@ -26,14 +26,31 @@ def collect(cfg: Config, store: Store, offline: bool = True, refresh: bool = Fal
             extra_urls: Iterable[str] | None = None) -> dict:
     sources = build_sources(cfg)
     projects: list[Project] = []
+    per_source: dict[str, dict] = {}
     if offline:
-        projects = collect_snapshots(cfg, sources)
+        for key, source in sources.items():
+            before = len(projects)
+            projects.extend(collect_snapshots(cfg, {key: source}))
+            per_source[key] = {"label": source.label, "ok": True, "offline": True,
+                               "fetched": len(projects) - before, "error": ""}
     else:
-        for source in sources.values():
-            projects.extend(source.collect(extra_urls=extra_urls, force=refresh))
+        for key, source in sources.items():
+            try:
+                got = source.collect(extra_urls=extra_urls, force=refresh)
+                per_source[key] = {"label": source.label, "ok": True, "offline": False,
+                                   "fetched": len(got), "error": ""}
+                projects.extend(got)
+            except Exception as exc:  # noqa: BLE001 - خرابیِ یک سایت نباید بقیه را بخواباند
+                per_source[key] = {"label": source.label, "ok": False, "offline": False,
+                                   "fetched": 0, "error": f"{type(exc).__name__}: {exc}"}
+                print(f"  ! {source.label}: {type(exc).__name__}: {exc}")
         if not projects:  # اگر دسترسی نبود، از اسنپ‌شات استفاده کن
             print("  ! دریافت زنده ناموفق بود؛ از اسنپ‌شات‌های محلی استفاده می‌شود")
             projects = collect_snapshots(cfg, sources)
+            for key, source in sources.items():
+                per_source.setdefault(key, {"label": source.label, "ok": False,
+                                            "offline": True, "fetched": 0,
+                                            "error": "دریافت زنده ناموفق بود"})
 
     # آگهی‌های بسته/در حال انجام را کنار می‌گذاریم
     before = len(projects)
@@ -44,7 +61,8 @@ def collect(cfg: Config, store: Store, offline: bool = True, refresh: bool = Fal
     new, updated = store.upsert_many(projects)
     store.log("collect", "-", f"{new} جدید / {updated} به‌روزرسانی (offline={offline})")
     return {"fetched": len(projects), "new": new, "updated": updated,
-            "sources": list(sources), "ids": [p.id for p in projects]}
+            "sources": list(sources), "ids": [p.id for p in projects],
+            "per_source": per_source}
 
 
 # ------------------------------------------------------------------ screen
@@ -52,8 +70,15 @@ def refresh_tracking(cfg: Config, store: Store, seen_ids) -> dict:
     """به‌روزرسانیِ وضعیتِ پیشنهادها پس از هر اسکن (نگه‌داری + تشخیص واگذاری)."""
     from .tracking import apply_scan_results
 
+    ids = list(seen_ids or [])
+    if not ids:
+        # اسکن هیچ آگهی‌ای نیاورده (قطعی اینترنت / هیچ سایتی انتخاب نشده)؛
+        # در این حالت نباید پیشنهادهای کاربر را «واگذار شده» فرض کنیم.
+        kept = len([p for p in store.all() if p.proposal_state in ("submitted", "won")])
+        return {"closed_by_miss": [], "closed_by_text": [], "kept": kept, "skipped": True}
+
     threshold = int(cfg.raw.get("tracking", {}).get("missed_scans_to_close", 2))
-    return apply_scan_results(store, seen_ids, threshold=threshold)
+    return apply_scan_results(store, ids, threshold=threshold)
 
 
 def screen_projects(cfg: Config, store: Store, force: bool = False) -> dict:

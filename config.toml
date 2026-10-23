@@ -126,6 +126,9 @@ fee_note = "تسویه از طریق پلتفرم"
 # اگر false باشد، فقط از اسنپ‌شات‌های داخل data/raw استفاده می‌شود (بدون اینترنت)
 allow_network = true
 timeout_seconds = 25
+# صفحه‌های دریافت‌شده چند ساعت کش شوند (بعد از آن دوباره از سایت گرفته می‌شود)؛
+# ۰ یعنی همیشه تازه بگیر. با دکمه‌ی «الان اسکن کن» همیشه تازه گرفته می‌شود.
+cache_ttl_hours = 2
 delay_between_requests = 2.0
 user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0 Safari/537.36"
 

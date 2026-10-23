@@ -41,7 +41,7 @@ class BaseSource:
             return path.read_text(encoding="utf-8")
 
         cache_file = self.cache_dir / f"{self.key}-{hashlib.md5(url.encode()).hexdigest()[:12]}.txt"
-        if cache_file.exists() and not force:
+        if cache_file.exists() and not force and self._cache_is_fresh(cache_file):
             return cache_file.read_text(encoding="utf-8")
 
         if not self.cfg.allow_network:
@@ -64,6 +64,23 @@ class BaseSource:
         cache_file.write_text(text, encoding="utf-8")
         time.sleep(float(self.cfg.fetch.get("delay_between_requests", 1.0)))
         return text
+
+    def _cache_is_fresh(self, cache_file: Path) -> bool:
+        """آیا کش هنوز اعتبار دارد؟
+
+        پیش‌تر کش همیشه معتبر بود، برای همین بعد از اولین دریافت، اسکن‌های بعدی
+        همان صفحه‌ی قدیمی را می‌خواندند و آگهی‌های جدید هرگز نمی‌آمدند. حالا با
+        ``[fetch] cache_ttl_hours`` (پیش‌فرض ۲ ساعت) کنترل می‌شود و دکمه‌ی
+        «اسکنِ الان» همیشه تازه می‌گیرد (force=True).
+        """
+        ttl_hours = float(self.cfg.fetch.get("cache_ttl_hours", 2) or 0)
+        if ttl_hours <= 0:
+            return False
+        try:
+            age_hours = (time.time() - cache_file.stat().st_mtime) / 3600.0
+        except OSError:
+            return False
+        return age_hours < ttl_hours
 
     @staticmethod
     def html_to_text(html: str) -> str:
