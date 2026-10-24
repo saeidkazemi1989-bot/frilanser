@@ -166,10 +166,18 @@ class BaseSource:
     def html_to_text(html: str) -> str:
         """HTML را به متن ساده تبدیل می‌کند (الگوی کارت‌ها در متن حفظ می‌شود)."""
         try:
+            # بسته‌ی اندروید typing_extensions را همراه ندارد و بدون آن
+            # ایمپورتِ bs4 شکست می‌خورد؛ قبل از ایمپورت آن را تأمین می‌کنیم.
+            from frilanser.compat import ensure_typing_extensions
+
+            ensure_typing_extensions()
             from bs4 import BeautifulSoup  # noqa: PLC0415
         except ImportError:
+            import html as _html_mod
+
             text = re.sub(r"(?is)<(script|style|noscript).*?</\1>", " ", html)
             text = re.sub(r"(?s)<[^>]+>", "\n", text)
+            text = _html_mod.unescape(text)
         else:
             soup = BeautifulSoup(html, "html.parser")
             for tag in soup(["script", "style", "noscript", "svg"]):

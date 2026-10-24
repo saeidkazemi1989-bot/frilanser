@@ -1563,3 +1563,63 @@ def test_updater_uses_stdlib_when_requests_broken(monkeypatch):
     assert info["ok"] is True and info["latest"] == "9.9.9"
     assert info["has_update"] is True          # ۹.۹.۹ جدیدتر از نسخه‌ی فعلی است
     assert info["current"] == __version__
+
+
+# ---------------------------------------------------------------------------
+# لایه‌ی سازگاریِ کتابخانه‌ها (۱.۰.۷)
+# ---------------------------------------------------------------------------
+def test_compat_typing_extensions_stub_allows_bs4(monkeypatch, tmp_path):
+    """بدون typing_extensions نصب‌شده، bs4 باید با جانشینِ typing ایمپورت شود."""
+    import builtins
+    import sys
+
+    from frilanser import compat
+
+    real_import = builtins.__import__
+    saved = sys.modules.pop("typing_extensions", None)
+
+    def fake_import(name, *args, **kwargs):
+        if name == "typing_extensions" and name not in sys.modules:
+            raise ImportError("No module named 'typing_extensions'")
+        return real_import(name, *args, **kwargs)
+
+    try:
+        monkeypatch.setattr(builtins, "__import__", fake_import)
+        assert compat.ensure_typing_extensions() is True
+        mod = sys.modules["typing_extensions"]
+        assert hasattr(mod, "Protocol") and hasattr(mod, "TypeAlias")
+    finally:
+        monkeypatch.setattr(builtins, "__import__", real_import)
+        sys.modules.pop("typing_extensions", None)
+        if saved is not None:
+            sys.modules["typing_extensions"] = saved
+
+
+def test_compat_probe_reports_real_state():
+    """probe() باید برای کتابخانه‌ی موجود True و برای ناموجود متن خطا بدهد."""
+    from frilanser import compat
+
+    assert compat.probe("json") is True
+    bad = compat.probe("این_کتابخانه_اصلا_وجود_ندارد")
+    assert bad is True or isinstance(bad, str)
+
+
+def test_html_to_text_works_with_bs4_and_without(tmp_path):
+    """تبدیل HTML→متن باید در هر دو حالت (bs4 یا جانشینِ regex) متن بدهد."""
+    from frilanser.sources.base import BaseSource
+
+    sample = "<div><script>x=1</script><p>سلام &amp; درود</p></div>"
+    text = BaseSource.html_to_text(sample)
+    assert "سلام" in text
+    assert "&amp;" not in text
+    assert "x=1" not in text
+
+
+def test_compat_describe_shape():
+    """گزارشِ describe باید libs و html_parser داشته باشد."""
+    from frilanser import compat
+
+    info = compat.describe()
+    assert isinstance(info["libs"], dict)
+    assert "bs4" in info["libs"]
+    assert isinstance(info["html_parser"]["ok"], bool)

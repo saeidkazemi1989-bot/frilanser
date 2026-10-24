@@ -419,6 +419,14 @@ def create_app(cfg: Config, store: Store, live: bool | None = None) -> Flask:
             "requests": False, "check": None, "trace": "",
             "http": http.describe(), "probes": [],
         }
+        # وضعیتِ واقعیِ کتابخانه‌ها روی این دستگاه (bs4 بدون typing_extensions
+        # ایمپورت نمی‌شود و این دقیقاً همان چیزی است که باید دیده شود).
+        try:
+            from .. import compat
+
+            report.update(compat.describe())
+        except Exception as exc:  # noqa: BLE001
+            report["libs_error"] = f"{type(exc).__name__}: {exc}"
         try:
             import requests  # noqa: F401
 
