@@ -1502,3 +1502,64 @@ def test_paste_page_adds_projects(tmp_path):
     res2 = client.post("/paste", data={"source": "karlancer", "text": "سلام"})
     assert "err=" in res2.headers["Location"]
     assert len(store.all()) == 1
+
+
+# ---------------------------------------------- دریافتِ اینترنتیِ بدون وابستگی
+def test_http_stdlib_path_works_without_requests(monkeypatch):
+    """اگر requests ناقص باشد، دریافت با کتابخانه‌ی استاندارد انجام می‌شود."""
+    import sys
+
+    import frilanser.http as http
+
+    class _Resp:
+        def __init__(self, body: bytes):
+            self._body = body
+            self.headers = {"Content-Type": "text/html; charset=utf-8"}
+
+        def read(self, n=-1):
+            return self._body
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *a):
+            return False
+
+    monkeypatch.setattr(http, "has_requests", lambda: False)
+    monkeypatch.setattr(http, "_opener",
+                        lambda context=None: type("O", (), {
+                            "open": lambda self, req, timeout=None: _Resp("سلام آگهی".encode())
+                        })())
+
+    got = http.get_text("https://example.invalid/list")
+    assert got["ok"] is True and "آگهی" in got["text"]
+    assert got["how"].startswith("stdlib")
+
+
+def test_updater_uses_stdlib_when_requests_broken(monkeypatch):
+    """بررسیِ نسخه حتی با نبودِ requests/urllib3 باید کار کند."""
+    import frilanser.updater as up
+    from frilanser.version import __version__
+
+    class Cfg:
+        raw = {"update": {}}
+        outbox_dir = "/tmp/frilanser-selftest-outbox"
+        sources: dict = {}
+
+    monkeypatch.setattr(up, "_request", lambda: None)
+    monkeypatch.setattr(up, "manifest_urls",
+                        lambda cfg: ["https://example.invalid/manifest.json"])
+    monkeypatch.setattr(up, "_cfg_value", lambda *a, **k: "")
+
+    def fake_get_json(url, timeout=15.0):
+        return {"ok": True, "status": 200, "how": "stdlib",
+                "data": {"version": "9.9.9", "notes": ["تست"],
+                         "assets": {"android": {"file": "frilanser.apk",
+                                                "url": "https://x/a.apk",
+                                                "size": 10, "sha256": ""}}}}
+
+    monkeypatch.setattr(up, "_http_get_json", fake_get_json)
+    info = up.check_update(Cfg(), key="android")
+    assert info["ok"] is True and info["latest"] == "9.9.9"
+    assert info["has_update"] is True          # ۹.۹.۹ جدیدتر از نسخه‌ی فعلی است
+    assert info["current"] == __version__

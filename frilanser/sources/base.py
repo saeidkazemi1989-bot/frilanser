@@ -81,16 +81,36 @@ class BaseSource:
                               f"کشِ تازه‌ای برای {url} وجود ندارد")
             raise FetchError(entry["error"], url=url)
 
+        # ابتدا با requests (اگر سالم نصب شده باشد)، وگرنه با کتابخانه‌ی استاندارد
         try:
             import requests  # noqa: PLC0415 - وابستگی اختیاری
-        except ImportError as exc:  # pragma: no cover
-            raise FetchError("برای دریافت زنده پکیج requests لازم است: pip install requests") from exc
+            import urllib3  # noqa: F401  # requests بدون urllib3 کار نمی‌کند
+        except ImportError:
+            requests = None
 
         headers = {"User-Agent": self.cfg.fetch.get("user_agent", "frilanser/1.0"),
                    "Accept-Language": "fa-IR,fa;q=0.9,en;q=0.6"}
         cookie = self._cookie()
         if cookie:
             headers["Cookie"] = cookie
+
+        if requests is None:
+            from .. import http
+
+            got = http.get_text(url, timeout=self.cfg.fetch.get("timeout_seconds", 25),
+                                headers=headers)
+            if got["ok"]:
+                entry.update({"ok": True, "status": got.get("status"),
+                              "chars": len(got.get("text") or "")})
+                text = got["text"]
+                entry["sample"] = text[:400]
+                self.cache_dir.mkdir(parents=True, exist_ok=True)
+                cache_file.write_text(text, encoding="utf-8")
+                time.sleep(float(self.cfg.fetch.get("delay_between_requests", 1.0)))
+                return text
+            entry["error"] = f"{got.get('error') or 'خطای ناشناخته'} ({got.get('how','')})"
+            raise FetchError(entry["error"], url=url, status=got.get("status"))
+
         try:
             resp = requests.get(url, headers=headers,
                                 timeout=self.cfg.fetch.get("timeout_seconds", 25))

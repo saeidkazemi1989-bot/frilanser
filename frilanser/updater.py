@@ -44,12 +44,42 @@ RELEASE_API = f"https://api.github.com/repos/{REPO_OWNER}/{REPO_NAME}/releases/l
 # کمکی‌ها
 # --------------------------------------------------------------------------- #
 def _request():
+    """ماژولِ requests اگر واقعاً قابل استفاده باشد (همراهِ وابستگی‌هایش)."""
     try:
         import requests  # وابستگی پروژه
-
-        return requests
+        import urllib3  # noqa: F401  # requests بدون urllib3 بالا نمی‌آید
     except Exception:  # noqa: BLE001
         return None
+    return requests
+
+
+def _http_get_json(url: str, timeout: float = 15.0) -> dict:
+    """خواندنِ JSON از اینترنت — با requests یا با کتابخانه‌ی استاندارد."""
+    requests = _request()
+    if requests is not None:
+        try:
+            resp = requests.get(url, timeout=timeout,
+                                headers={"Cache-Control": "no-cache"})
+            if resp.status_code != 200:
+                return {"ok": False, "status": resp.status_code, "data": None,
+                        "how": "requests"}
+            return {"ok": True, "status": 200, "data": resp.json(), "how": "requests"}
+        except Exception as exc:  # noqa: BLE001
+            return {"ok": False, "status": None, "data": None, "how": "requests",
+                    "error": f"{type(exc).__name__}: {exc}"}
+    from . import http
+
+    got = http.get_json(url, timeout=timeout)
+    return {"ok": bool(got.get("ok")), "status": got.get("status"),
+            "data": got.get("data"), "how": got.get("how", "stdlib"),
+            "error": got.get("error", "")}
+
+
+def _http_download(url: str, dest, progress=None) -> dict:
+    """دانلود فایل — با requests یا با کتابخانه‌ی استاندارد."""
+    from . import http
+
+    return http.download_file(url, dest, progress=progress)
 
 
 def _cfg_value(cfg, key: str, default: str = "") -> str:
@@ -236,38 +266,39 @@ def check_update(cfg, key: str | None = None, timeout: int = 15) -> dict:
 def _check_update_inner(cfg, key: str, timeout: int) -> dict:
     """نسخه‌ی موجود را بررسی می‌کند (بدون تغییر در برنامه)."""
     key = key or platform_key()
-    requests = _request()
     result = {"ok": False, "error": "", "current": __version__, "platform": key,
               "latest": __version__, "has_update": False, "notes": [], "asset": {},
               "release_url": "", "source": ""}
-    if requests is None:
-        result["error"] = "کتابخانه‌ی requests در دسترس نیست"
-        return result
 
+    # نکته: برای دریافت هم requests را امتحان می‌کنیم و هم کتابخانه‌ی استاندارد را،
+    # چون در بعضی بسته‌ها requests بدون وابستگی‌هایش بسته‌بندی شده است.
     found: dict | None = None
     last_error = ""
+    tried: list[str] = []
     for url in manifest_urls(cfg):
-        try:
-            resp = requests.get(url, timeout=timeout,
-                                headers={"Cache-Control": "no-cache"})
-            if resp.status_code == 200:
-                data = resp.json()
-                found = _from_manifest(data, key)
-                if found:
-                    found["source"] = url
-                    break
-        except Exception as exc:  # noqa: BLE001
-            last_error = f"{type(exc).__name__}: {exc}"
+        got = _http_get_json(url, timeout=timeout)
+        tried.append(url)
+        if got.get("ok") and isinstance(got.get("data"), dict):
+            found = _from_manifest(got["data"], key)
+            if found:
+                found["source"] = url
+                found["how"] = got.get("how", "")
+                break
+        elif got.get("error"):
+            last_error = f"{got.get('error')} ({got.get('how','')})"
 
     if not found:
-        try:
-            resp = requests.get(RELEASE_API, timeout=timeout)
-            if resp.status_code == 200:
-                found = _from_release_api(resp.json(), key)
-                if found:
-                    found["source"] = RELEASE_API
-        except Exception as exc:  # noqa: BLE001
-            last_error = f"{type(exc).__name__}: {exc}"
+        got = _http_get_json(RELEASE_API, timeout=timeout)
+        tried.append(RELEASE_API)
+        if got.get("ok") and isinstance(got.get("data"), dict):
+            found = _from_release_api(got["data"], key)
+            if found:
+                found["source"] = RELEASE_API
+                found["how"] = got.get("how", "")
+        elif got.get("error"):
+            last_error = f"{got.get('error')} ({got.get('how','')})"
+
+    result["tried"] = tried
 
     if not found:
         result["error"] = last_error or "نسخه‌ی جدیدی پیدا نشد"
@@ -315,36 +346,54 @@ def download(cfg, url, dest: Path, sha256: str = "") -> dict:
 
 def _download_one(cfg, url: str, dest: Path, sha256: str = "") -> dict:
     """دانلود فایل با ذخیره‌ی وضعیت پیشرفت (برای نمایش در رابط کاربری)."""
-    requests = _request()
-    if requests is None:
-        return {"ok": False, "error": "کتابخانه‌ی requests در دسترس نیست"}
     dest = Path(dest)
     dest.parent.mkdir(parents=True, exist_ok=True)
 
-    try:
-        resp = requests.get(url, stream=True, timeout=60)
-        resp.raise_for_status()
-        total = int(resp.headers.get("content-length") or 0)
-        done = 0
-        with open(dest, "wb") as fh:
-            for block in resp.iter_content(1 << 16):
-                if not block:
-                    continue
-                fh.write(block)
-                done += len(block)
-                _write_state(cfg, downloading=True, file=dest.name,
-                             percent=round(done * 100 / total) if total else 0,
-                             downloaded=done, total=total)
-    except Exception as exc:  # noqa: BLE001
-        _write_state(cfg, downloading=False, error=str(exc))
-        return {"ok": False, "error": f"{type(exc).__name__}: {exc}"}
+    def _progress(done: int, total: int) -> None:
+        _write_state(cfg, downloading=True, file=dest.name,
+                     percent=round(done * 100 / total) if total else 0,
+                     downloaded=done, total=total)
+
+    requests = _request()
+    error = "requests در دسترس نیست"
+    downloaded = False
+    how = "requests"
+    if requests is not None:
+        try:
+            resp = requests.get(url, stream=True, timeout=60)
+            resp.raise_for_status()
+            total = int(resp.headers.get("content-length") or 0)
+            done = 0
+            with open(dest, "wb") as fh:
+                for block in resp.iter_content(1 << 16):
+                    if not block:
+                        continue
+                    fh.write(block)
+                    done += len(block)
+                    _progress(done, total)
+            downloaded = True
+            how = "requests"
+        except Exception as exc:  # noqa: BLE001
+            error = f"{type(exc).__name__}: {exc}"
+            how = "requests"
+
+    # تلاش با کتابخانه‌ی استاندارد (وقتی requests ناقص بسته‌بندی شده باشد)
+    if not downloaded:
+        got = _http_download(url, dest, progress=_progress)
+        if got.get("ok"):
+            downloaded = True
+            how = got.get("how", "stdlib")
+        else:
+            _write_state(cfg, downloading=False, error=str(got.get("error") or error))
+            return {"ok": False, "error": f"{error} | {got.get('error')}",
+                    "how": got.get("how", "stdlib")}
 
     if sha256 and sha256_of(dest).lower() != sha256.lower():
         _write_state(cfg, downloading=False, error="امضای فایل درست نیست")
         return {"ok": False, "error": "امضای فایل (sha256) با مانیفست یکی نیست"}
     _write_state(cfg, downloading=False, percent=100, file=dest.name,
                  downloaded=dest.stat().st_size, total=dest.stat().st_size)
-    return {"ok": True, "path": str(dest), "size": dest.stat().st_size}
+    return {"ok": True, "path": str(dest), "size": dest.stat().st_size, "how": how}
 
 
 # --------------------------------------------------------------------------- #

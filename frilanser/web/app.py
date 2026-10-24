@@ -409,12 +409,15 @@ def create_app(cfg: Config, store: Store, live: bool | None = None) -> Flask:
         from .. import updater
         from ..version import __version__, platform_key
 
+        from .. import http
+
         report = {
             "version": __version__, "platform": platform_key(),
             "python": _platform.python_version(),
             "home": str(cfg.root), "outbox": str(cfg.outbox_dir),
             "writable": os.access(str(cfg.outbox_dir), os.W_OK),
             "requests": False, "check": None, "trace": "",
+            "http": http.describe(), "probes": [],
         }
         try:
             import requests  # noqa: F401
@@ -422,6 +425,20 @@ def create_app(cfg: Config, store: Store, live: bool | None = None) -> Flask:
             report["requests"] = True
         except Exception as exc:  # noqa: BLE001
             report["requests"] = f"{type(exc).__name__}: {exc}"
+
+        # آزمایشِ واقعیِ دسترسی: کدام نشانی از روی دستگاه جواب می‌دهد؟
+        for url in updater.manifest_urls(cfg)[:4]:
+            try:
+                got = http.get_text(url, timeout=8)
+                report["probes"].append({
+                    "url": url, "ok": bool(got.get("ok")),
+                    "status": got.get("status"), "how": got.get("how"),
+                    "error": (got.get("error") or "")[:200],
+                    "head": (got.get("text") or "")[:100],
+                })
+            except Exception as exc:  # noqa: BLE001
+                report["probes"].append({"url": url, "ok": False,
+                                         "error": f"{type(exc).__name__}: {exc}"})
         try:
             report["check"] = updater.check_update(cfg, timeout=8)
             report["manifest_urls"] = updater.manifest_urls(cfg)
