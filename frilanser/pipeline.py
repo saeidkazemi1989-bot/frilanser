@@ -38,11 +38,13 @@ def collect(cfg: Config, store: Store, offline: bool = True, refresh: bool = Fal
             try:
                 got = source.collect(extra_urls=extra_urls, force=refresh)
                 per_source[key] = {"label": source.label, "ok": True, "offline": False,
-                                   "fetched": len(got), "error": ""}
+                                   "fetched": len(got), "error": "",
+                                   "fetch": source.fetch_report()}
                 projects.extend(got)
             except Exception as exc:  # noqa: BLE001 - خرابیِ یک سایت نباید بقیه را بخواباند
                 per_source[key] = {"label": source.label, "ok": False, "offline": False,
-                                   "fetched": 0, "error": f"{type(exc).__name__}: {exc}"}
+                                   "fetched": 0, "error": f"{type(exc).__name__}: {exc}",
+                                   "fetch": source.fetch_report()}
                 print(f"  ! {source.label}: {type(exc).__name__}: {exc}")
         if not projects:  # اگر دسترسی نبود، از اسنپ‌شات استفاده کن
             print("  ! دریافت زنده ناموفق بود؛ از اسنپ‌شات‌های محلی استفاده می‌شود")

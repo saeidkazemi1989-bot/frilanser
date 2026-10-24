@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+{% block title %}گزارشِ اسکن — فریلنس‌یار آرنا{% endblock %}
+{% block body %}
+
+<div class="panel">
+  <h2>🩺 گزارشِ آخرین اسکن (چرا آگهی جدید نمی‌آید؟)</h2>
+  {% if not last_scan %}
+    <p class="muted">هنوز هیچ اسکنی انجام نشده. به صفحه‌ی اصلی برگردید و «🔄 الان اسکن کن» را بزنید، سپس اینجا را تازه کنید.</p>
+  {% else %}
+    <div class="kv" style="margin-bottom:10px">
+      <span>زمان: {{ last_scan.get('age_text') or '—' }}</span>
+      <span>نوع: {{ 'دستی' if last_scan.get('trigger')=='manual' else 'خودکار' }}</span>
+      <span>{{ 'آفلاین (اسنپ‌شات)' if last_scan.get('offline') else 'آنلاین (از سایت‌ها)' }}</span>
+      <span>آگهی‌های بررسی‌شده: {{ last_scan.get('fetched', 0) }}</span>
+      <span>جدید: {{ last_scan.get('new', 0) }}</span>
+      {% if last_scan.get('fell_back') %}<span class="badge warn">دریافت زنده ناموفق بود؛ از نسخه‌ی ذخیره‌شده خوانده شد</span>{% endif %}
+      {% if last_scan.get('error') %}<span class="badge bad">{{ last_scan.get('error')[:120] }}</span>{% endif %}
+    </div>
+  {% endif %}
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
+    <a href="{{ url_for('index') }}">بازگشت به پروژه‌ها</a>
+    <button type="button" data-copy="report-text">📋 کپیِ گزارش (بفرستید برای پشتیبانی)</button>
+  </div>
+</div>
+
+<div id="report-text" class="panel">
+{% for key, info in sources.items() %}
+  <div class="task">
+    <div class="h">
+      <h3>{{ info.label }} <span class="muted" style="font-size:12px">(<span dir="ltr">{{ key }}</span>)</span></h3>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        {% if info.ok %}
+          <span class="badge {% if info.fetched %}ok{% else %}warn{% endif %}">
+            {{ info.fetched }} آگهی پیدا شد
+          </span>
+        {% else %}
+          <span class="badge bad">ناموفق</span>
+        {% endif %}
+        {% if info.error %}<span class="muted" style="font-size:12px">{{ info.error }}</span>{% endif %}
+      </div>
+    </div>
+    {% set fr = info.get('fetch') or {} %}
+    <div class="muted" style="font-size:12.5px;margin-top:6px">
+      تلاش‌ها: {{ fr.get('attempts', 0) }} | موفق: {{ fr.get('ok', 0) }} | ناموفق: {{ fr.get('failed', 0) }}
+      | حجمِ دریافتی: {{ '{:,}'.format(fr.get('chars', 0)) }} کاراکتر
+      | کوکیِ ورود: {{ 'دارد ✓' if fr.get('has_cookie') else 'ندارد' }}
+    </div>
+    {% for e in (fr.get('log') or []) %}
+      <div class="muted" style="font-size:12px;margin-top:6px">
+        <span class="badge {{ 'ok' if e.ok else 'bad' }}">{{ e.get('status') or ('کش' if e.get('cached') else 'خطا') }}</span>
+        <span dir="ltr" style="word-break:break-all">{{ e.get('url') }}</span>
+        <span>({{ '{:,}'.format(e.get('chars') or 0) }} کاراکتر{% if e.get('cached') %} — از کش{% endif %})</span>
+        {% if e.get('error') %}<div style="color:#a02626">{{ e.error }}</div>{% endif %}
+        {% if e.get('sample') %}
+          <pre dir="auto" style="background:#f8fafc;border:1px solid #e5e8f0;border-radius:10px;
+               padding:8px;font-size:11.5px;max-height:120px;overflow:auto;white-space:pre-wrap">{{ e.sample }}</pre>
+        {% endif %}
+      </div>
+    {% endfor %}
+  </div>
+{% else %}
+  <p class="muted">گزارشی ثبت نشده است. یک بار «الان اسکن کن» را بزنید و دوباره اینجا بیایید.</p>
+{% endfor %}
+</div>
+
+{% if request.args.get('pasted') or request.args.get('err') %}
+<div class="panel" style="border-color:{% if request.args.get('pasted') != '0' and request.args.get('pasted') %}#b7e6cd{% else %}#f6c9c9{% endif %}">
+  <b>نتیجه‌ی خواندنِ متنِ شما:</b>
+  {% if request.args.get('err') %}
+    <span style="color:#a02626">{{ request.args.get('err') }}</span>
+  {% else %}
+    {{ request.args.get('parsed') }} آگهی در متن پیدا شد → {{ request.args.get('pasted') }} آگهی جدید به برنامه اضافه شد.
+    {% if request.args.get('sample') %}<div class="muted">نمونه: {{ request.args.get('sample') }}</div>{% endif %}
+    <div style="margin-top:8px"><a href="{{ url_for('index') }}">دیدنِ پروژه‌ها ↗</a></div>
+  {% endif %}
+</div>
+{% endif %}
+
+<div class="panel">
+  <h2>📋 خواندنِ آگهی‌ها از متنِ صفحه (برای سایت‌هایی که فقط با اکانت باز می‌شوند)</h2>
+  <p class="muted">
+    اگر سایتی روی اینترنتِ شما باز نمی‌شود یا فقط وقتی وارد شده‌اید آگهی نشان می‌دهد:
+    آن صفحه را در مرورگرِ گوشی باز کنید، با نگه داشتن روی صفحه «انتخاب همه» و سپس «کپی» را بزنید،
+    و متن را اینجا بچسبانید. برنامه همان آگهی‌ها را می‌خواند، غربال می‌کند و قیمت می‌گذارد.
+  </p>
+  <form method="post" action="{{ url_for('paste_page') }}">
+    <div style="margin:8px 0">
+      <label style="font-size:13px">این متن مالِ کدام سایت است؟</label><br>
+      <select name="source" style="border:1px solid #d9deeb;border-radius:10px;padding:7px 10px;font:inherit;font-size:13px">
+        {% for s in source_info %}
+          <option value="{{ s.key }}">{{ s.label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div style="margin:8px 0">
+      <label style="font-size:13px">متنِ صفحه (یا اچ‌تی‌ام‌ال):</label><br>
+      <textarea name="text" rows="6" placeholder="متنِ صفحه‌ی آگهی‌ها را اینجا بچسبانید…"
+                style="width:100%;border:1px solid #d9deeb;border-radius:10px;padding:8px 10px;font:inherit;font-size:12.5px"></textarea>
+    </div>
+    <div style="margin:8px 0">
+      <label style="font-size:13px">نشانیِ صفحه (اختیاری):</label><br>
+      <input type="text" name="url" dir="ltr" placeholder="https://..."
+             style="width:100%;border:1px solid #d9deeb;border-radius:10px;padding:7px 10px;font:inherit;font-size:12px">
+    </div>
+    <button type="submit">📥 بخوان و به فهرست اضافه کن</button>
+  </form>
+</div>
+
+<div class="panel">
+  <h2>🍪 اگر سایتی فقط با اکانت آگهی نشان می‌دهد</h2>
+  <p class="muted">
+    در مرورگرِ گوشی وارد آن سایت شوید، سپس کوکیِ نشست را اینجا بگذارید تا برنامه با همان نشست صفحه را بخواند.
+    (روشِ ساده: در کروم آدرس‌بار را لمس کنید و <span dir="ltr">view-source:</span> را پیش از آدرس بگذارید؛ یا از افزونه‌ی
+    نمایشِ کوکی استفاده کنید. مقدارِ کوکی را همان‌طور که هست اینجا پیست کنید.)
+  </p>
+  <form method="post" action="{{ url_for('save_sources') }}">
+    {% for s in source_info %}
+      {% if s.enabled %}
+      <div style="margin:8px 0">
+        <label style="font-size:13px">{{ s.label }}</label><br>
+        <input type="text" name="cookie__{{ s.key }}" dir="ltr" placeholder="name=value; name2=value2"
+               style="width:100%;border:1px solid #d9deeb;border-radius:10px;padding:7px 10px;font:inherit;font-size:12px">
+      </div>
+      {% endif %}
+      <input type="hidden" name="source" value="{{ s.key }}">
+    {% endfor %}
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
+      <button type="submit">💾 ذخیره‌ی کوکی</button>
+      <button type="submit" name="scan" value="1">💾 ذخیره و اسکنِ تازه</button>
+    </div>
+  </form>
+  <div class="muted" style="font-size:12px;margin-top:8px">
+    کوکی‌ها فقط در <code>outbox/source-secrets.json</code> روی دستگاهِ خودتان ذخیره می‌شوند و به اینترنت فرستاده نمی‌شوند.
+  </div>
+</div>
+
+{% endblock %}

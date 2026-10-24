@@ -22,6 +22,36 @@ SOURCE_CLASSES: dict[str, type[BaseSource]] = {
 PREFS_FILE = "source-prefs.json"
 
 
+SECRETS_FILE = "source-secrets.json"
+
+
+def load_source_secrets(cfg: Config) -> dict[str, str]:
+    """کوکی/نشانه‌ی ورودِ هر سایت (جدا از تنظیمات، در فایلِ خروجی‌ها)."""
+    path = Path(cfg.outbox_dir) / SECRETS_FILE
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return {}
+    cookies = data.get("cookie") if isinstance(data, dict) else None
+    return {str(k): str(v or "").strip() for k, v in (cookies or {}).items()} \
+        if isinstance(cookies, dict) else {}
+
+
+def save_source_secrets(cfg: Config, cookies: dict[str, str]) -> dict[str, str]:
+    """ذخیره‌ی کوکیِ ورود (برای سایت‌هایی که فقط با اکانت آگهی نشان می‌دهند)."""
+    known = set(cfg.sources)
+    clean = {k: str(v or "").strip() for k, v in (cookies or {}).items() if k in known}
+    clean = {k: v for k, v in clean.items() if v}          # خالی‌ها حذف شوند
+    path = Path(cfg.outbox_dir) / SECRETS_FILE
+    try:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(json.dumps({"cookie": clean}, ensure_ascii=False, indent=2),
+                        encoding="utf-8")
+    except OSError:
+        pass
+    return clean
+
+
 def load_source_prefs(cfg: Config) -> dict[str, bool]:
     """انتخابِ کاربر: کدام سایت‌ها اسکن شوند؟
 

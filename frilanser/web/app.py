@@ -226,14 +226,88 @@ def create_app(cfg: Config, store: Store, live: bool | None = None) -> Flask:
                          base_url=base_url, refresh=not offline)
         return redirect(url_for("index"))
 
+    @app.get("/scan-report")
+    def scan_report():
+        """گزارشِ دقیقِ آخرین اسکن: هر سایت چه فرستاد (برای پیدا کردنِ علتِ آگهی نیامدن)."""
+        svc = app.extensions.get("live")
+        last = ((svc.last_scan or {}) if svc else {}) or {}
+        sources = last.get("sources") or {}
+        return render_template(
+            "scan_report.html",
+            stats=summarize(),
+            last_scan=last,
+            sources=sources or {},
+            cfg=cfg,
+            source_info=source_info(),
+            has_live=svc is not None,
+        )
+
+    @app.post("/paste")
+    def paste_page():
+        """خواندنِ آگهی‌ها از متن/اچ‌تی‌ام‌الِ صفحه‌ای که خودتان کپی کرده‌اید.
+
+        برای سایت‌هایی که فقط با اکانت آگهی نشان می‌دهند (یا روی اینترنتِ شما در
+        دسترس نیستند): صفحه را در مرورگر باز کنید، همه را کپی کنید و اینجا
+        بچسبانید تا برنامه همان آگهی‌ها را به فهرست اضافه کند.
+        """
+        from ..sources.registry import SOURCE_CLASSES
+
+        key = (request.form.get("source") or "").strip()
+        text = request.form.get("text") or ""
+        url = (request.form.get("url") or "").strip()
+        result: dict = {"ok": False, "parsed": 0, "added": 0, "updated": 0, "error": ""}
+        try:
+            scfg = (cfg.sources or {}).get(key) or {}
+            cls = SOURCE_CLASSES.get(scfg.get("kind", key))
+            if not cls:
+                result["error"] = "سایت انتخاب نشده یا ناشناس است"
+            elif len(text.strip()) < 50:
+                result["error"] = "متن خیلی کوتاه است (صفحه را کامل کپی کنید)"
+            else:
+                source = cls(cfg, key)
+                body = source.html_to_text(text) if ("<" in text and ">" in text) else text
+                records = source.parse(body)
+                projects = source.to_projects(records)
+                if url:
+                    for project in projects:
+                        project.url = project.url or url
+                new, updated = store.upsert_many(projects)
+                store.save()
+                from ..pipeline import price_projects, screen_projects
+
+                screen_projects(cfg, store, force=False)
+                price_projects(cfg, store, force=False)
+                store.log("paste", key, f"{new} جدید از متنِ دستی ({len(records)} رکورد)")
+                result.update({"ok": True, "parsed": len(records), "added": new,
+                               "updated": updated,
+                               "sample": (records[0].get("title", "") if records else "")})
+        except Exception as exc:  # noqa: BLE001
+            result["error"] = f"{type(exc).__name__}: {exc}"
+
+        if request.headers.get("X-Requested-With") == "live":
+            return jsonify(result)
+        return redirect(url_for(
+            "scan_report", pasted=result.get("added", 0), parsed=result.get("parsed", 0),
+            err=(result.get("error") or "")[:140],
+            sample=(result.get("sample") or "")[:80]))
+
     @app.post("/sources")
     def save_sources():
         """انتخابِ کاربر: کدام سایت‌ها اسکن شوند (در فایلِ جداگانه ذخیره می‌شود)."""
-        from ..sources.registry import save_source_prefs
+        from ..sources.registry import save_source_prefs, save_source_secrets
 
         chosen = set(request.form.getlist("source"))
         enabled = {key: (key in chosen) for key in (cfg.sources or {})}
         saved = save_source_prefs(cfg, enabled)
+
+        # کوکیِ ورود (اگر کاربر برای سایتی که نیاز به اکانت دارد، پر کرده باشد)
+        cookies = {}
+        prefix = "cookie__"
+        for field, value in request.form.items():
+            if field.startswith(prefix) and str(value).strip():
+                cookies[field[len(prefix):]] = str(value).strip()
+        if cookies:
+            save_source_secrets(cfg, cookies)
         if request.form.get("scan") == "1" and saved:
             svc = app.extensions.get("live")
             if svc is not None:

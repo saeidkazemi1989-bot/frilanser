@@ -13,7 +13,12 @@ from ..models import Project
 
 
 class FetchError(RuntimeError):
-    pass
+    """خطا در دریافتِ یک صفحه؛ نشانی و کدِ پاسخ را هم همراه دارد (برای گزارش)."""
+
+    def __init__(self, message: str, url: str = "", status: int | None = None):
+        super().__init__(message)
+        self.url = url
+        self.status = status
 
 
 class BaseSource:
@@ -28,42 +33,97 @@ class BaseSource:
         self.key = source_key
         self.scfg = cfg.sources.get(source_key, {})
         self.cache_dir = cfg.cache_dir
+        # گزارشِ آخرین دریافت‌ها (برای اینکه بدانیم چرا آگهی جدید نمی‌آید)
+        self.fetch_log: list[dict] = []
+
+    def _cookie(self) -> str:
+        """کوکیِ ورود به سایت (اگر کاربر در برنامه یا config گذاشته باشد)."""
+        value = str(self.scfg.get("cookie") or "").strip()
+        if value:
+            return value
+        try:
+            from .registry import load_source_secrets
+
+            return str(load_source_secrets(self.cfg).get(self.key) or "").strip()
+        except Exception:  # noqa: BLE001
+            return ""
 
     # ---------------- fetch ----------------
     def fetch_text(self, url: str, force: bool = False) -> str:
         """اگر url مسیر فایل محلی است آن را می‌خواند، در غیر این صورت از شبکه."""
+        entry: dict = {"url": url, "ok": False, "status": None, "chars": 0,
+                       "error": "", "cached": False, "sample": ""}
+        self.fetch_log.append(entry)
+        if len(self.fetch_log) > 40:
+            self.fetch_log[:] = self.fetch_log[-40:]
+
         if not url.lower().startswith(("http://", "https://")):
             path = Path(url)
             if not path.is_absolute():
                 path = self.cfg.root / url
             if not path.exists():
-                raise FetchError(f"فایل اسنپ‌شات پیدا نشد: {path}")
-            return path.read_text(encoding="utf-8")
+                entry["error"] = f"فایل اسنپ‌شات پیدا نشد: {path}"
+                raise FetchError(entry["error"], url=url)
+            text = path.read_text(encoding="utf-8")
+            entry.update({"ok": True, "chars": len(text), "cached": True,
+                          "sample": text[:400]})
+            return text
 
         cache_file = self.cache_dir / f"{self.key}-{hashlib.md5(url.encode()).hexdigest()[:12]}.txt"
         if cache_file.exists() and not force and self._cache_is_fresh(cache_file):
-            return cache_file.read_text(encoding="utf-8")
+            text = cache_file.read_text(encoding="utf-8")
+            entry.update({"ok": True, "chars": len(text), "cached": True,
+                          "sample": text[:400]})
+            return text
 
         if not self.cfg.allow_network:
-            raise FetchError(
-                f"دسترسی شبکه غیرفعال است (allow_network=false) و کش برای {url} وجود ندارد"
-            )
+            entry["error"] = (f"دسترسی شبکه غیرفعال است (allow_network=false) و "
+                              f"کشِ تازه‌ای برای {url} وجود ندارد")
+            raise FetchError(entry["error"], url=url)
 
         try:
             import requests  # noqa: PLC0415 - وابستگی اختیاری
         except ImportError as exc:  # pragma: no cover
             raise FetchError("برای دریافت زنده پکیج requests لازم است: pip install requests") from exc
 
-        headers = {"User-Agent": self.cfg.fetch.get("user_agent", "frilanser/1.0")}
-        resp = requests.get(url, headers=headers, timeout=self.cfg.fetch.get("timeout_seconds", 25))
-        resp.raise_for_status()
-        html = resp.text
+        headers = {"User-Agent": self.cfg.fetch.get("user_agent", "frilanser/1.0"),
+                   "Accept-Language": "fa-IR,fa;q=0.9,en;q=0.6"}
+        cookie = self._cookie()
+        if cookie:
+            headers["Cookie"] = cookie
+        try:
+            resp = requests.get(url, headers=headers,
+                                timeout=self.cfg.fetch.get("timeout_seconds", 25))
+            entry["status"] = resp.status_code
+            resp.raise_for_status()
+            html = resp.text
+            entry.update({"ok": True, "chars": len(html)})
+        except Exception as exc:  # noqa: BLE001 - علتِ دقیق در گزارش ثبت می‌شود
+            entry["error"] = f"{type(exc).__name__}: {exc}"
+            if isinstance(exc, FetchError):
+                raise
+            raise FetchError(entry["error"], url=url, status=entry.get("status")) from exc
 
         text = self.html_to_text(html)
+        entry["sample"] = text[:400]
         self.cache_dir.mkdir(parents=True, exist_ok=True)
         cache_file.write_text(text, encoding="utf-8")
         time.sleep(float(self.cfg.fetch.get("delay_between_requests", 1.0)))
         return text
+
+    def fetch_report(self) -> dict:
+        """خلاصه‌ی آخرین تلاش‌ها برای دریافت (برای نمایش در «گزارشِ اسکن»)."""
+        ok = [e for e in self.fetch_log if e.get("ok")]
+        return {
+            "key": self.key,
+            "label": getattr(self, "label", self.key),
+            "has_cookie": bool(self._cookie()),
+            "attempts": len(self.fetch_log),
+            "ok": len(ok),
+            "failed": len(self.fetch_log) - len(ok),
+            "chars": sum(int(e.get("chars") or 0) for e in self.fetch_log),
+            "log": self.fetch_log[-12:],
+        }
 
     def _cache_is_fresh(self, cache_file: Path) -> bool:
         """آیا کش هنوز اعتبار دارد؟

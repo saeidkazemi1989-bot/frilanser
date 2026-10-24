@@ -1371,3 +1371,134 @@ def test_download_falls_back_to_next_url(tmp_path, monkeypatch):
                         lambda *a, **k: {"ok": False, "error": "همه بسته‌اند"})
     res2 = updater.download(cfg, ["https://a/x", "https://b/x"], tmp_path / "b.apk")
     assert res2["ok"] is False and "tried" in res2
+
+
+# ---------------------------------------------- گزارشِ اسکن و کوکیِ ورود
+class _FakeResp:
+    def __init__(self, text: str, status: int = 200):
+        self.text = text
+        self.status_code = status
+
+    def raise_for_status(self):
+        if self.status_code >= 400:
+            raise RuntimeError(f"خطای HTTP {self.status_code}")
+
+
+def _fake_requests(handler):
+    """ماژولِ requests ساختگی برای تستِ بدون اینترنت."""
+    import sys
+    import types as _t
+
+    mod = _t.ModuleType("requests")
+    mod.get = staticmethod(handler)
+    return mod
+
+
+def test_fetch_log_records_status_and_sample(tmp_path, monkeypatch):
+    """هر تلاشِ دریافت با کدِ پاسخ و نمونه‌ای از متن ثبت می‌شود (برای گزارش)."""
+    import sys
+
+    from frilanser.sources.base import BaseSource
+
+    cfg = _sources_cfg(tmp_path, fetch={"cache_ttl_hours": 0, "timeout_seconds": 5,
+                                        "delay_between_requests": 0})
+    monkeypatch.setitem(sys.modules, "requests",
+                        _fake_requests(lambda url, **kw: _FakeResp("<html>آگهی تست</html>")))
+    src = BaseSource(cfg, "karlancer")
+    text = src.fetch_text("https://example.invalid/jobs", force=True)
+
+    assert "آگهی" in text
+    rep = src.fetch_report()
+    assert rep["attempts"] == 1 and rep["ok"] == 1 and rep["failed"] == 0
+    assert rep["log"][0]["status"] == 200
+    assert rep["log"][0]["chars"] > 0
+    assert "آگهی" in (rep["log"][0]["sample"] or "")
+    assert rep["has_cookie"] is False
+
+
+def test_fetch_log_records_http_error(tmp_path, monkeypatch):
+    """کدِ خطای سایت (مثل ۴۰۳ نیاز به ورود) در گزارش دیده می‌شود."""
+    import sys
+
+    from frilanser.sources.base import BaseSource, FetchError
+
+    cfg = _sources_cfg(tmp_path, fetch={"cache_ttl_hours": 0, "timeout_seconds": 5,
+                                        "delay_between_requests": 0})
+    monkeypatch.setitem(sys.modules, "requests",
+                        _fake_requests(lambda url, **kw: _FakeResp("denied", 403)))
+    src = BaseSource(cfg, "karlancer")
+    with pytest.raises(FetchError):
+        src.fetch_text("https://example.invalid/jobs", force=True)
+
+    rep = src.fetch_report()
+    assert rep["failed"] == 1 and rep["ok"] == 0
+    assert rep["log"][0]["status"] == 403
+
+
+def test_cookie_from_secrets_is_sent(tmp_path, monkeypatch):
+    """کوکی‌ای که کاربر در برنامه می‌گذارد همراهِ درخواست فرستاده می‌شود."""
+    import sys
+
+    from frilanser.sources.base import BaseSource
+    from frilanser.sources.registry import load_source_secrets, save_source_secrets
+
+    cfg = _sources_cfg(tmp_path, fetch={"cache_ttl_hours": 0, "timeout_seconds": 5,
+                                        "delay_between_requests": 0})
+    save_source_secrets(cfg, {"karlancer": "sid=abc; uid=7"})
+    assert load_source_secrets(cfg)["karlancer"].startswith("sid=abc")
+
+    seen: dict = {}
+    monkeypatch.setitem(sys.modules, "requests",
+                        _fake_requests(lambda url, **kw: (seen.update(kw) or _FakeResp("ok"))))
+    src = BaseSource(cfg, "karlancer")
+    src.fetch_text("https://example.invalid/jobs", force=True)
+
+    assert seen.get("headers", {}).get("Cookie") == "sid=abc; uid=7"
+    assert src.fetch_report()["has_cookie"] is True
+
+
+def test_scan_report_page_renders(tmp_path):
+    """صفحه‌ی «گزارشِ اسکن» در دسترس است (برای فرستادنِ علت به پشتیبانی)."""
+    from frilanser.store import Store
+    from frilanser.web.app import create_app
+
+    cfg = _sources_cfg(tmp_path)
+    client = create_app(cfg, Store(cfg.data_dir), live=False).test_client()
+    page = client.get("/scan-report")
+    assert page.status_code == 200
+    text = page.get_data(as_text=True)
+    assert "گزارشِ آخرین اسکن" in text
+    assert "اگر سایتی فقط با اکانت آگهی نشان می‌دهد" in text
+    assert "cookie__karlancer" in text
+
+
+def test_paste_page_adds_projects(tmp_path):
+    """متن/اچ‌تی‌ام‌الِ صفحه‌ای که کاربر می‌چسباند، آگهی می‌سازد."""
+    from frilanser.store import Store
+    from frilanser.web.app import create_app
+
+    cfg = _sources_cfg(tmp_path)
+    store = Store(cfg.data_dir)
+    client = create_app(cfg, store, live=False).test_client()
+
+    page = """###### [1a2b3c - طراحی سایت فروشگاهی](https://www.karlancer.com/projects/1a2b3c)
+###### حداکثر بودجه: 8,000,000 تومان
+###### 3 پیشنهاد
+
+فروشگاه اینترنتی با وردپرس و ووکامرس می‌خواهم که امکان پرداخت آنلاین داشته باشد
+و صفحه‌ی محصول برای هر کالا با تصویر و توضیحات کامل نمایش داده شود.
+"""
+    res = client.post("/paste", data={"source": "karlancer", "text": page,
+                                      "url": "https://www.karlancer.com/jobs/programming"})
+    assert res.status_code == 302
+    assert "pasted=1" in res.headers["Location"] or "parsed=1" in res.headers["Location"]
+
+    stored = store.all()
+    assert len(stored) == 1
+    assert "فروشگاه" in stored[0].title
+    assert stored[0].screening is not None and stored[0].proposal is not None
+
+    # متنِ خیلی کوتاه رد می‌شود و چیزی اضافه نمی‌کند
+    res2 = client.post("/paste", data={"source": "karlancer", "text": "سلام"})
+    assert "err=" in res2.headers["Location"]
+    assert len(store.all()) == 1
