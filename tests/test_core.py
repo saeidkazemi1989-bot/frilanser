@@ -1800,3 +1800,40 @@ def test_empty_listing_url_in_config_does_not_win():
     cfg = Config({"sources": {"ponisha": {"enabled": True, "listing_url": ""}}},
                  Path(".") / "config.toml")
     assert cfg.sources["ponisha"]["listing_url"].startswith("https://ponisha.ir")
+
+
+# ---------------------------------------------------------------------------
+# گزارشِ کهنه‌ی نسخه‌ی قبل نباید نشان داده شود (۱.۰.۱۲)
+# ---------------------------------------------------------------------------
+def test_stale_scan_record_from_other_version_is_dropped(tmp_path, monkeypatch):
+    """رکوردِ مانده از نسخه‌ی دیگر ممکن است ساختارِ دیگری داشته باشد و گمراه کند."""
+    from frilanser import live as live_mod
+    from frilanser.live import LiveService
+
+    cfg = _sources_cfg(tmp_path)
+    from frilanser.store import Store
+
+    store = Store(cfg.data_dir)
+    state_path = Path(cfg.outbox_dir) / live_mod.STATE_FILE
+    state_path.parent.mkdir(parents=True, exist_ok=True)
+    state_path.write_text(json.dumps({
+        "auto": True,
+        "last_scan": {"ok": True, "at": 1, "fetched": 0, "app_version": "0.9.9",
+                      "sources": {"ponisha": {"ok": True, "fetched": 0}}},
+    }), encoding="utf-8")
+
+    svc = LiveService(cfg, store)
+    assert svc.last_scan is None, "گزارشِ نسخه‌ی دیگر باید کنار گذاشته شود"
+
+
+def test_scan_record_is_stamped_with_app_version(tmp_path):
+    """هر رکورد باید شماره‌ی نسخه‌ی سازنده‌اش را داشته باشد."""
+    from frilanser import live as live_mod
+    from frilanser.live import LiveService
+    from frilanser.store import Store
+
+    cfg = _sources_cfg(tmp_path)
+    svc = LiveService(cfg, Store(cfg.data_dir))
+    svc._run_scan(trigger="manual", offline=True)
+    assert svc.last_scan["app_version"] == live_mod.__version__
+    assert svc.last_scan.get("running") is False

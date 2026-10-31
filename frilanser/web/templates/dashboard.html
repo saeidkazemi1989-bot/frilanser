@@ -1,6 +1,31 @@
 {# تکه‌ی زنده‌ی داشبورد — هم در صفحه‌ی اصلی قرار می‌گیرد و هم با /fragment
    برای نوسازیِ خودکار (بدون بارگذاریِ دوباره‌ی صفحه) بازخوانی می‌شود. #}
 
+{% set _att = scan_attempts or 0 %}
+{% set _err = scan_error or '' %}
+
+{# یک خطِ وضعیت: با یک نگاه معلوم شود برنامه چه کرده #}
+{% if last_scan %}
+<div class="panel" id="status-line" style="padding:10px 12px;margin-bottom:12px;background:#f7f9fc">
+  <div style="font-size:12.5px;line-height:1.9" dir="auto">
+    <b>وضعیت:</b>
+    {% if last_scan.get('running') %}
+      ⏳ در حال اسکن… ({{ last_scan.get('duration', 0) }} ثانیه گذشته)
+    {% else %}
+      {% if last_scan.get('offline') %}آفلاین (فایل‌های همراه){% else %}آنلاین (از سایت‌ها){% endif %}
+      | تعداد منبع: {{ (last_scan.get('sources') or {}) | length }}
+      | تلاش برای دریافت: {{ _att }}
+      | آگهی: {{ last_scan.get('fetched', 0) }} (جدید: {{ last_scan.get('new', 0) }})
+      | زمان: {{ last_scan.get('age_text') or '—' }}
+      {% if last_scan.get('app_version') and last_scan.get('app_version') != version %}
+        <span class="badge warn">این گزارش مالِ نسخه‌ی {{ last_scan.get('app_version') }} است</span>
+      {% endif %}
+    {% endif %}
+    {% if _err %}<div style="color:#a02626">خطا: {{ _err[:200] }}</div>{% endif %}
+  </div>
+</div>
+{% endif %}
+
 {% set _offline_empty = last_scan and last_scan.get('offline') and not last_scan.get('fetched') %}
 {% if (last_scan and last_scan.get('live_failed')) or _offline_empty %}
 <div class="panel" id="fetch-warning" style="padding:12px 14px;margin-bottom:12px;border-color:#f6c9c9;background:#fff8f8">

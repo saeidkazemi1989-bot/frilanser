@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import os
+import time
 from pathlib import Path
 
 from flask import (
@@ -20,6 +21,7 @@ from flask import (
 from ..config import Config
 from ..models import PROPOSAL_STATES, STATUS_LABELS, VERDICT_LABELS, Project
 from ..store import Store
+from ..version import __version__
 
 BUDGET_VERDICT_FA = {
     "excellent": ("بودجه عالی", "ok"),
@@ -144,6 +146,9 @@ def create_app(cfg: Config, store: Store, live: bool | None = None) -> Flask:
             "source_info": source_info(),
             "projects": projects,
             "stats": summarize(),
+            "version": __version__,
+            "scan_attempts": _scan_attempts(),
+            "scan_error": _scan_error(),
             "verdict": verdict,
             "source": source,
             "q": q,
@@ -157,6 +162,26 @@ def create_app(cfg: Config, store: Store, live: bool | None = None) -> Flask:
             "last_scan": (((app.extensions.get("live").last_scan or {})
                            if app.extensions.get("live") else {}) or {}),
         }
+
+    def _last_scan_record() -> dict:
+        svc = app.extensions.get("live")
+        return ((svc.last_scan or {}) if svc else {}) or {}
+
+    def _scan_attempts() -> int:
+        """جمعِ تلاش‌های دریافت در آخرین اسکن (۰ یعنی اصلاً تلاش نشده)."""
+        total = 0
+        for info in (_last_scan_record().get("sources") or {}).values():
+            total += int(((info or {}).get("fetch") or {}).get("attempts") or 0)
+        return total
+
+    def _scan_error() -> str:
+        record = _last_scan_record()
+        if record.get("error"):
+            return str(record["error"])
+        for info in (record.get("sources") or {}).values():
+            if (info or {}).get("error"):
+                return str(info["error"])
+        return ""
 
     # -------------------------------------------------------------- routes
     @app.get("/")
@@ -233,7 +258,13 @@ def create_app(cfg: Config, store: Store, live: bool | None = None) -> Flask:
         if svc is not None and not offline:
             # از سرویسِ زنده استفاده می‌کنیم تا نتیجه در «گزارشِ اسکن» هم ثبت شود
             svc.scan_now(trigger="manual", refresh=True)
-            return redirect(url_for("index"))
+            # کمی صبر می‌کنیم تا اسکنِ تازه جای رکوردِ کهنه را بگیرد و کاربر
+            # نتیجه‌ی واقعی را ببیند، نه گزارشِ به‌جامانده از نسخه‌ی قبل.
+            for _ in range(60):
+                time.sleep(1)
+                if not getattr(svc, "scanning", False):
+                    break
+            return redirect(url_for("scan_report"))
 
         from .. import pipeline
 

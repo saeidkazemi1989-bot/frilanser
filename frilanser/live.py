@@ -86,7 +86,13 @@ class LiveService:
         except (OSError, json.JSONDecodeError):
             saved = {}
         self.auto = bool(saved.get("auto", True))
-        self.last_scan = saved.get("last_scan") or None
+        stored = saved.get("last_scan") or None
+        if isinstance(stored, dict) and stored.get("app_version") \
+                and stored.get("app_version") != __version__:
+            # رکوردِ مانده از نسخه‌ی دیگر: ممکن است ساختارش فرق کند و باعث
+            # شود گزارشِ غلط (مثلاً «نشانی خالی») نشان داده شود.
+            stored = None
+        self.last_scan = stored
         self.last_update = saved.get("last_update") or None
         self.next_scan_at = saved.get("next_scan_at") or None
 
@@ -204,7 +210,12 @@ class LiveService:
             "ok": False, "at": time.time(), "trigger": trigger,
             "offline": use_offline, "new": 0, "updated": 0, "fetched": 0,
             "duration": 0.0, "error": "", "closed": 0,
+            "app_version": __version__, "running": True,
         }
+        # بلافاصله وضعیتِ «در حال اسکن» را ذخیره می‌کنیم تا گزارشِ کهنه‌ی
+        # نسخه‌ی قبلی جای نتیجه‌ی تازه را نگیرد.
+        self.last_scan = record
+        self._save_state()
         try:
             try:
                 result = pipeline.run_all(
@@ -257,6 +268,8 @@ class LiveService:
                     record["error"] = " | ".join(why)
         finally:
             record["duration"] = round(time.time() - started, 1)
+            record["running"] = False
+            record["app_version"] = __version__
             self.scanning = False
             self.last_scan = record
             self.refresh_stamp()
