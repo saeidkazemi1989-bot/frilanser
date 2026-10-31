@@ -962,7 +962,6 @@ stty: 'standard input': Inappropriate ioctl for device
 
 
 [WARNING]: prerequisites.py is experimental and does not support all prerequisites yet.
-[WARNING]: Please report any issues to the python-for-android issue tracker.
 [0m[1;34m# Build the application #1[0m
 [0m[1;30m# Copy application source from /home/runner/work/frilanser/frilanser/android[0m
 [0m[1;30m# Create directory /home/runner/work/frilanser/frilanser/android/.buildozer/android/app[0m
@@ -1027,8 +1026,9 @@ stty: 'standard input': Inappropriate ioctl for device
 [0m[1;30m# Copy /home/runner/work/frilanser/frilanser/android/data/raw/karlancer-2026-09-28.json[0m
 [0m[1;34m# Package the application[0m
 [0m[1;30m# project.properties updated[0m
-[0m[1;30m# Run ['/opt/hostedtoolcache/Python/3.11.17/x64/bin/python', '-m', 'pythonforandroid.toolchain', 'apk', '--bootstrap', 'webview', '--dist_name', 'frilanser', '--name', 'فریلنسر یار آرنا', '--version', '1.0.11', '--package', 'org.arena.frilanser', '--minsdk', '24', '--ndk-api', '24', '--private', '/home/runner/work/frilanser/frilanser/android/.buildozer/android/app', '--permission', 'INTERNET', '--permission', 'ACCESS_NETWORK_STATE', '--permission', 'REQUEST_INSTALL_PACKAGES', '--permission', '\\\nREAD_EXTERNAL_STORAGE', '--permission', 'WRITE_EXTERNAL_STORAGE', '--android-entrypoint', 'org.kivy.android.PythonActivity', '--android-apptheme', '@android:style/Theme.NoTitleBar', '--presplash', '/home/runner/work/frilanser/frilanser/android/./presplash.png', '--icon', '/home/runner/work/frilanser/frilanser/android/./icon.png', '--orientation', 'portrait', '--window', '--enable-androidx', '--copy-libs', '--local-recipes', '/home/runner/work/frilanser/frilanser/android/p4a-recipes', '--arch', 'arm64-v8a', '--color=always', '--storage-dir=/home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a', '--ndk-api=24', '--port=5000', '--ignore-setup-py', '--debug'][0m
+[0m[1;30m# Run ['/opt/hostedtoolcache/Python/3.11.17/x64/bin/python', '-m', 'pythonforandroid.toolchain', 'apk', '--bootstrap', 'webview', '--dist_name', 'frilanser', '--name', 'فریلنسر یار آرنا', '--version', '1.0.12', '--package', 'org.arena.frilanser', '--minsdk', '24', '--ndk-api', '24', '--private', '/home/runner/work/frilanser/frilanser/android/.buildozer/android/app', '--permission', 'INTERNET', '--permission', 'ACCESS_NETWORK_STATE', '--permission', 'REQUEST_INSTALL_PACKAGES', '--permission', '\\\nREAD_EXTERNAL_STORAGE', '--permission', 'WRITE_EXTERNAL_STORAGE', '--android-entrypoint', 'org.kivy.android.PythonActivity', '--android-apptheme', '@android:style/Theme.NoTitleBar', '--presplash', '/home/runner/work/frilanser/frilanser/android/./presplash.png', '--icon', '/home/runner/work/frilanser/frilanser/android/./icon.png', '--orientation', 'portrait', '--window', '--enable-androidx', '--copy-libs', '--local-recipes', '/home/runner/work/frilanser/frilanser/android/p4a-recipes', '--arch', 'arm64-v8a', '--color=always', '--storage-dir=/home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a', '--ndk-api=24', '--port=5000', '--ignore-setup-py', '--debug'][0m
 [0m[1;30m# Cwd /home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/python-for-android[0m
+[WARNING]: Please report any issues to the python-for-android issue tracker.
 [WARNING]: prerequisites.py is experimental and does not support all prerequisites yet.
 [WARNING]: Please report any issues to the python-for-android issue tracker.
 [1m[INFO][0m:    Will compile for the following archs: arm64-v8a
@@ -1039,17 +1039,17 @@ stty: 'standard input': Inappropriate ioctl for device
 [1m[INFO][0m:    Found NDK version 25b
 [1m[INFO][0m:    Getting NDK API version (i.e. minimum supported API) from user argument
 [1m[INFO][0m:    ccache is missing, the build will not be optimized in the future.
-[1m[90m[DEBUG][39m[0m:   All possible dists: [<Distribution: name frilanser with recipes (hostpython3, libffi, openssl, sqlite3, python3, genericndkbuild, setuptools, flask, six, pyjnius, android, markupsafe, werkzeug==2.2.3, typing_extensions, click==8.1.7, beautifulsoup4, itsdangerous==2.1.2, jinja2==3.1.4, soupsieve, requests, urllib3, certifi)>]
-[1m[90m[DEBUG][39m[0m:   Dist matching name and arch: [<Distribution: name frilanser with recipes (hostpython3, libffi, openssl, sqlite3, python3, genericndkbuild, setuptools, flask, six, pyjnius, android, markupsafe, werkzeug==2.2.3, typing_extensions, click==8.1.7, beautifulsoup4, itsdangerous==2.1.2, jinja2==3.1.4, soupsieve, requests, urllib3, certifi)>]
-[1m[90m[DEBUG][39m[0m:   Dist matching ndk_api and recipe: [<Distribution: name frilanser with recipes (hostpython3, libffi, openssl, sqlite3, python3, genericndkbuild, setuptools, flask, six, pyjnius, android, markupsafe, werkzeug==2.2.3, typing_extensions, click==8.1.7, beautifulsoup4, itsdangerous==2.1.2, jinja2==3.1.4, soupsieve, requests, urllib3, certifi)>]
+[1m[90m[DEBUG][39m[0m:   All possible dists: [<Distribution: name frilanser with recipes (hostpython3, libffi, openssl, sqlite3, python3, genericndkbuild, setuptools, flask, six, pyjnius, android, certifi, markupsafe, jinja2==3.1.4, urllib3, typing_extensions, werkzeug==2.2.3, beautifulsoup4, itsdangerous==2.1.2, requests, soupsieve, click==8.1.7)>]
+[1m[90m[DEBUG][39m[0m:   Dist matching name and arch: [<Distribution: name frilanser with recipes (hostpython3, libffi, openssl, sqlite3, python3, genericndkbuild, setuptools, flask, six, pyjnius, android, certifi, markupsafe, jinja2==3.1.4, urllib3, typing_extensions, werkzeug==2.2.3, beautifulsoup4, itsdangerous==2.1.2, requests, soupsieve, click==8.1.7)>]
+[1m[90m[DEBUG][39m[0m:   Dist matching ndk_api and recipe: [<Distribution: name frilanser with recipes (hostpython3, libffi, openssl, sqlite3, python3, genericndkbuild, setuptools, flask, six, pyjnius, android, certifi, markupsafe, jinja2==3.1.4, urllib3, typing_extensions, werkzeug==2.2.3, beautifulsoup4, itsdangerous==2.1.2, requests, soupsieve, click==8.1.7)>]
 [1m[INFO][0m:    Of the existing distributions, the following meet the given requirements:
-[1m[INFO][0m:    	[32m[1mfrilanser[0m: min API 24, includes recipes ([32mhostpython3, libffi, openssl, sqlite3, python3, genericndkbuild, setuptools, flask, six, pyjnius, android, markupsafe, werkzeug==2.2.3, typing_extensions, click==8.1.7, beautifulsoup4, itsdangerous==2.1.2, jinja2==3.1.4, soupsieve, requests, urllib3, certifi[0m), built for archs ([34marm64-v8a[0m)
+[1m[INFO][0m:    	[32m[1mfrilanser[0m: min API 24, includes recipes ([32mhostpython3, libffi, openssl, sqlite3, python3, genericndkbuild, setuptools, flask, six, pyjnius, android, certifi, markupsafe, jinja2==3.1.4, urllib3, typing_extensions, werkzeug==2.2.3, beautifulsoup4, itsdangerous==2.1.2, requests, soupsieve, click==8.1.7[0m), built for archs ([34marm64-v8a[0m)
 [1m[INFO][0m:    [1m[94mfrilanser has compatible recipes, using this one[0m
-[1m[90m[DEBUG][39m[0m:   All possible dists: [<Distribution: name frilanser with recipes (hostpython3, libffi, openssl, sqlite3, python3, genericndkbuild, setuptools, flask, six, pyjnius, android, markupsafe, werkzeug==2.2.3, typing_extensions, click==8.1.7, beautifulsoup4, itsdangerous==2.1.2, jinja2==3.1.4, soupsieve, requests, urllib3, certifi)>]
-[1m[90m[DEBUG][39m[0m:   Dist matching name and arch: [<Distribution: name frilanser with recipes (hostpython3, libffi, openssl, sqlite3, python3, genericndkbuild, setuptools, flask, six, pyjnius, android, markupsafe, werkzeug==2.2.3, typing_extensions, click==8.1.7, beautifulsoup4, itsdangerous==2.1.2, jinja2==3.1.4, soupsieve, requests, urllib3, certifi)>]
-[1m[90m[DEBUG][39m[0m:   Dist matching ndk_api and recipe: [<Distribution: name frilanser with recipes (hostpython3, libffi, openssl, sqlite3, python3, genericndkbuild, setuptools, flask, six, pyjnius, android, markupsafe, werkzeug==2.2.3, typing_extensions, click==8.1.7, beautifulsoup4, itsdangerous==2.1.2, jinja2==3.1.4, soupsieve, requests, urllib3, certifi)>]
+[1m[90m[DEBUG][39m[0m:   All possible dists: [<Distribution: name frilanser with recipes (hostpython3, libffi, openssl, sqlite3, python3, genericndkbuild, setuptools, flask, six, pyjnius, android, certifi, markupsafe, jinja2==3.1.4, urllib3, typing_extensions, werkzeug==2.2.3, beautifulsoup4, itsdangerous==2.1.2, requests, soupsieve, click==8.1.7)>]
+[1m[90m[DEBUG][39m[0m:   Dist matching name and arch: [<Distribution: name frilanser with recipes (hostpython3, libffi, openssl, sqlite3, python3, genericndkbuild, setuptools, flask, six, pyjnius, android, certifi, markupsafe, jinja2==3.1.4, urllib3, typing_extensions, werkzeug==2.2.3, beautifulsoup4, itsdangerous==2.1.2, requests, soupsieve, click==8.1.7)>]
+[1m[90m[DEBUG][39m[0m:   Dist matching ndk_api and recipe: [<Distribution: name frilanser with recipes (hostpython3, libffi, openssl, sqlite3, python3, genericndkbuild, setuptools, flask, six, pyjnius, android, certifi, markupsafe, jinja2==3.1.4, urllib3, typing_extensions, werkzeug==2.2.3, beautifulsoup4, itsdangerous==2.1.2, requests, soupsieve, click==8.1.7)>]
 [1m[INFO][0m:    Of the existing distributions, the following meet the given requirements:
-[1m[INFO][0m:    	[32m[1mfrilanser[0m: min API 24, includes recipes ([32mhostpython3, libffi, openssl, sqlite3, python3, genericndkbuild, setuptools, flask, six, pyjnius, android, markupsafe, werkzeug==2.2.3, typing_extensions, click==8.1.7, beautifulsoup4, itsdangerous==2.1.2, jinja2==3.1.4, soupsieve, requests, urllib3, certifi[0m), built for archs ([34marm64-v8a[0m)
+[1m[INFO][0m:    	[32m[1mfrilanser[0m: min API 24, includes recipes ([32mhostpython3, libffi, openssl, sqlite3, python3, genericndkbuild, setuptools, flask, six, pyjnius, android, certifi, markupsafe, jinja2==3.1.4, urllib3, typing_extensions, werkzeug==2.2.3, beautifulsoup4, itsdangerous==2.1.2, requests, soupsieve, click==8.1.7[0m), built for archs ([34marm64-v8a[0m)
 [1m[INFO][0m:    [1m[94mfrilanser has compatible recipes, using this one[0m
 [1m[INFO][0m:    [36m-> directory context /home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/build/bootstrap_builds/webview[39m
 [1m[INFO][0m:    [36m<- directory context /home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/python-for-android[39m
@@ -1088,7 +1088,7 @@ Compiling '/home/runner/work/frilanser/frilanser/android/.buildozer/android/app/
 Compiling '/home/runner/work/frilanser/frilanser/android/.buildozer/android/app/frilanser/web/__init__.py'...
 Compiling '/home/runner/work/frilanser/frilanser/android/.buildozer/android/app/frilanser/web/app.py'...
 Compiling '/home/runner/work/frilanser/frilanser/android/.buildozer/android/app/p4a-recipes/flask/__init__.py'...
-[1m[90m[DEBUG][39m[0m:   Remove directory and subdirectory /tmp/p4a-extra-env-he544lr3
+[1m[90m[DEBUG][39m[0m:   Remove directory and subdirectory /tmp/p4a-extra-env-m4zhkk8s
 [1m[INFO][0m:    Detected highest available build tools version to be 37.0.0
 stty: 'standard input': Inappropriate ioctl for device
 [1m[90m[DEBUG][39m[0m:   [90m->[0m running gradlew clean assembleDebug[0m
@@ -1111,9 +1111,9 @@ stty: 'standard input': Inappropriate ioctl for device
 [1m[90m[DEBUG][39m[0m:   	> Task :preBuild UP-TO-DATE
 [1m[90m[DEBUG][39m[0m:   	> Task :preDebugBuild UP-TO-DATE
 [1m[90m[DEBUG][39m[0m:   	> Task :mergeDebugNativeDebugMetadata NO-SOURCE
-[1m[90m[DEBUG][39m[0m:   	> Task :generateDebugResValues
-[1m[90m[DEBUG][39m[0m:   	> Task :checkDebugAarMetadata
 [1m[90m[DEBUG][39m[0m:   	> Task :javaPreCompileDebug
+[1m[90m[DEBUG][39m[0m:   	> Task :checkDebugAarMetadata
+[1m[90m[DEBUG][39m[0m:   	> Task :generateDebugResValues
 [1m[90m[DEBUG][39m[0m:   	> Task :mapDebugSourceSetPaths
 [1m[90m[DEBUG][39m[0m:   	> Task :generateDebugResources
 [1m[90m[DEBUG][39m[0m:   	> Task :packageDebugResources
@@ -1134,12 +1134,12 @@ stty: 'standard input': Inappropriate ioctl for device
 [1m[90m[DEBUG][39m[0m:   	> Task :compileDebugShaders NO-SOURCE
 [1m[90m[DEBUG][39m[0m:   	> Task :generateDebugAssets UP-TO-DATE
 [1m[90m[DEBUG][39m[0m:   	> Task :mergeDebugAssets
-[1m[90m[DEBUG][39m[0m:   	> Task :processDebugJavaRes NO-SOURCE
-[1m[90m[DEBUG][39m[0m:   	> Task :checkDebugDuplicateClasses
 [1m[90m[DEBUG][39m[0m:   	> Task :processDebugManifestForPackage
 [1m[90m[DEBUG][39m[0m:   	> Task :compressDebugAssets
-[1m[90m[DEBUG][39m[0m:   	> Task :mergeDebugJavaResource
+[1m[90m[DEBUG][39m[0m:   	> Task :processDebugJavaRes NO-SOURCE
+[1m[90m[DEBUG][39m[0m:   	> Task :checkDebugDuplicateClasses
 [1m[90m[DEBUG][39m[0m:   	> Task :desugarDebugFileDependencies
+[1m[90m[DEBUG][39m[0m:   	> Task :mergeDebugJavaResource
 [1m[90m[DEBUG][39m[0m:   	> Task :mergeExtDexDebug
 [1m[90m[DEBUG][39m[0m:   	> Task :mergeLibDexDebug
 [1m[90m[DEBUG][39m[0m:   	> Task :mergeDebugJniLibFolders
@@ -1166,35 +1166,35 @@ stty: 'standard input': Inappropriate ioctl for device
 [1m[90m[DEBUG][39m[0m:   	
 [1m[90m[DEBUG][39m[0m:   	See https://docs.gradle.org/8.0.2/userguide/command_line_interface.html#sec:command_line_warnings
 [1m[90m[DEBUG][39m[0m:   	
-[1m[90m[DEBUG][39m[0m:   	BUILD SUCCESSFUL in 26s
+[1m[90m[DEBUG][39m[0m:   	BUILD SUCCESSFUL in 37s
 [1m[90m[DEBUG][39m[0m:   	33 actionable tasks: 32 executed, 1 up-to-date
 [1m[INFO][0m:    [36m<- directory context /home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/python-for-android[39m
-[1m[90m[DEBUG][39m[0m:   All possible dists: [<Distribution: name frilanser with recipes (hostpython3, libffi, openssl, sqlite3, python3, genericndkbuild, setuptools, flask, six, pyjnius, android, markupsafe, werkzeug==2.2.3, typing_extensions, click==8.1.7, beautifulsoup4, itsdangerous==2.1.2, jinja2==3.1.4, soupsieve, requests, urllib3, certifi)>]
-[1m[90m[DEBUG][39m[0m:   Dist matching name and arch: [<Distribution: name frilanser with recipes (hostpython3, libffi, openssl, sqlite3, python3, genericndkbuild, setuptools, flask, six, pyjnius, android, markupsafe, werkzeug==2.2.3, typing_extensions, click==8.1.7, beautifulsoup4, itsdangerous==2.1.2, jinja2==3.1.4, soupsieve, requests, urllib3, certifi)>]
-[1m[90m[DEBUG][39m[0m:   Dist matching ndk_api and recipe: [<Distribution: name frilanser with recipes (hostpython3, libffi, openssl, sqlite3, python3, genericndkbuild, setuptools, flask, six, pyjnius, android, markupsafe, werkzeug==2.2.3, typing_extensions, click==8.1.7, beautifulsoup4, itsdangerous==2.1.2, jinja2==3.1.4, soupsieve, requests, urllib3, certifi)>]
+[1m[90m[DEBUG][39m[0m:   All possible dists: [<Distribution: name frilanser with recipes (hostpython3, libffi, openssl, sqlite3, python3, genericndkbuild, setuptools, flask, six, pyjnius, android, certifi, markupsafe, jinja2==3.1.4, urllib3, typing_extensions, werkzeug==2.2.3, beautifulsoup4, itsdangerous==2.1.2, requests, soupsieve, click==8.1.7)>]
+[1m[90m[DEBUG][39m[0m:   Dist matching name and arch: [<Distribution: name frilanser with recipes (hostpython3, libffi, openssl, sqlite3, python3, genericndkbuild, setuptools, flask, six, pyjnius, android, certifi, markupsafe, jinja2==3.1.4, urllib3, typing_extensions, werkzeug==2.2.3, beautifulsoup4, itsdangerous==2.1.2, requests, soupsieve, click==8.1.7)>]
+[1m[90m[DEBUG][39m[0m:   Dist matching ndk_api and recipe: [<Distribution: name frilanser with recipes (hostpython3, libffi, openssl, sqlite3, python3, genericndkbuild, setuptools, flask, six, pyjnius, android, certifi, markupsafe, jinja2==3.1.4, urllib3, typing_extensions, werkzeug==2.2.3, beautifulsoup4, itsdangerous==2.1.2, requests, soupsieve, click==8.1.7)>]
 [1m[INFO][0m:    Of the existing distributions, the following meet the given requirements:
-[1m[INFO][0m:    	[32m[1mfrilanser[0m: min API 24, includes recipes ([32mhostpython3, libffi, openssl, sqlite3, python3, genericndkbuild, setuptools, flask, six, pyjnius, android, markupsafe, werkzeug==2.2.3, typing_extensions, click==8.1.7, beautifulsoup4, itsdangerous==2.1.2, jinja2==3.1.4, soupsieve, requests, urllib3, certifi[0m), built for archs ([34marm64-v8a[0m)
+[1m[INFO][0m:    	[32m[1mfrilanser[0m: min API 24, includes recipes ([32mhostpython3, libffi, openssl, sqlite3, python3, genericndkbuild, setuptools, flask, six, pyjnius, android, certifi, markupsafe, jinja2==3.1.4, urllib3, typing_extensions, werkzeug==2.2.3, beautifulsoup4, itsdangerous==2.1.2, requests, soupsieve, click==8.1.7[0m), built for archs ([34marm64-v8a[0m)
 [1m[INFO][0m:    [1m[94mfrilanser has compatible recipes, using this one[0m
 [1m[INFO][0m:    [1m[32m# Copying android package to current directory[0m[39m
 [1m[INFO][0m:    [1m[32m# Android package filename not found in build output. Guessing...[0m[39m
 [1m[INFO][0m:    [1m[32m# Found android package file: /home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/build/outputs/apk/debug/frilanser-debug.apk[0m[39m
 [1m[INFO][0m:    # Add version number to android package
-[1m[INFO][0m:    # Android package renamed to frilanser-debug-1.0.11.apk
+[1m[INFO][0m:    # Android package renamed to frilanser-debug-1.0.12.apk
 stty: 'standard input': Inappropriate ioctl for device
-[1m[90m[DEBUG][39m[0m:   [90m->[0m running cp /home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/build/outputs/apk/debug/frilanser-debug.apk frilanser-debug-1.0.11.apk[0m
+[1m[90m[DEBUG][39m[0m:   [90m->[0m running cp /home/runner/work/frilanser/frilanser/android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/build/outputs/apk/debug/frilanser-debug.apk frilanser-debug-1.0.12.apk[0m
 No setup.py/pyproject.toml used, copying full private data into .apk.
 [0m[1;34m# Android packaging done![0m
-[0m[1;34m# APK frilanser-1.0.11-arm64-v8a-debug.apk available in the bin directory[0m
+[0m[1;34m# APK frilanser-1.0.12-arm64-v8a-debug.apk available in the bin directory[0m
 buildozer_exit=0
 === خروجی‌های احتمالی ===
 total 16404
-drwxr-xr-x 2 runner runner     4096 Oct 31 13:19 .
-drwxr-xr-x 7 runner runner     4096 Oct 31 13:14 ..
--rw-r--r-- 1 runner runner 16785551 Oct 31 13:19 frilanser-1.0.11-arm64-v8a-debug.apk
-16785551 بایت  ../android/bin/frilanser-1.0.11-arm64-v8a-debug.apk
-16785551 بایت  ../android/.buildozer/android/platform/python-for-android/frilanser-debug-1.0.11.apk
-16785551 بایت  ../android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/build/outputs/apk/debug/frilanser-debug.apk
-16784627 بایت  ../dist/updates/frilanser.apk
-16784627 بایت  ../dist/frilanser.apk
+drwxr-xr-x 2 runner runner     4096 Oct 31 13:46 .
+drwxr-xr-x 7 runner runner     4096 Oct 31 13:40 ..
+-rw-r--r-- 1 runner runner 16787095 Oct 31 13:46 frilanser-1.0.12-arm64-v8a-debug.apk
+16787095 بایت  ../android/bin/frilanser-1.0.12-arm64-v8a-debug.apk
+16787095 بایت  ../android/.buildozer/android/platform/python-for-android/frilanser-debug-1.0.12.apk
+16787095 بایت  ../android/.buildozer/android/platform/build-arm64-v8a/dists/frilanser/build/outputs/apk/debug/frilanser-debug.apk
+16785551 بایت  ../dist/updates/frilanser.apk
+16785551 بایت  ../dist/frilanser.apk
 === آخرین ۳۰ خطِ خلاصه ===
 === نسخه‌ها و ریسپی‌های نصب‌شده ===
