@@ -75,20 +75,20 @@ Creating setup files
 
 Warning: Architecture identifier "x64" is deprecated. Substituting "x64os", but note that "x64compatible" is preferred in most cases. See the "Architecture Identifiers" topic in help file for more information.
 
-Successful compile (3.719 sec). Resulting Setup program filename is:
+Successful compile (4.750 sec). Resulting Setup program filename is:
 D:\a\frilanser\frilanser\dist\Frilanser-Setup.exe
 
 --- stderr ---
 
 --- محتوای dist ---
-android-build.log: 121817 بایت
+android-build.log: 121824 بایت
 android-versions.txt: 468 بایت
 ci-report.md: 5235 بایت
-frilanser-gui.exe: 15563691 بایت
-frilanser-portable.zip: 27616330 بایت
-Frilanser-Setup.exe: 29571436 بایت
-frilanser.apk: 16784443 بایت
-frilanser.exe: 12532177 بایت
+frilanser-gui.exe: 15565678 بایت
+frilanser-portable.zip: 27617724 بایت
+Frilanser-Setup.exe: 29571538 بایت
+frilanser.apk: 16784627 بایت
+frilanser.exe: 12531148 بایت
 installer.log: 0 بایت
 updates: 0 بایت
 zip.log: 47 بایت
