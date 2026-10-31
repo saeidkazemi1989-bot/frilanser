@@ -66,8 +66,8 @@
 
 <div class="panel" style="padding:12px 14px">
   <form method="post" action="{{ url_for('rescan') }}" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
-    <button type="submit">🔄 اسکن دوباره (از اسنپ‌شات‌ها)</button>
-    <label class="muted"><input type="checkbox" name="online" value="1"> دریافت زنده از سایت‌ها (نیاز به اینترنت)</label>
+    <button type="submit">🔄 الان اسکن کن (از سایت‌ها)</button>
+    <label class="muted"><input type="checkbox" name="offline" value="1"> فقط از فایل‌های همراهِ برنامه (بدون اینترنت)</label>
     <label class="muted">تعداد دمو: <input type="number" name="demos" value="3" min="0" max="10" style="width:70px"></label>
   </form>
 </div>
@@ -122,7 +122,7 @@
   علت دقیق را می‌گوید و فایل <code>outbox/doctor.txt</code> را می‌سازد.</p>
   <div style="margin-top:10px">
     <form method="post" action="{{ url_for('rescan') }}">
-      <button type="submit">🔄 همین حالا اسکن کن (آفلاین)</button>
+      <button type="submit">🔄 همین حالا از سایت‌ها اسکن کن</button>
     </form>
   </div>
 </div>

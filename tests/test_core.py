@@ -1791,3 +1791,12 @@ def test_cache_buster_keeps_existing_query():
     assert bust("https://x.test/a?b=1").startswith("https://x.test/a?b=1&_=")
     assert bust("https://x.test/a").startswith("https://x.test/a?_=")
     assert bust("") == ""
+
+
+def test_empty_listing_url_in_config_does_not_win():
+    """اگر در تنظیمات نشانی خالی باشد، پیش‌فرضِ برنامه به کار می‌رود."""
+    from frilanser.config import Config
+
+    cfg = Config({"sources": {"ponisha": {"enabled": True, "listing_url": ""}}},
+                 Path(".") / "config.toml")
+    assert cfg.sources["ponisha"]["listing_url"].startswith("https://ponisha.ir")

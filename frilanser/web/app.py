@@ -218,10 +218,25 @@ def create_app(cfg: Config, store: Store, live: bool | None = None) -> Flask:
 
     @app.post("/rescan")
     def rescan():
-        from .. import pipeline
-        offline = request.form.get("online") != "1"
+        """اسکنِ دستی.
+
+        پیش‌فرض **آنلاین** است (از سایت‌ها می‌خواند)؛ فقط اگر کاربر تیکِ
+        «بدون اینترنت» را بزند سراغِ اسنپ‌شات‌های همراه می‌رویم. قبلاً برعکس
+        بود و خیلی‌ها همان دکمه را می‌زدند و فکر می‌کردند برنامه آگهی نمی‌آورد،
+        در حالی که اصلاً به اینترنت وصل نشده بود.
+        """
+        offline = request.form.get("offline") == "1"
         limit = int(request.form.get("demos", 3) or 3)
         base_url = request.host_url.rstrip("/")
+
+        svc = app.extensions.get("live")
+        if svc is not None and not offline:
+            # از سرویسِ زنده استفاده می‌کنیم تا نتیجه در «گزارشِ اسکن» هم ثبت شود
+            svc.scan_now(trigger="manual", refresh=True)
+            return redirect(url_for("index"))
+
+        from .. import pipeline
+
         # وقتی کاربر می‌خواهد از سایت‌ها بخواند، کش را دور می‌زنیم تا آگهی‌های
         # تازه واقعاً بیایند (در غیر این صورت همان صفحه‌ی ذخیره‌شده خوانده می‌شد)
         pipeline.run_all(cfg, store, offline=offline, demo_limit=limit,
@@ -234,10 +249,33 @@ def create_app(cfg: Config, store: Store, live: bool | None = None) -> Flask:
         svc = app.extensions.get("live")
         last = ((svc.last_scan or {}) if svc else {}) or {}
         sources = last.get("sources") or {}
+        # وضعیتِ تنظیمات روی دستگاه (برای اینکه بدانیم چرا نشانی خالی است)
+        diag = {}
+        try:
+            raw_sources = (cfg.raw.get("sources") or {}) if hasattr(cfg, "raw") else {}
+            diag = {
+                "config_path": str(getattr(cfg, "path", "") or ""),
+                "config_exists": bool(getattr(cfg, "path", None)
+                                      and Path(str(cfg.path)).exists()),
+                "root": str(cfg.root),
+                "sources_in_file": len(raw_sources),
+                "sources_resolved": len(cfg.sources or {}),
+                "urls": {k: (v.get("listing_url") or "— خالی —")
+                         for k, v in sorted((cfg.sources or {}).items())},
+                "live_offline": bool((cfg.raw.get("live") or {}).get(
+                    "auto_scan_offline", False)) if hasattr(cfg, "raw") else False,
+                "allow_network": bool(cfg.allow_network),
+                "snapshot_files": len(list(cfg.raw_dir.glob("*")))
+                if cfg.raw_dir.exists() else 0,
+            }
+        except Exception as exc:  # noqa: BLE001
+            diag = {"error": f"{type(exc).__name__}: {exc}"}
+
         return render_template(
             "scan_report.html",
             stats=summarize(),
             last_scan=last,
+            diag=diag,
             sources=sources or {},
             cfg=cfg,
             source_info=source_info(),

@@ -21,6 +21,25 @@
     <a href="{{ url_for('index') }}">بازگشت به پروژه‌ها</a>
     <button type="button" data-copy="report-text">📋 کپیِ گزارش (بفرستید برای پشتیبانی)</button>
   </div>
+  {% if diag %}
+  <div id="diag" style="border:1px dashed #c9d2e4;border-radius:10px;padding:10px;margin-top:12px">
+    <div style="font-weight:700;font-size:13px">🔧 وضعیتِ تنظیمات روی این دستگاه</div>
+    <div class="muted" style="font-size:12px;margin-top:6px" dir="auto">
+      حالتِ اسکن: <b>{{ 'آفلاین (فایل‌های همراه)' if last_scan.get('offline') else 'آنلاین (از سایت‌ها)' }}</b>
+      | دسترسیِ شبکه: {{ 'مجاز' if diag.allow_network else 'غیرفعال' }}
+      | پرچمِ آفلاینِ خودکار: {{ 'روشن' if diag.live_offline else 'خاموش' }}
+    </div>
+    <div class="muted" style="font-size:12px;margin-top:4px" dir="ltr" style="word-break:break-all">
+      فایلِ تنظیمات: {{ diag.config_path }} ({{ 'موجود' if diag.config_exists else 'پیدا نشد' }})
+      | منبع در فایل: {{ diag.sources_in_file }} | منبعِ نهایی: {{ diag.sources_resolved }}
+      | فایل‌های اسنپ‌شات: {{ diag.snapshot_files }}
+    </div>
+    <div class="muted" style="font-size:12px;margin-top:4px">نشانیِ هر منبع:</div>
+    <ul dir="ltr" style="font-size:11.5px;margin:4px 0 0 18px">
+      {% for k, u in diag.urls.items() %}<li>{{ k }}: {{ u }}</li>{% endfor %}
+    </ul>
+  </div>
+  {% endif %}
 </div>
 
 <div id="report-text" class="panel">

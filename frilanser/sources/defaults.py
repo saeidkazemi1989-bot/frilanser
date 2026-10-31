@@ -74,7 +74,8 @@ def merged_sources(raw_sources: dict | None) -> dict:
     merged: dict[str, dict] = {}
     for key, value in raw.items():
         item = dict(DEFAULT_SOURCES.get(key) or {})
-        item.update(value or {})
+        # مقدارِ خالی (مثلاً listing_url = "") نباید پیش‌فرض را از بین ببرد
+        item.update({k: v for k, v in (value or {}).items() if v not in ("", None)})
         merged[key] = item
     return merged
 
