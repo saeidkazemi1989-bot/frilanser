@@ -20,7 +20,7 @@ source.exclude_dirs = tests,.github,.git,dist,outbox,node_modules,__pycache__,.p
 source.exclude_patterns = */__pycache__/*,*/.pytest_cache/*
 
 # (str) نسخه‌ی برنامه (با frilanser/version.py هماهنگ نگه دارید)
-version = 1.0.9
+version = 1.0.10
 
 # (list) نیازمندی‌ها: وب‌سرور Flask + کتابخانه‌های دریافت داده + پل جاوا برای نصب به‌روزرسانی
 requirements = python3,flask,requests,urllib3,certifi,beautifulsoup4,typing_extensions,soupsieve,pyjnius

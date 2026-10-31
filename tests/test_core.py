@@ -1340,9 +1340,12 @@ def test_asset_urls_order_cdn_then_mirror_then_release():
              "mirror": "https://raw.githubusercontent.com/x/y.apk",
              "cdn": "https://cdn.jsdelivr.net/gh/x/y.apk"}
     urls = asset_urls(asset)
-    assert urls[:3] == [asset["cdn"], asset["cdn"].replace("cdn.", "gcore."), asset["mirror"]]
-    assert asset["url"] in urls
-    assert asset_urls({"url": "https://only/x.apk"}) == ["https://only/x.apk"]
+    # همه‌ی نشانی‌ها یک «ضدّ‌کش» دارند تا CDN نسخه‌ی قبلی را ندهد
+    assert all("_=" in u for u in urls)
+    plain = [u.split("_=")[0].rstrip("?&") for u in urls]
+    assert plain[:3] == [asset["cdn"], asset["cdn"].replace("cdn.", "gcore."), asset["mirror"]]
+    assert asset["url"] in plain
+    assert len(asset_urls({"url": "https://only/x.apk"})) == 1
     assert asset_urls({}) == []
 
 
@@ -1766,3 +1769,25 @@ def test_missing_listing_url_is_reported(tmp_path):
         assert sources["ponisha"].list_urls() == []
     finally:
         defaults.DEFAULT_SOURCES["ponisha"]["listing_url"] = saved
+
+
+# ---------------------------------------------------------------------------
+# ضدّ‌کش برای CDNها (۱.۰.۱۰)
+# ---------------------------------------------------------------------------
+def test_cache_buster_added_to_manifest_urls():
+    """مانیفست باید همیشه تازه خوانده شود، نه از کشِ CDN."""
+    from frilanser.updater import _cdn_manifest_urls
+
+    urls = _cdn_manifest_urls()
+    assert urls, "هیچ نشانی‌ای برای مانیفست ساخته نشد"
+    for url in urls:
+        assert "_=" in url, f"بدون ضدّ‌کش: {url}"
+
+
+def test_cache_buster_keeps_existing_query():
+    """اگر نشانی خودش پارامتر داشت، ضدّ‌کش با & چسبانده شود."""
+    from frilanser.updater import bust
+
+    assert bust("https://x.test/a?b=1").startswith("https://x.test/a?b=1&_=")
+    assert bust("https://x.test/a").startswith("https://x.test/a?_=")
+    assert bust("") == ""
