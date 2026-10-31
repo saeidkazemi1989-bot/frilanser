@@ -45,6 +45,15 @@
       | حجمِ دریافتی: {{ '{:,}'.format(fr.get('chars', 0)) }} کاراکتر
       | کوکیِ ورود: {{ 'دارد ✓' if fr.get('has_cookie') else 'ندارد' }}
     </div>
+    <div class="muted" style="font-size:12px;margin-top:4px" dir="ltr"
+         style="word-break:break-all">
+      {% if info.get('urls') %}
+        نشانی: {{ info['urls'] | join(' ، ') }}
+      {% else %}
+        <span style="color:#a02626">نشانی‌ای برای این منبع پیدا نشد ( listing_url خالی است )</span>
+      {% endif %}
+      {% if info.get('stale') %}<span class="badge warn">کشِ کهنه</span>{% endif %}
+    </div>
     {% for e in (fr.get('log') or []) %}
       <div class="muted" style="font-size:12px;margin-top:6px">
         <span class="badge {{ 'ok' if e.ok else 'bad' }}">{{ e.get('status') or ('کش' if e.get('cached') else 'خطا') }}</span>

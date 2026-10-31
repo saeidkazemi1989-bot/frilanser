@@ -208,7 +208,18 @@ class Config:
     # ---------- sources ----------
     @property
     def sources(self) -> dict:
-        return self.raw.get("sources", {})
+        """منبع‌ها: تنظیماتِ کاربر + پیش‌فرض‌های داخل برنامه.
+
+        پیش‌فرض‌ها اینجا ادغام می‌شوند تا اگر ``config.toml`` خوانده نشد (یا
+        قدیمی بود و نشانی‌ها را نداشت)، منبع‌ها بی‌نشانی نمانند و اسکن بی‌صدا
+        صفر آگهی برنگرداند.
+        """
+        from .sources.defaults import merged_sources
+
+        raw = self.raw.get("sources", {})
+        if not isinstance(raw, dict):
+            raw = {}
+        return merged_sources(raw)
 
     def enabled_sources(self) -> list[str]:
         return [name for name, cfg in self.sources.items() if cfg.get("enabled", True)]

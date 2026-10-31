@@ -36,10 +36,16 @@ def collect(cfg: Config, store: Store, offline: bool = True, refresh: bool = Fal
                                "fetched": len(projects) - before, "error": ""}
     else:
         for key, source in sources.items():
+            urls = source.list_urls()
             try:
+                if not urls:
+                    raise RuntimeError(
+                        "هیچ نشانی‌ای برای این منبع تعریف نشده "
+                        "(listing_url در config.toml و پیش‌فرضِ برنامه خالی است)")
                 got = source.collect(extra_urls=extra_urls, force=refresh)
                 per_source[key] = {"label": source.label, "ok": True, "offline": False,
                                    "fetched": len(got), "error": "",
+                                   "urls": urls,
                                    "stale": bool(getattr(source, "used_stale_cache", False)),
                                    "fetch": source.fetch_report()}
                 projects.extend(got)

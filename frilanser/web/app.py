@@ -449,6 +449,32 @@ def create_app(cfg: Config, store: Store, live: bool | None = None) -> Flask:
             except Exception as exc:  # noqa: BLE001
                 report["probes"].append({"url": url, "ok": False,
                                          "error": f"{type(exc).__name__}: {exc}"})
+        # وضعیتِ تنظیمات: آیا config.toml خوانده شده و منبع‌ها نشانی دارند؟
+        try:
+            from ..sources.registry import build_sources
+
+            raw_sources = (cfg.raw.get("sources") or {}) if hasattr(cfg, "raw") else {}
+            report["config"] = {
+                "path": str(getattr(cfg, "path", "") or ""),
+                "exists": bool(getattr(cfg, "path", None)
+                               and Path(str(cfg.path)).exists()),
+                "root": str(cfg.root),
+                "sections": sorted((cfg.raw or {}).keys()) if hasattr(cfg, "raw") else [],
+                "sources_in_file": sorted(raw_sources.keys()),
+                "sources_resolved": sorted((cfg.sources or {}).keys()),
+                "missing_listing_url": [k for k, v in (cfg.sources or {}).items()
+                                        if not str(v.get("listing_url") or "").strip()],
+                "live_offline": bool((cfg.raw.get("live") or {}).get("auto_scan_offline", False)),
+                "allow_network": bool(cfg.allow_network),
+                "urls": {k: (v.get("listing_url") or "")
+                         for k, v in sorted((cfg.sources or {}).items())},
+                "built_sources": sorted(build_sources(cfg).keys()),
+                "raw_snapshot_files": len(list(cfg.raw_dir.glob("*")))
+                if cfg.raw_dir.exists() else 0,
+            }
+        except Exception as exc:  # noqa: BLE001
+            report["config_error"] = f"{type(exc).__name__}: {exc}"
+
         # آزمایشِ واقعیِ «سایت‌های آگهی»: مستقیم و از راهِ واسطه‌ها.
         # فقط با ?sites=1 اجرا می‌شود چون ممکن است چند ثانیه طول بکشد.
         if request.args.get("sites"):

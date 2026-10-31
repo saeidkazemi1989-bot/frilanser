@@ -219,7 +219,11 @@ class BaseSource:
         return projects
 
     def list_urls(self) -> list[str]:
-        return [self.scfg["listing_url"]] if self.scfg.get("listing_url") else []
+        """نشانیِ فهرستِ این منبع (از تنظیمات، وگرنه از پیش‌فرضِ داخل برنامه)."""
+        from .defaults import listing_url_for
+
+        url = listing_url_for(self.key, self.scfg)
+        return [url] if url else []
 
     def collect(self, extra_urls: Iterable[str] | None = None, force: bool = False) -> list[Project]:
         urls = list(extra_urls or []) or self.list_urls()

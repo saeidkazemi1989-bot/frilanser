@@ -1,12 +1,18 @@
 {# تکه‌ی زنده‌ی داشبورد — هم در صفحه‌ی اصلی قرار می‌گیرد و هم با /fragment
    برای نوسازیِ خودکار (بدون بارگذاریِ دوباره‌ی صفحه) بازخوانی می‌شود. #}
 
-{% if last_scan and last_scan.get('live_failed') %}
+{% set _offline_empty = last_scan and last_scan.get('offline') and not last_scan.get('fetched') %}
+{% if (last_scan and last_scan.get('live_failed')) or _offline_empty %}
 <div class="panel" id="fetch-warning" style="padding:12px 14px;margin-bottom:12px;border-color:#f6c9c9;background:#fff8f8">
   <div style="font-weight:700;color:#a02626">⚠️ آگهی‌های تازه از سایت‌ها دریافت نشد</div>
   <div class="muted" style="font-size:13px;margin-top:4px">
-    برنامه نتوانست هیچ‌یک از سایت‌ها را باز کند، بنابراین فقط آگهی‌های قبلی را نشان می‌دهد
-    (تعداد: {{ last_scan.get('fetched', 0) }}، جدید: {{ last_scan.get('new', 0) }}).
+    {% if _offline_empty %}
+      اسکن در حالتِ «آفلاین» اجرا شد و هیچ آگهی‌ای از فایل‌های همراهِ برنامه هم پیدا نکرد
+      (تعداد: {{ last_scan.get('fetched', 0) }}، جدید: {{ last_scan.get('new', 0) }}).
+    {% else %}
+      برنامه نتوانست هیچ‌یک از سایت‌ها را باز کند، بنابراین فقط آگهی‌های قبلی را نشان می‌دهد
+      (تعداد: {{ last_scan.get('fetched', 0) }}، جدید: {{ last_scan.get('new', 0) }}).
+    {% endif %}
     {% if last_scan.get('error') %}<div dir="auto" style="margin-top:4px">علت: {{ last_scan.get('error')[:200] }}</div>{% endif %}
   </div>
   <div style="margin-top:8px">

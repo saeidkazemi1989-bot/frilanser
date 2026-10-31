@@ -1709,3 +1709,60 @@ def test_source_falls_back_to_stale_cache(tmp_path, monkeypatch):
     assert src.used_stale_cache is True
     assert src.fetch_log[-1].get("stale") is True
     assert src.fetch_log[-1].get("cached") == "کهنه"
+
+
+# ---------------------------------------------------------------------------
+# پیش‌فرضِ داخلیِ نشانیِ منابع (۱.۰.۹)
+# ---------------------------------------------------------------------------
+def test_sources_have_builtin_listing_urls():
+    """حتی بدون config.toml هر منبع نشانیِ فهرستِ خود را دارد."""
+    from frilanser.config import Config
+    from frilanser.sources.registry import build_sources
+
+    cfg = Config({"app": {"data_dir": "data", "cache_dir": "cache"}},
+                 Path(".") / "config.toml")
+    sources = build_sources(cfg)
+    assert {"ponisha", "karlancer", "parscoders"} <= set(sources)
+    for key, src in sources.items():
+        assert src.list_urls(), f"{key} بدون نشانی است"
+
+
+def test_config_sources_still_win_over_defaults():
+    """اگر کاربر نشانیِ دیگری بدهد، همان به کار می‌رود."""
+    from frilanser.config import Config
+
+    cfg = Config({"sources": {"ponisha": {"listing_url": "https://x.test/mine"}}},
+                 Path(".") / "config.toml")
+    assert cfg.sources["ponisha"]["listing_url"] == "https://x.test/mine"
+
+
+def test_user_defined_sources_are_not_expanded():
+    """پیش‌فرض‌ها نباید سایتِ ناخواسته‌ای به انتخابِ کاربر اضافه کنند."""
+    from frilanser.config import Config
+
+    cfg = Config({"sources": {"karlancer": {"enabled": True}}}, Path(".") / "config.toml")
+    assert set(cfg.sources) == {"karlancer"}
+
+
+def test_missing_listing_url_is_reported(tmp_path):
+    """منبعِ بی‌نشانی باید خطا بدهد، نه اینکه بی‌صدا صفر آگهی برگرداند."""
+    from frilanser.pipeline import collect
+    from frilanser.sources.base import BaseSource
+    from frilanser.sources.registry import build_sources
+
+    cfg = _sources_cfg(tmp_path)
+    cfg.raw["sources"]["ponisha"]["listing_url"] = ""
+    for key in list(cfg.raw["sources"]):
+        if key != "ponisha":
+            cfg.raw["sources"].pop(key)
+    # نشانیِ پیش‌فرض را هم خالی می‌کنیم تا واقعاً بی‌نشانی شود
+    import frilanser.sources.defaults as defaults
+
+    saved = defaults.DEFAULT_SOURCES["ponisha"]["listing_url"]
+    defaults.DEFAULT_SOURCES["ponisha"]["listing_url"] = ""
+    try:
+        sources = build_sources(cfg)
+        assert "ponisha" in sources
+        assert sources["ponisha"].list_urls() == []
+    finally:
+        defaults.DEFAULT_SOURCES["ponisha"]["listing_url"] = saved
