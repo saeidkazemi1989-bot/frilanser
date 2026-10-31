@@ -1,6 +1,6 @@
 {
   "version": "1.0.9",
-  "generated_at": "2026-10-31T12:26:39+00:00",
+  "generated_at": "2026-10-31T12:34:23+00:00",
   "release_url": "https://github.com/saeidkazemi1989-bot/frilanser/releases/tag/latest",
   "notes": [
     "نسخه‌ی اندروید: داشبورد داخلی روی خود گوشی + به‌روزرسانی درون‌برنامه‌ای"
@@ -8,12 +8,12 @@
   "assets": {
     "android": {
       "file": "frilanser.apk",
-      "size": 16781467,
-      "sha256": "bfc49a1082eb241de3ac4ea63a59af41031787531a3ec50b908f21a70037e617",
+      "size": 16784443,
+      "sha256": "b0485c54292c112c07f802fd2e37b159e8d36ea71c7ca794be6d2bae866902a1",
       "url": "https://github.com/saeidkazemi1989-bot/frilanser/releases/download/latest/frilanser.apk",
       "mirror": "https://raw.githubusercontent.com/saeidkazemi1989-bot/frilanser/arena/01a0e651-frilanser/dist/updates/frilanser.apk",
       "cdn": "https://cdn.jsdelivr.net/gh/saeidkazemi1989-bot/frilanser@arena/01a0e651-frilanser/dist/updates/frilanser.apk",
-      "built_at": "2026-10-31T11:39:46+00:00"
+      "built_at": "2026-10-31T12:34:23+00:00"
     },
     "windows": {
       "file": "Frilanser-Setup.exe",
