@@ -154,6 +154,8 @@ def create_app(cfg: Config, store: Store, live: bool | None = None) -> Flask:
             "cfg": cfg,
             "prop_states": PROPOSAL_STATES,
             "tracking": tracking_summary(),
+            "last_scan": (((app.extensions.get("live").last_scan or {})
+                           if app.extensions.get("live") else {}) or {}),
         }
 
     # -------------------------------------------------------------- routes
@@ -447,6 +449,31 @@ def create_app(cfg: Config, store: Store, live: bool | None = None) -> Flask:
             except Exception as exc:  # noqa: BLE001
                 report["probes"].append({"url": url, "ok": False,
                                          "error": f"{type(exc).__name__}: {exc}"})
+        # آزمایشِ واقعیِ «سایت‌های آگهی»: مستقیم و از راهِ واسطه‌ها.
+        # فقط با ?sites=1 اجرا می‌شود چون ممکن است چند ثانیه طول بکشد.
+        if request.args.get("sites"):
+            try:
+                from ..sources.registry import build_sources
+
+                report["sites"] = []
+                for src in build_sources(cfg):
+                    url = getattr(src, "listing_url", "") or src.scfg.get("listing_url", "")
+                    if not url:
+                        continue
+                    got = http.get_text(url, timeout=8, allow_relay=True)
+                    text = got.get("text") or ""
+                    report["sites"].append({
+                        "key": src.key, "url": url,
+                        "ok": bool(got.get("ok")), "how": got.get("how"),
+                        "status": got.get("status"),
+                        "chars": len(text),
+                        "error": (got.get("error") or "")[:200],
+                        "relays": got.get("relay_errors") or [],
+                        "head": text[:120],
+                    })
+            except Exception as exc:  # noqa: BLE001
+                report["sites_error"] = f"{type(exc).__name__}: {exc}"
+
         try:
             report["check"] = updater.check_update(cfg, timeout=8)
             report["manifest_urls"] = updater.manifest_urls(cfg)

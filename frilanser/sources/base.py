@@ -35,6 +35,9 @@ class BaseSource:
         self.cache_dir = cfg.cache_dir
         # گزارشِ آخرین دریافت‌ها (برای اینکه بدانیم چرا آگهی جدید نمی‌آید)
         self.fetch_log: list[dict] = []
+        # اگر دریافتِ زنده شکست خورد و از کشِ کهنه استفاده شد، این پرچم روشن
+        # می‌شود تا اسکن «موفقِ قلابی» به نظر نرسد.
+        self.used_stale_cache = False
 
     def _cookie(self) -> str:
         """کوکیِ ورود به سایت (اگر کاربر در برنامه یا config گذاشته باشد)."""
@@ -81,12 +84,11 @@ class BaseSource:
                               f"کشِ تازه‌ای برای {url} وجود ندارد")
             raise FetchError(entry["error"], url=url)
 
-        # ابتدا با requests (اگر سالم نصب شده باشد)، وگرنه با کتابخانه‌ی استاندارد
-        try:
-            import requests  # noqa: PLC0415 - وابستگی اختیاری
-            import urllib3  # noqa: F401  # requests بدون urllib3 کار نمی‌کند
-        except ImportError:
-            requests = None
+        # زنجیره‌ی دریافت در frilanser/http.py است: requests → کتابخانه‌ی
+        # استاندارد → بدون تأییدِ گواهی → واسطه‌های عمومی. اینجا فقط نتیجه را
+        # می‌خوانیم تا هیچ مسیری امتحان‌نشده نماند (قبلاً اگر requests سالم بود،
+        # مسیرِ پشتیبان اصلاً امتحان نمی‌شد و دریافت همان‌جا رها می‌شد).
+        from .. import http
 
         headers = {"User-Agent": self.cfg.fetch.get("user_agent", "frilanser/1.0"),
                    "Accept-Language": "fa-IR,fa;q=0.9,en;q=0.6"}
@@ -94,36 +96,40 @@ class BaseSource:
         if cookie:
             headers["Cookie"] = cookie
 
-        if requests is None:
-            from .. import http
+        use_relays = bool(self.cfg.fetch.get("use_relays", True))
+        relays = self.cfg.fetch.get("relays") or None
+        if relays:
+            relays = tuple((str(name), str(tmpl)) for name, tmpl in relays)
+        got = http.get_text(url, timeout=self.cfg.fetch.get("timeout_seconds", 25),
+                            headers=headers, allow_relay=use_relays,
+                            relays=relays or http.RELAYS)
+        entry["status"] = got.get("status")
+        entry["how"] = got.get("how") or ""
 
-            got = http.get_text(url, timeout=self.cfg.fetch.get("timeout_seconds", 25),
-                                headers=headers)
-            if got["ok"]:
-                entry.update({"ok": True, "status": got.get("status"),
-                              "chars": len(got.get("text") or "")})
-                text = got["text"]
-                entry["sample"] = text[:400]
-                self.cache_dir.mkdir(parents=True, exist_ok=True)
-                cache_file.write_text(text, encoding="utf-8")
-                time.sleep(float(self.cfg.fetch.get("delay_between_requests", 1.0)))
-                return text
-            entry["error"] = f"{got.get('error') or 'خطای ناشناخته'} ({got.get('how','')})"
+        if not (got.get("ok") and (got.get("text") or "").strip()):
+            entry["error"] = f"{got.get('error') or 'خطای ناشناخته'} ({entry['how']})"
+            if got.get("relay_errors"):
+                entry["relays"] = got["relay_errors"]
+            # آخرین چاره: کشِ کهنه — فقط اگر واقعاً محتوای آگهی داشته باشد
+            # (کش‌های چندکاراکتری ارزشِ نشان دادن ندارند و اسکن را قلابی موفق
+            # نشان می‌دادند).
+            min_chars = int(self.cfg.fetch.get("min_stale_chars", 400) or 0)
+            if cache_file.exists():
+                try:
+                    old = cache_file.read_text(encoding="utf-8")
+                except OSError:
+                    old = ""
+                if len(old.strip()) >= min_chars:
+                    self.used_stale_cache = True
+                    entry.update({"ok": True, "stale": True, "chars": len(old),
+                                  "cached": "کهنه", "sample": old[:400]})
+                    return old
+                if old.strip():
+                    entry["error"] += f" | کشِ موجود فقط {len(old.strip())} کاراکتر است (نادیده گرفته شد)"
             raise FetchError(entry["error"], url=url, status=got.get("status"))
 
-        try:
-            resp = requests.get(url, headers=headers,
-                                timeout=self.cfg.fetch.get("timeout_seconds", 25))
-            entry["status"] = resp.status_code
-            resp.raise_for_status()
-            html = resp.text
-            entry.update({"ok": True, "chars": len(html)})
-        except Exception as exc:  # noqa: BLE001 - علتِ دقیق در گزارش ثبت می‌شود
-            entry["error"] = f"{type(exc).__name__}: {exc}"
-            if isinstance(exc, FetchError):
-                raise
-            raise FetchError(entry["error"], url=url, status=entry.get("status")) from exc
-
+        html = got["text"]
+        entry.update({"ok": True, "chars": len(html)})
         text = self.html_to_text(html)
         entry["sample"] = text[:400]
         self.cache_dir.mkdir(parents=True, exist_ok=True)

@@ -188,6 +188,8 @@ class LiveService:
             + len(tracking.get("closed_by_text") or []),
             "kept": int(tracking.get("kept", 0) or 0),
             "sources": collect.get("per_source") or {},
+            "stale_sources": collect.get("stale_sources") or [],
+            "offline_fallback": bool(collect.get("offline_fallback")),
         })
         self.last_result = result
 
@@ -231,6 +233,28 @@ class LiveService:
                     record["error"] = (str(record.get("error") or "")
                                        + " | تلاشِ آفلاین هم ناموفق بود: "
                                        f"{type(exc).__name__}: {exc}").strip(" |")
+
+            # پرچم برای نمایشِ هشدار در داشبورد: فقط وقتی قرار بوده آنلاین باشد
+            if not use_offline:
+                record["live_failed"] = (bool(record.get("fell_back"))
+                                         or not record["ok"]
+                                         or bool(record.get("stale_sources"))
+                                         or bool(record.get("offline_fallback")))
+                if record["live_failed"] and not record.get("error"):
+                    first_err = ""
+                    for _k, _v in (record.get("sources") or {}).items():
+                        first_err = str(_v.get("error") or "").strip()
+                        if first_err:
+                            break
+                    why = []
+                    if record.get("offline_fallback"):
+                        why.append("هیچ سایتی در دسترس نبود؛ از داده‌ی همراهِ برنامه خوانده شد")
+                    if record.get("stale_sources"):
+                        why.append("این منابع فقط از کشِ کهنه خوانده شدند: "
+                                   + "، ".join(record["stale_sources"]))
+                    if first_err:
+                        why.append(first_err[:200])
+                    record["error"] = " | ".join(why)
         finally:
             record["duration"] = round(time.time() - started, 1)
             self.scanning = False
@@ -393,6 +417,9 @@ class LiveService:
                 "kept": last.get("kept", 0),
                 "duration": last.get("duration", 0),
                 "error": last.get("error", ""),
+                "live_failed": last.get("live_failed", False),
+                "offline_fallback": last.get("offline_fallback", False),
+                "stale_sources": last.get("stale_sources") or [],
                 "sources": last.get("sources") or {},
             } if last else None,
             "next_scan_in": seconds_to_next,

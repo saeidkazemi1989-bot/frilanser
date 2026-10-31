@@ -1623,3 +1623,89 @@ def test_compat_describe_shape():
     assert isinstance(info["libs"], dict)
     assert "bs4" in info["libs"]
     assert isinstance(info["html_parser"]["ok"], bool)
+
+
+# ---------------------------------------------------------------------------
+# زنجیره‌ی دریافت: مستقیم → کتابخانه‌ی استاندارد → واسطه (۱.۰.۸)
+# ---------------------------------------------------------------------------
+def test_http_relay_used_when_direct_fails(monkeypatch):
+    """اگر دریافتِ مستقیم شکست بخورد، واسطه‌ها باید امتحان شوند."""
+    from frilanser import http
+
+    calls: list[str] = []
+
+    def fake_direct(url, timeout=25.0, headers=None, allow_insecure=True):
+        calls.append(url)
+        if url == "https://example.com/page":
+            return {"ok": False, "status": None, "text": "", "error": "SSLError: booom",
+                    "how": "requests"}
+        return {"ok": True, "status": 200, "text": "<html>OK</html>", "error": "",
+                "how": "stdlib"}
+
+    monkeypatch.setattr(http, "_fetch_direct", fake_direct)
+    got = http.get_text("https://example.com/page", allow_relay=True)
+    assert got["ok"] is True
+    assert "واسطه" in got["how"]
+    assert got["text"] == "<html>OK</html>"
+    # اول خودِ نشانی امتحان شده، بعد واسطه‌ی اول
+    assert calls[0] == "https://example.com/page"
+    assert len(calls) >= 2
+
+
+def test_http_no_relay_when_direct_works(monkeypatch):
+    """وقتی دریافتِ مستقیم جواب می‌دهد، نباید سراغ واسطه رفت."""
+    from frilanser import http
+
+    def fake_direct(url, timeout=25.0, headers=None, allow_insecure=True):
+        assert url == "https://example.com/page"
+        return {"ok": True, "status": 200, "text": "سلام", "error": "", "how": "requests"}
+
+    monkeypatch.setattr(http, "_fetch_direct", fake_direct)
+    got = http.get_text("https://example.com/page", allow_relay=True)
+    assert got["how"] == "requests"
+
+
+def test_http_relay_errors_reported(monkeypatch):
+    """اگر همه‌چیز شکست بخورد، علتِ هر واسطه هم در گزارش باشد."""
+    from frilanser import http
+
+    monkeypatch.setattr(
+        http, "_fetch_direct",
+        lambda url, timeout=25.0, headers=None, allow_insecure=True: {
+            "ok": False, "status": None, "text": "", "error": "URLError: بسته است",
+            "how": "stdlib"},
+    )
+    got = http.get_text("https://example.com/page", allow_relay=True)
+    assert got["ok"] is False
+    assert got["relay_errors"]
+    assert any("allorigins" in e or "واسطه" in e for e in got["relay_errors"]) or len(
+        got["relay_errors"]) >= 2
+
+
+def test_source_falls_back_to_stale_cache(tmp_path, monkeypatch):
+    """اگر شبکه شکست بخورد اما کشِ قدیمی هست، همان برگردانده و «کهنه» نشان شود."""
+    import hashlib
+
+    from frilanser.config import Config
+    from frilanser.sources.base import BaseSource
+
+    cfg = Config({"app": {"data_dir": "data", "cache_dir": "cache"},
+                  "sources": {"ponisha": {"listing_url": "https://x.test/p"}}},
+                 tmp_path / "config.toml")
+    src = BaseSource(cfg, "ponisha")
+    url = "https://x.test/projects"
+    digest = hashlib.md5(url.encode()).hexdigest()[:12]
+    cache_file = src.cache_dir / f"ponisha-{digest}.txt"
+    src.cache_dir.mkdir(parents=True, exist_ok=True)
+    cache_file.write_text(("آگهی قدیمی " * 60) + "\n", encoding="utf-8")
+
+    monkeypatch.setattr(
+        "frilanser.http.get_text",
+        lambda *a, **k: {"ok": False, "status": None, "text": "", "error": "قطعی",
+                         "how": "stdlib", "relay_errors": ["allorigins: خطا"]},
+    )
+    got = src.fetch_text(url, force=True)
+    assert "آگهی قدیمی" in got
+    assert src.used_stale_cache is True
+    assert src.fetch_log[-1].get("stale") is True
+    assert src.fetch_log[-1].get("cached") == "کهنه"

@@ -38,6 +38,34 @@ DEFAULT_UA = (
     "(KHTML, like Gecko) Chrome/122.0 Mobile Safari/537.36"
 )
 
+# --------------------------------------------------------------------------- #
+# واسطه‌ها (relay)
+# --------------------------------------------------------------------------- #
+# اگر دریافتِ مستقیم از یک سایت شکست بخورد (فیلتر، قطعی، خطای گواهی، بلاک شدنِ
+# IP، یا صفحه‌ای که فقط با جاوااسکریپت ساخته می‌شود)، برنامه می‌تواند همان
+# نشانی را از یک «واسطه‌ی عمومی» بخواند که صفحه را از طرفِ ما می‌گیرد و متنِ
+# خام برمی‌گرداند. این واسطه‌ها هیچ داده‌ای از ما نمی‌گیرند و فقط همان صفحه‌ی
+# عمومی را باز می‌کنند. ترتیب مهم است: اولی‌هایی که HTML خام می‌دهند (چون
+# الگوهای استخراجِ آگهی روی HTML کار می‌کنند)، آخری markdown می‌دهد.
+RELAYS: tuple[tuple[str, str], ...] = (
+    ("allorigins", "https://api.allorigins.win/raw?url={url}"),
+    ("codetabs", "https://api.codetabs.com/v1/proxy?quest={url}"),
+    ("jina", "https://r.jina.ai/{url}"),
+)
+
+# بیشینهٔ زمانِ هر واسطه (ثانیه) — واسطه‌ها نباید کلِ اسکن را کند کنند.
+RELAY_TIMEOUT_CAP = 10.0
+# بیشینهٔ شمارِ واسطه‌ای که برای یک نشانی امتحان می‌شود.
+RELAY_MAX_TRIES = 3
+
+
+def relay_urls(url: str, relays=RELAYS) -> list[tuple[str, str]]:
+    """فهرستِ (نام، نشانیِ واسطه) برای یک نشانیِ هدف."""
+    from urllib.parse import quote
+
+    encoded = quote(url, safe="")
+    return [(name, tmpl.format(url=encoded)) for name, tmpl in relays]
+
 
 # --------------------------------------------------------------------------- #
 # امکاناتِ موجود
@@ -139,11 +167,40 @@ def _opener(context: ssl.SSLContext | None = None) -> OpenerDirector:
 # دریافتِ متن / JSON
 # --------------------------------------------------------------------------- #
 def get_text(url: str, timeout: float = 25.0, headers: dict | None = None,
-             allow_insecure: bool = True) -> dict:
+             allow_insecure: bool = True, allow_relay: bool = False,
+             relays=RELAYS) -> dict:
     """دریافتِ متن؛ خروجی {'ok','status','text','error','how'}.
 
-    هرگز استثنا پرتاب نمی‌کند؛ برای نمایشِ علت در رابط کاربری مناسب است.
+    زنجیره‌ی تلاش: requests → کتابخانه‌ی استاندارد → همان بدون تأییدِ گواهی →
+    واسطه‌های عمومی (اگر ``allow_relay`` باشد). هرگز استثنا پرتاب نمی‌کند؛
+    برای نمایشِ علت در رابط کاربری مناسب است.
     """
+    got = _fetch_direct(url, timeout=timeout, headers=headers,
+                        allow_insecure=allow_insecure)
+    if got["ok"] or not allow_relay:
+        return got
+
+    # ---- مسیرِ سوم: واسطه‌های عمومی (وقتی خودِ سایت در دسترس نیست)
+    errors = [f"{got.get('how')}: {got.get('error') or 'نامشخص'}"]
+    relay_timeout = min(float(timeout), RELAY_TIMEOUT_CAP)
+    for name, relay_url in relay_urls(url, relays)[:RELAY_MAX_TRIES]:
+        attempt = _fetch_direct(relay_url, timeout=relay_timeout, headers=headers,
+                                allow_insecure=allow_insecure)
+        if attempt["ok"] and (attempt.get("text") or "").strip():
+            attempt["how"] = f"واسطه: {name}"
+            attempt["relay"] = name
+            attempt["via"] = relay_url
+            return attempt
+        errors.append(f"{name}: {attempt.get('error') or attempt.get('status') or 'نامشخص'}")
+
+    got["relay_errors"] = errors
+    got["error"] = " | ".join(errors[:3])
+    return got
+
+
+def _fetch_direct(url: str, timeout: float = 25.0, headers: dict | None = None,
+                  allow_insecure: bool = True) -> dict:
+    """دریافتِ مستقیم: requests، بعد کتابخانه‌ی استاندارد (با و بدون گواهی)."""
     hdrs = {"User-Agent": DEFAULT_UA,
             "Accept": "text/html,application/xhtml+xml,application/json;q=0.9,*/*;q=0.8",
             "Accept-Language": "fa-IR,fa;q=0.9,en;q=0.6"}

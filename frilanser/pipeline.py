@@ -27,6 +27,7 @@ def collect(cfg: Config, store: Store, offline: bool = True, refresh: bool = Fal
     sources = build_sources(cfg)
     projects: list[Project] = []
     per_source: dict[str, dict] = {}
+    offline_fallback = False
     if offline:
         for key, source in sources.items():
             before = len(projects)
@@ -39,6 +40,7 @@ def collect(cfg: Config, store: Store, offline: bool = True, refresh: bool = Fal
                 got = source.collect(extra_urls=extra_urls, force=refresh)
                 per_source[key] = {"label": source.label, "ok": True, "offline": False,
                                    "fetched": len(got), "error": "",
+                                   "stale": bool(getattr(source, "used_stale_cache", False)),
                                    "fetch": source.fetch_report()}
                 projects.extend(got)
             except Exception as exc:  # noqa: BLE001 - خرابیِ یک سایت نباید بقیه را بخواباند
@@ -46,13 +48,16 @@ def collect(cfg: Config, store: Store, offline: bool = True, refresh: bool = Fal
                                    "fetched": 0, "error": f"{type(exc).__name__}: {exc}",
                                    "fetch": source.fetch_report()}
                 print(f"  ! {source.label}: {type(exc).__name__}: {exc}")
+        offline_fallback = False
         if not projects:  # اگر دسترسی نبود، از اسنپ‌شات استفاده کن
             print("  ! دریافت زنده ناموفق بود؛ از اسنپ‌شات‌های محلی استفاده می‌شود")
             projects = collect_snapshots(cfg, sources)
+            offline_fallback = True
             for key, source in sources.items():
                 per_source.setdefault(key, {"label": source.label, "ok": False,
                                             "offline": True, "fetched": 0,
                                             "error": "دریافت زنده ناموفق بود"})
+                per_source[key]["offline_fallback"] = True
 
     # آگهی‌های بسته/در حال انجام را کنار می‌گذاریم
     before = len(projects)
@@ -60,9 +65,16 @@ def collect(cfg: Config, store: Store, offline: bool = True, refresh: bool = Fal
     if before != len(projects):
         print(f"  · {before - len(projects)} آگهی بسته‌شده/در حال انجام حذف شد")
 
+    stale_sources = [k for k, v in per_source.items() if v.get("stale")]
+    if stale_sources:
+        print(f"  ! {len(stale_sources)} منبع فقط از کشِ کهنه خوانده شد: "
+              f"{', '.join(stale_sources)}")
+
     new, updated = store.upsert_many(projects)
     store.log("collect", "-", f"{new} جدید / {updated} به‌روزرسانی (offline={offline})")
     return {"fetched": len(projects), "new": new, "updated": updated,
+            "stale_sources": stale_sources,
+            "offline_fallback": offline_fallback,
             "sources": list(sources), "ids": [p.id for p in projects],
             "per_source": per_source}
 
