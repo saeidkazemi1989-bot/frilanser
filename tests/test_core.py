@@ -2066,3 +2066,82 @@ def test_project_can_have_attachments(tmp_path):
     back = Project.from_dict(data)
     assert back.attachments[0]["name"] == "spec.pdf"
     assert back.attachments[0]["size"] == 2048
+
+
+# ---------------------------------------------------------------------------
+# «انجام بده» — دکمه‌ای که قبلاً هیچ کاری نمی‌کرد
+# ---------------------------------------------------------------------------
+def test_approving_a_project_actually_builds_a_delivery(tmp_path):
+    """زدنِ «انجام بده» باید واقعاً فایل بسازد و وضعیت را جابه‌جا کند."""
+    from frilanser import delivery
+    from frilanser.models import Project
+    from frilanser.pipeline import price_projects, screen_projects
+    from frilanser.store import Store
+
+    cfg = _sources_cfg(tmp_path)
+    (cfg.data_dir).mkdir(parents=True, exist_ok=True)
+    store = Store(cfg.data_dir)
+    p = Project.from_scrape(
+        source="manual", external_id="do1",
+        title="ساخت وب‌سایت رزرو نوبت برای کلینیک",
+        url="https://example.com/p/9",
+        description="یک سایت برای رزرو نوبت آنلاین با تقویم و پرداخت می‌خواهم.",
+        skills=["PHP", "Laravel"], budget_toman=20_000_000)
+    store.upsert_many([p]); store.save()
+    screen_projects(cfg, store, force=True)
+    price_projects(cfg, store, force=True)
+
+    report = delivery.do_work(cfg, store, p.id)
+    assert report["ok"], f"اجرا ناموفق: {report}"
+    assert report["files"], "هیچ فایلی ساخته نشد"
+
+    # وضعیت باید عوض شده باشد
+    saved = store.get(p.id)
+    assert saved.status == "built"
+    assert saved.user_decision == "approved"
+    assert saved.delivery and saved.delivery["files"]
+
+    # فایل‌های کلیدی باید واقعاً روی دیسک باشند
+    root = Path(report["dir"])
+    assert (root / "تحویل.md").exists()
+    assert (root / "پیامِ تحویل.txt").exists()
+    assert (root / "source").is_dir()
+    assert any((root / "source").rglob("package.json"))
+    if report.get("preview"):
+        assert (root / report["preview"]).exists()
+
+    # چک‌لیست و پیام باید غیرخالی باشند
+    assert report["checklist"]
+    assert "سلام" in report["message"]
+
+    # و در «نیاز به ورود شما» ثبت شود
+    assert any(i.get("project_id") == p.id for i in store.needs_you())
+
+
+def test_work_page_shows_result_and_is_reachable(tmp_path):
+    """صفحه‌ی نتیجه باید بعد از اجرا در دسترس باشد."""
+    from frilanser import delivery
+    from frilanser.models import Project
+    from frilanser.store import Store
+    from frilanser.web.app import create_app
+
+    cfg = _sources_cfg(tmp_path)
+    (cfg.data_dir).mkdir(parents=True, exist_ok=True)
+    store = Store(cfg.data_dir)
+    p = Project.from_scrape(source="manual", external_id="wp1",
+                            title="اپلیکیشن مدیریت انبار", url="",
+                            description="برنامه‌ای برای مدیریت موجودی انبار")
+    store.upsert_many([p]); store.save()
+    app = create_app(cfg, store, live=False)
+    client = app.test_client()
+
+    # قبل از اجرا: صفحه‌ی کار به صفحه‌ی آگهی برمی‌گردد
+    r = client.get(f"/p/{p.id}/work")
+    assert r.status_code in (302, 308)
+
+    delivery.do_work(cfg, store, p.id)
+    r = client.get(f"/p/{p.id}/work")
+    assert r.status_code == 200
+    body = r.get_data(as_text=True)
+    assert "چه اتفاقی افتاد" in body
+    assert "چه مانده است" in body

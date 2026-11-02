@@ -92,6 +92,10 @@ class Project:
     # پیوندهای فایل که در متنِ آگهی پیدا شده (خودِ فایل دانلود نشده)
     attachment_links: list[dict] = field(default_factory=list)
 
+    # ---------- اجرا و تحویل ----------
+    # نتیجه‌ی «انجام بده»: مراحل، فایل‌ها، چک‌لیست و پیامِ آماده
+    delivery: dict | None = None
+
     # ---------- helpers ----------
     @property
     def state_label(self) -> str:

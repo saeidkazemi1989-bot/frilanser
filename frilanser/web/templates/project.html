@@ -2,6 +2,30 @@
 {% block title %}{{ p.title }} — جزئیات{% endblock %}
 {% block body %}
 
+{% if request.args.get('err') %}
+  <div class="alert bad"><div class="t">⚠️ خطا</div>{{ request.args.get('err') }}</div>
+{% endif %}
+{% if request.args.get('done') == 'delivered' %}
+  <div class="alert ok"><div class="t">📦 ثبت شد</div>تحویلِ نهاییِ این پروژه ثبت شد.</div>
+{% elif request.args.get('done') == 'rejected' %}
+  <div class="alert ok"><div class="t">↩️ ثبت شد</div>این پروژه رد شد.</div>
+{% endif %}
+
+{# ---------- اگر کار روی آن انجام شده ---------- #}
+{% if p.delivery %}
+<div class="alert ok" style="display:block">
+  <div class="t">✅ کار روی این پروژه انجام شده — {{ p.delivery.built_at }}</div>
+  <div style="margin-bottom:8px">
+    {{ p.delivery.files|length }} فایل ساخته شده
+    {% if p.delivery.has_source %} · کدِ منبع آماده است{% endif %}
+    {% if p.delivery.preview %} · پیش‌نمایشِ کارفرما آماده است{% endif %}
+  </div>
+  <a href="{{ url_for('work_page', pid=p.id) }}" class="btn btn-primary btn-sm">
+    📦 دیدنِ بسته‌ی تحویل و پیامِ آماده
+  </a>
+</div>
+{% endif %}
+
 {# ---------- نوارِ اقدامِ بالای صفحه ---------- #}
 <div class="panel tight">
   <div style="display:flex;gap:9px;flex-wrap:wrap;align-items:center">
@@ -353,16 +377,29 @@
         </span>
         تصمیم شما
       </div>
+      <div class="muted" style="margin-bottom:10px;font-size:12.5px">
+        «انجام بده» یعنی: برنامه بسته‌ی تحویل را می‌سازد (کدِ منبع + پیش‌نمایشِ
+        قفل‌شده برای کارفرما + راهنما + پیامِ آماده) و بعد نتیجه را همان لحظه
+        نشان می‌دهد. فرستادنِ پیشنهاد و تحویلِ نهایی همیشه با خودِ شماست.
+      </div>
       <form method="post" action="{{ url_for('project_decision', pid=p.id) }}">
         <div class="field">
           <input name="note" class="input" placeholder="یادداشت (اختیاری)">
         </div>
         <div class="actions">
-          <button class="go" name="decision" value="approved">✅ تایید — کار را انجام بده</button>
+          <button class="go" name="decision" value="approved">
+            {% if p.delivery %}🔁 دوباره انجام بده{% else %}▶️ تایید — کار را انجام بده{% endif %}
+          </button>
           <button class="no" name="decision" value="rejected">❌ رد کن</button>
           <button name="decision" value="delivered">📦 تحویل داده شد</button>
         </div>
       </form>
+      {% if p.proposal_state == 'won' and not p.delivery %}
+        <div class="alert warn" style="margin:12px 0 0">
+          <div class="t">🏆 این پروژه را گرفته‌اید اما هنوز کاری روی آن انجام نشده</div>
+          دکمه‌ی «▶️ تایید — کار را انجام بده» را بزنید تا بسته‌ی تحویل ساخته شود.
+        </div>
+      {% endif %}
       {% if p.screening and p.screening.needs_you %}
         <div class="sec-title" style="margin-top:20px;font-size:14.5px">
           <span class="ico">🙋</span>

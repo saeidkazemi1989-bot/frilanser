@@ -367,13 +367,71 @@ def create_app(cfg: Config, store: Store, live: bool | None = None) -> Flask:
 
     @app.post("/p/<path:pid>/decision")
     def project_decision(pid: str):
+        from .. import delivery as delivery_mod
         from .. import pipeline
+
         decision = request.form.get("decision", "")
         note = request.form.get("note", "")
+
+        if decision == "approved":
+            # «انجام بده»: واقعاً می‌سازیم و بعد صفحه‌ی نتیجه را نشان می‌دهیم،
+            # تا معلوم باشد چه اتفاقی افتاده (قبلاً فقط یک برچسب عوض می‌شد).
+            try:
+                delivery_mod.do_work(cfg, store, pid,
+                                     base_url=request.host_url.rstrip("/"))
+            except Exception as exc:  # noqa: BLE001
+                pipeline.set_decision(store, pid, decision, note=note or None)
+                return redirect(url_for("project_detail", pid=pid,
+                                        err=f"اجرا ناموفق بود: {exc}"))
+            return redirect(url_for("work_page", pid=pid))
+
         project = pipeline.set_decision(store, pid, decision, note=note or None)
         if project:
             pipeline.notify(cfg, store)
-        return redirect(url_for("project_detail", pid=pid))
+        return redirect(url_for("project_detail", pid=pid,
+                                done=decision if decision else ""))
+
+    @app.get("/p/<path:pid>/work")
+    def work_page(pid: str):
+        """نتیجه‌ی «انجام بده»: چه ساخته شد، چه مانده، و پیامِ آماده."""
+        project = store.get(pid)
+        if project is None:
+            abort(404)
+        info = project.delivery
+        if not info:
+            return redirect(url_for("project_detail", pid=pid))
+        return render_template("work.html", p=project, info=info, stats=summarize())
+
+    @app.post("/p/<path:pid>/work")
+    def work_rerun(pid: str):
+        """دوباره ساختنِ بسته‌ی تحویل."""
+        from .. import delivery as delivery_mod
+
+        try:
+            delivery_mod.do_work(cfg, store, pid,
+                                 base_url=request.host_url.rstrip("/"))
+        except Exception as exc:  # noqa: BLE001
+            return redirect(url_for("project_detail", pid=pid,
+                                    err=f"اجرا ناموفق بود: {exc}"))
+        return redirect(url_for("work_page", pid=pid))
+
+    @app.get("/deliveries/<path:filename>")
+    def serve_delivery(filename: str):
+        """دانلودِ فایل‌های بسته‌ی تحویل."""
+        from flask import send_file
+
+        base = (Path(cfg.outbox_dir) / "deliveries").resolve()
+        rel = str(filename).replace("\\", "/").lstrip("/")
+        if rel.startswith("deliveries/"):
+            rel = rel[len("deliveries/"):]
+        target = (base / rel).resolve()
+        try:
+            target.relative_to(base)
+        except ValueError:
+            abort(404)
+        if not target.is_file():
+            abort(404)
+        return send_file(str(target), as_attachment=False, download_name=target.name)
 
     @app.post("/p/<path:pid>/proposal-state")
     def project_proposal_state(pid: str):
