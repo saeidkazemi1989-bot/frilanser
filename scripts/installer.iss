@@ -10,7 +10,7 @@ AppName={#MyAppName}
 AppVersion={#MyAppVersion}
 AppPublisher={#MyAppPublisher}
 AppPublisherURL=https://github.com/saeidkazemi1989-bot/frilanser
-DefaultDirName={autopf}\Frilanser
+DefaultDirName={localappdata}\Frilanser
 DefaultGroupName={#MyAppName}
 DisableProgramGroupPage=yes
 ; خروجی با پارامتر /O مشخص می‌شود
@@ -19,6 +19,10 @@ ArchitecturesInstallIn64BitMode=x64
 Compression=lzma2/max
 SolidCompression=yes
 WizardStyle=modern
+; نصبِ «فقط برای این کاربر»: بدون نیاز به دسترسیِ مدیر (admin) اجرا می‌شود.
+; قبلاً در Program Files نصب می‌کرد و روی سیستم‌هایی که کاربر مدیر نبود
+; (یا پنجره‌ی تأیید را رد می‌کردند) نصب شکست می‌خورد.
+PrivilegesRequired=lowest
 PrivilegesRequiredOverridesAllowed=dialog
 
 [Languages]

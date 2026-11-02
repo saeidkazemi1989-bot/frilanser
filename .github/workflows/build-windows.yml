@@ -184,6 +184,18 @@ jobs:
           echo "== فایل‌های dist بعد از تست =="
           ls -la "$WORK"
 
+      - name: پیوست کردن فایل‌های ویندوز به Release (برای دانلودِ مستقیم)
+        if: success()
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: latest
+          files: |
+            dist/frilanser-gui.exe
+            dist/Frilanser-Setup.exe
+            dist/frilanser-portable.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: بارگذاری فایل اجرایی و گزارش تست
         if: always()
         uses: actions/upload-artifact@v4
