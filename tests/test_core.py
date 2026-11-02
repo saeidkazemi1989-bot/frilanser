@@ -1837,3 +1837,42 @@ def test_scan_record_is_stamped_with_app_version(tmp_path):
     svc._run_scan(trigger="manual", offline=True)
     assert svc.last_scan["app_version"] == live_mod.__version__
     assert svc.last_scan.get("running") is False
+
+
+# ---------------------------------------------------------------------------
+# تبدیلِ HTML: پیوندها باید به مارک‌داون بمانند (۱.۰.۱۳)
+# ---------------------------------------------------------------------------
+def test_html_to_text_keeps_links_as_markdown():
+    """بدون پیوندِ پروژه، تحلیل‌گرها هیچ آگهی‌ای پیدا نمی‌کنند."""
+    from frilanser.sources.base import BaseSource
+
+    html = ('<div><h6><a href="https://parscoders.com/project/88123/x">'
+            'طراحی سایت فروشگاهی</a></h6><p>توضیح</p></div>')
+    text = BaseSource.html_to_text(html, base_url="https://parscoders.com/project")
+    assert "###### [طراحی سایت فروشگاهی](https://parscoders.com/project/88123/x)" in text
+
+
+def test_html_to_text_makes_relative_links_absolute():
+    """پیوندهای نسبی باید با نشانیِ پایه کامل شوند."""
+    from frilanser.sources.base import BaseSource
+
+    html = '<div><a href="/project/77/y">یک پروژه</a></div>'
+    text = BaseSource.html_to_text(html, base_url="https://parscoders.com/project")
+    assert "https://parscoders.com/project/77/y" in text
+
+
+def test_generic_extractor_finds_projects_without_site_parser():
+    """اگر تحلیل‌گرِ اختصاصی جواب ندهد، استخراجِ عمومی باید آگهی بیابد."""
+    from frilanser.config import Config
+    from frilanser.sources.base import BaseSource
+
+    cfg = Config({"app": {"data_dir": "data", "cache_dir": "cache"}}, Path(".") / "config.toml")
+    src = BaseSource(cfg, "ponisha")
+    html = """
+      <div><a href="https://ponisha.ir/project/12345/foo">ساخت فروشگاه</a>
+      <p>توضیح</p><span>بودجه: ۹,۰۰۰,۰۰۰ تومان</span><span>با ۴ پیشنهاد</span></div>
+    """
+    text = src.html_to_text(html, base_url="https://ponisha.ir")
+    records = src.generic_records(text)
+    assert records and records[0]["title"] == "ساخت فروشگاه"
+    assert records[0]["budget_toman"] == 9000000

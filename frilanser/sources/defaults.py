@@ -49,6 +49,13 @@ DEFAULT_SOURCES: dict[str, dict] = {
     "parscoders": {
         "enabled": True,
         "label": "پارس‌کدرز",
+        # فهرستِ این سایت با جاوااسکریپت ساخته می‌شود؛ اگر نشانیِ اصلی خالی
+        # بود، این‌ها هم امتحان می‌شوند.
+        "alt_listing_urls": [
+            "https://parscoders.com/projects",
+            "https://parscoders.com/project/all",
+            "https://parscoders.com/projects/all",
+        ],
         "kind": "parscoders",
         "base_url": "https://parscoders.com",
         "listing_url": "https://parscoders.com/project",

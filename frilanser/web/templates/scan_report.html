@@ -72,6 +72,16 @@
         <span style="color:#a02626">نشانی‌ای برای این منبع پیدا نشد ( listing_url خالی است )</span>
       {% endif %}
       {% if info.get('stale') %}<span class="badge warn">کشِ کهنه</span>{% endif %}
+      {% if info.get('js_list') %}
+        <div style="color:#8a6d1f;margin-top:4px">فهرستِ این سایت با جاوااسکریپت ساخته می‌شود؛ در متنِ صفحه آگهی‌ای نیست.</div>
+      {% endif %}
+      {% if info.get('links') %}
+        <div style="font-size:11.5px;margin-top:4px">نمونه پیوندهای پروژه در صفحه:
+          <ul dir="ltr" style="margin:2px 0 0 18px">{% for l in info['links'] %}<li>{{ l }}</li>{% endfor %}</ul>
+        </div>
+      {% elif info.get('fetched') == 0 %}
+        <div style="color:#a02626;margin-top:4px">هیچ پیوندِ پروژه‌ای در صفحه پیدا نشد (ساختارِ سایت عوض شده یا نیاز به ورود است).</div>
+      {% endif %}
     </div>
     {% for e in (fr.get('log') or []) %}
       <div class="muted" style="font-size:12px;margin-top:6px">

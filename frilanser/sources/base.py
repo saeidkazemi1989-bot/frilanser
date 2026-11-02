@@ -7,9 +7,30 @@ import re
 import time
 from pathlib import Path
 from typing import Iterable
+from urllib.parse import urljoin
 
 from ..config import Config
 from ..models import Project
+
+
+# عناصرِ بلوکی: فقط این‌ها در تبدیل به متن خطِ جدید می‌گیرند.
+_BLOCK_TAGS = [
+    "address", "article", "aside", "blockquote", "br", "dd", "div", "dl", "dt",
+    "figcaption", "figure", "footer", "form", "h1", "h2", "h3", "h4", "h5", "h6",
+    "header", "hr", "li", "main", "nav", "ol", "p", "pre", "section", "table",
+    "tbody", "td", "tfoot", "th", "thead", "tr", "ul",
+]
+
+# پیوندی که به صفحه‌ی یک پروژه می‌رود (برای استخراجِ عمومی)
+_GENERIC_LINK_RE = re.compile(
+    r"\[([^\]]{5,200})\]\((https?://[^\s)]+?/(?:projects?|jobs?|gigs?)/[^)\s]+)\)"
+)
+
+# صفاتی که نشانه‌ی «این یک پروژه نیست» است (لینک‌های ناوبری و …)
+_GENERIC_STOP = (
+    "new", "search", "all", "index", "list", "create", "login", "register",
+    "category", "categories", "skills", "skill", "page", "filter",
+)
 
 
 class FetchError(RuntimeError):
@@ -35,6 +56,12 @@ class BaseSource:
         self.cache_dir = cfg.cache_dir
         # گزارشِ آخرین دریافت‌ها (برای اینکه بدانیم چرا آگهی جدید نمی‌آید)
         self.fetch_log: list[dict] = []
+        # آخرین HTML خام (برای استخراجِ عمومی و گزارشِ ساختار)
+        self.last_html: str = ""
+        # نمونه پیوندهای پروژه که در صفحه پیدا شد
+        self.link_samples: list[str] = []
+        # آیا صفحه به‌نظر می‌رسد فهرست را با جاوااسکریپت می‌سازد؟
+        self.empty_like_js = False
         # اگر دریافتِ زنده شکست خورد و از کشِ کهنه استفاده شد، این پرچم روشن
         # می‌شود تا اسکن «موفقِ قلابی» به نظر نرسد.
         self.used_stale_cache = False
@@ -130,7 +157,8 @@ class BaseSource:
 
         html = got["text"]
         entry.update({"ok": True, "chars": len(html)})
-        text = self.html_to_text(html)
+        self.last_html = html
+        text = self.html_to_text(html, base_url=url)
         entry["sample"] = text[:400]
         self.cache_dir.mkdir(parents=True, exist_ok=True)
         cache_file.write_text(text, encoding="utf-8")
@@ -169,8 +197,16 @@ class BaseSource:
         return age_hours < ttl_hours
 
     @staticmethod
-    def html_to_text(html: str) -> str:
-        """HTML را به متن ساده تبدیل می‌کند (الگوی کارت‌ها در متن حفظ می‌شود)."""
+    def html_to_text(html: str, base_url: str = "") -> str:
+        """HTML را به متنِ مارک‌داون‌مانند تبدیل می‌کند.
+
+        **نکته‌ی حیاتی:** پیوندها باید به شکلِ مارک‌داون (``[عنوان](نشانی)``)
+        در متن بمانند، چون همه‌ی تحلیل‌گرها آگهی را از روی پیوندِ صفحه‌ی پروژه
+        پیدا می‌کنند. نسخه‌ی قبلی با ``get_text`` پیوندها را می‌بُرید و برای
+        همین با وجود دریافتِ موفقِ صفحه، صفر آگهی استخراج می‌شد.
+        تیترها هم با ``#`` مشخص می‌شوند (تحلیل‌گرِ پارس‌کدرز به ``######``
+        نیاز دارد).
+        """
         try:
             # بسته‌ی اندروید typing_extensions را همراه ندارد و بدون آن
             # ایمپورتِ bs4 شکست می‌خورد؛ قبل از ایمپورت آن را تأمین می‌کنیم.
@@ -182,13 +218,50 @@ class BaseSource:
             import html as _html_mod
 
             text = re.sub(r"(?is)<(script|style|noscript).*?</\1>", " ", html)
+
+            def _link(match: re.Match) -> str:
+                label = re.sub(r"(?s)<[^>]+>", "", match.group(2)).strip()
+                return f"[{label}]({match.group(1)})" if label else ""
+
+            text = re.sub(r'(?is)<a\s[^>]*href="([^"]+)"[^>]*>(.*?)</a>', _link, text)
+            text = re.sub(r"(?is)<h([1-6])[^>]*>", lambda m: "\n" + "#" * int(m.group(1)) + " ", text)
             text = re.sub(r"(?s)<[^>]+>", "\n", text)
             text = _html_mod.unescape(text)
         else:
             soup = BeautifulSoup(html, "html.parser")
-            for tag in soup(["script", "style", "noscript", "svg"]):
+            for tag in soup(["script", "style", "noscript", "svg", "template"]):
                 tag.decompose()
-            text = soup.get_text("\n")
+
+            # ۱) پیوندها → مارک‌داون (نسبی‌ها با نشانیِ پایه مطلق می‌شوند)
+            for anchor in soup.find_all("a"):
+                href = str(anchor.get("href") or "").strip()
+                if not href or href.startswith("#") \
+                        or href.lower().startswith(("javascript:", "mailto:", "tel:")):
+                    continue
+                if base_url and not href.lower().startswith(("http://", "https://")):
+                    href = urljoin(base_url, href)
+                label = anchor.get_text(" ").strip()
+                if not label:
+                    continue
+                anchor.replace_with(f"[{label}]({href})")
+
+            # ۲) تیترها → # / ## / … / ######
+            for level in range(1, 7):
+                for heading in soup.find_all(f"h{level}"):
+                    heading.insert(0, "#" * level + " ")
+
+            # ۳) جداکننده‌ی افقی
+            for rule in soup.find_all("hr"):
+                rule.replace_with("\n* * *\n")
+
+            # ۴) فقط عناصرِ بلوکی خطِ جدید می‌گیرند تا محتوایِ درون‌خطی
+            #    (مثل عنوان و زمانِ انتشار) در یک خط بماند
+            for tag in soup.find_all(_BLOCK_TAGS):
+                tag.insert_before("\n")
+                tag.insert_after("\n")
+
+            text = soup.get_text("")
+
         text = re.sub(r"[ \t]+", " ", text)
         text = re.sub(r"\n\s*\n\s*\n+", "\n\n", text)
         return text.strip()
@@ -223,7 +296,58 @@ class BaseSource:
         from .defaults import listing_url_for
 
         url = listing_url_for(self.key, self.scfg)
-        return [url] if url else []
+        urls = [url] if url else []
+        for extra in (self.scfg.get("alt_listing_urls") or []):
+            extra = str(extra or "").strip()
+            if extra and extra not in urls:
+                urls.append(extra)
+        return urls
+
+    def generic_records(self, text: str) -> list[dict]:
+        """استخراجِ عمومیِ آگهی‌ها از روی پیوندهایِ صفحه.
+
+        هر پیوندی که به صفحه‌ی یک پروژه برود (مثل ``/project/123`` یا
+        ``/projects/slug``) یک آگهی است؛ عنوان همان متنِ پیوند و توضیح و
+        بودجه از متنِ بعد از آن برداشته می‌شود. این متد وقتی به کار می‌آید که
+        قالبِ سایت عوض شده و تحلیل‌گرِ اختصاصی دیگر چیزی پیدا نکند.
+        """
+        records: list[dict] = []
+        seen: set[str] = set()
+        matches = list(_GENERIC_LINK_RE.finditer(text))
+        for index, match in enumerate(matches):
+            title = match.group(1).strip().strip("*").strip()
+            url = match.group(2).strip()
+            tail = url.rstrip("/").split("/")[-1]
+            if not tail or tail.lower() in _GENERIC_STOP:
+                continue
+            key = url.split("?")[0]
+            if key in seen:
+                continue
+            seen.add(key)
+
+            end = matches[index + 1].start() if index + 1 < len(matches) \
+                else min(len(text), match.end() + 1500)
+            block = text[match.end():end]
+
+            from ..normalize import (  # import محلی: وابستگیِ دور
+                clean_text, parse_bids, parse_budget, parse_deadline_days,
+            )
+
+            description = clean_text(block)[:1200]
+            record = {
+                "external_id": tail,
+                "title": clean_text(title)[:200],
+                "url": url,
+                "description": description,
+                "budget_toman": parse_budget(block),
+                "bids": parse_bids(block),
+                "client_deadline_days": parse_deadline_days(block),
+                "skills": [],
+                "flags": [],
+            }
+            if record["title"]:
+                records.append(record)
+        return records
 
     def collect(self, extra_urls: Iterable[str] | None = None, force: bool = False) -> list[Project]:
         urls = list(extra_urls or []) or self.list_urls()
@@ -235,8 +359,27 @@ class BaseSource:
                 print(f"  ! خطا در دریافت {url}: {exc}")
                 continue
             parsed = self.parse(text)
+            how = "تحلیل‌گرِ اختصاصی"
+            if not parsed:
+                # قالبِ سایت عوض شده؟ استخراجِ عمومی را امتحان می‌کنیم.
+                parsed = self.generic_records(text)
+                how = "استخراجِ عمومی" if parsed else "هیچ‌کدام"
+            if parsed:
+                self.link_samples = [str(r.get("url") or "") for r in parsed[:5]]
+            else:
+                # نمونه پیوندهای پروژه در صفحه (برای گزارشِ ساختار)
+                self.link_samples = [
+                    m.group(2) for m in _GENERIC_LINK_RE.finditer(text)][:5]
+                # صفحه‌هایی که فهرست را با جاوااسکریپت می‌سازند، در متنِ خام
+                # چیزی ندارند؛ این را در گزارش می‌گوییم.
+                self.empty_like_js = bool(
+                    re.search(r"no results? found|نتیجه‌ای یافت نشد", text, re.I))
             records.extend(parsed)
-            print(f"  · {self.label}: {len(parsed)} آگهی از {url if len(url) < 70 else url[:70] + '…'}")
+            print(f"  · {self.label}: {len(parsed)} آگهی از "
+                  f"{url if len(url) < 70 else url[:70] + '…'} ({how})")
+            if records:
+                # نشانی‌های جایگزین فقط وقتی امتحان می‌شوند که چیزی پیدا نشده باشد
+                break
         return self.to_projects(records)
 
 

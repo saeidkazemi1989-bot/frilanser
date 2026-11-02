@@ -47,6 +47,8 @@ def collect(cfg: Config, store: Store, offline: bool = True, refresh: bool = Fal
                                    "fetched": len(got), "error": "",
                                    "urls": urls,
                                    "stale": bool(getattr(source, "used_stale_cache", False)),
+                                   "links": list(getattr(source, "link_samples", []) or []),
+                                   "js_list": bool(getattr(source, "empty_like_js", False)),
                                    "fetch": source.fetch_report()}
                 projects.extend(got)
             except Exception as exc:  # noqa: BLE001 - خرابیِ یک سایت نباید بقیه را بخواباند
