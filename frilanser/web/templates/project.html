@@ -2,6 +2,65 @@
 {% block title %}{{ p.title }} — جزئیات{% endblock %}
 {% block body %}
 
+<div class="panel" style="padding:12px 14px">
+  <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+    <a href="{{ url_for('upsell', pid=p.id) }}"><button type="button">💡 پیشنهادِ بهتر (مثلاً به‌جای اکسل، یک برنامه)</button></a>
+    <button type="button" id="edit-toggle">✏️ ویرایشِ مشخصات</button>
+    {% if p.url %}<a href="{{ p.url }}" target="_blank" rel="noopener">آگهی اصلی ↗</a>{% endif %}
+  </div>
+</div>
+
+<div class="panel" id="edit-panel" style="display:none;padding:12px 14px">
+  <h3 style="margin-top:0;font-size:15px">✏️ ویرایشِ مشخصات (هر تغییری بخواهید بدهید)</h3>
+  <form method="post" action="{{ url_for('edit_project', pid=p.id) }}">
+    <div style="margin:8px 0">
+      <label style="font-size:13px">عنوان:</label><br>
+      <input name="title" value="{{ p.title }}"
+             style="width:100%;border:1px solid #d9deeb;border-radius:10px;padding:7px 10px;font:inherit;font-size:13px">
+    </div>
+    <div style="margin:8px 0">
+      <label style="font-size:13px">متنِ آگهی:</label><br>
+      <textarea name="description" rows="7"
+                style="width:100%;border:1px solid #d9deeb;border-radius:10px;padding:8px 10px;font:inherit;font-size:13px">{{ p.description }}</textarea>
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <div style="flex:1;min-width:180px">
+        <label style="font-size:13px">نشانی:</label><br>
+        <input name="url" dir="ltr" value="{{ p.url or '' }}"
+               style="width:100%;border:1px solid #d9deeb;border-radius:10px;padding:7px 10px;font:inherit;font-size:12.5px">
+      </div>
+      <div style="min-width:140px">
+        <label style="font-size:13px">بودجه (تومان):</label><br>
+        <input name="budget" inputmode="numeric" value="{{ p.budget_toman or '' }}"
+               style="width:100%;border:1px solid #d9deeb;border-radius:10px;padding:7px 10px;font:inherit;font-size:12.5px">
+      </div>
+      <div style="min-width:120px">
+        <label style="font-size:13px">مهلت (روز):</label><br>
+        <input name="deadline" inputmode="numeric" value="{{ p.client_deadline_days or '' }}"
+               style="width:100%;border:1px solid #d9deeb;border-radius:10px;padding:7px 10px;font:inherit;font-size:12.5px">
+      </div>
+    </div>
+    <div style="margin:8px 0">
+      <label style="font-size:13px">مهارت‌ها (با کاما):</label><br>
+      <input name="skills" value="{{ (p.skills or []) | join(', ') }}"
+             style="width:100%;border:1px solid #d9deeb;border-radius:10px;padding:7px 10px;font:inherit;font-size:12.5px">
+    </div>
+    <button type="submit">💾 ذخیره و دوباره قیمت‌گذاری</button>
+  </form>
+</div>
+
+<script>
+  (function () {
+    var b = document.getElementById('edit-toggle');
+    var p = document.getElementById('edit-panel');
+    if (b && p) {
+      b.addEventListener('click', function () {
+        p.style.display = (p.style.display === 'none') ? 'block' : 'none';
+      });
+    }
+  })();
+</script>
+
 <div class="panel" style="border-color:#c7d2fe;background:#f8faff">
   <h2 style="margin-top:0;font-size:17px">📌 وضعیتِ پیشنهادِ من</h2>
   <div class="muted" style="margin-bottom:10px">

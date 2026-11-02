@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}پیشنهادِ بهتر — {{ p.title }}{% endblock %}
+{% block body %}
+
+<div class="panel">
+  <h2>💡 پیشنهادِ بهتر برای «{{ p.title }}»</h2>
+  <p class="muted" style="font-size:13.5px;line-height:1.9">
+    کارفرما <b>{{ up.wanted }}</b> خواسته است. شما می‌توانید همان را بدهید،
+    یا گزینه‌ی بهتری پیشنهاد کنید. متنِ زیر آماده است: کپی کنید و در سایت برای
+    کارفرما بفرستید (ارسال همچنان با خودِ شماست).
+  </p>
+
+  <div class="stats">
+    <div class="stat"><div class="k">خواسته‌ی کارفرما</div><div class="v" style="font-size:15px">{{ up.wanted }}</div></div>
+    <div class="stat"><div class="k">پیشنهادِ شما</div><div class="v" style="font-size:14px">{{ up.alternative }}</div></div>
+    <div class="stat"><div class="k">مبلغِ گزینه‌ی ۱</div><div class="v">{{ '{:,}'.format(up.base_price) if up.base_price else '—' }}</div></div>
+    <div class="stat"><div class="k">مبلغِ گزینه‌ی ۲</div><div class="v">{{ '{:,}'.format(up.price) }}</div></div>
+    <div class="stat"><div class="k">اختلاف</div><div class="v">{{ '{:,}'.format(up.diff) if up.base_price else '—' }}</div></div>
+    <div class="stat"><div class="k">زمانِ برآوردی</div><div class="v">{{ up.hours }} ساعت</div></div>
+  </div>
+
+  <div style="margin-top:14px">
+    <button type="button" data-copy="upsell-text">📋 کپیِ متنِ پیشنهاد (برای کارفرما)</button>
+    <a href="{{ url_for('project_detail', pid=p.id) }}">بازگشت به آگهی</a>
+  </div>
+</div>
+
+<div class="panel">
+  <h3 style="margin-top:0">متنِ آماده</h3>
+  <pre id="upsell-text" dir="auto"
+       style="background:#f8fafc;border:1px solid #e5e8f0;border-radius:10px;
+              padding:12px;font-size:13px;line-height:2;white-space:pre-wrap">{{ up.text }}</pre>
+</div>
+
+<div class="panel">
+  <h3 style="margin-top:0">چرا این پیشنهاد بهتر است؟</h3>
+  <ul style="line-height:2;font-size:13.5px">
+    {% for r in up.reasons %}<li>{{ r }}</li>{% endfor %}
+  </ul>
+  <div class="muted" style="font-size:12.5px;margin-top:10px">
+    نکته: پیش از فرستادن، مبلغ‌ها را با نرخِ امروز و محدوده‌ی کاری که می‌پذیرید
+    هماهنگ کنید. اگر کارفرما گزینه‌ی ۲ را خواست، می‌توانید از همین صفحه‌ی آگهی
+    یک پیش‌نمایشِ گرافیکی بسازید و همراهِ پیشنهاد بفرستید — تا دقیقاً ببیند چه
+    می‌گیرد، بی‌آن‌که بتواند از آن استفاده کند.
+  </div>
+</div>
+
+{% endblock %}

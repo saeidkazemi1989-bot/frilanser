@@ -200,6 +200,54 @@ def create_app(cfg: Config, store: Store, live: bool | None = None) -> Flask:
             abort(404)
         return render_template("project.html", p=project, stats=summarize(), cfg=cfg)
 
+    @app.get("/p/<path:pid>/upsell")
+    def upsell(pid: str):
+        """پیشنهادِ بهتر: به‌جای آنچه کارفرما خواسته، چه چیزی بهتر است؟"""
+        from .. import upsell as upsell_mod
+
+        project = store.get(pid)
+        if project is None:
+            abort(404)
+        proposal = getattr(project, "proposal", None) or {}
+        info = upsell_mod.build_upsell(project, cfg, proposal)
+        return render_template("upsell.html", p=project, up=info,
+                               stats=summarize(), cfg=cfg)
+
+    @app.post("/p/<path:pid>/edit")
+    def edit_project(pid: str):
+        """ویرایشِ دستیِ مشخصاتِ آگهی (تا هر تغییری بخواهید در آن بدهید)."""
+        from ..normalize import clean_text, parse_budget, parse_deadline_days
+        from ..pipeline import price_projects, screen_projects
+
+        project = store.get(pid)
+        if project is None:
+            abort(404)
+
+        title = (request.form.get("title") or "").strip()
+        if title:
+            project.title = clean_text(title)
+        project.description = clean_text(request.form.get("description") or "")
+        url = (request.form.get("url") or "").strip()
+        if url:
+            project.url = url
+        budget_raw = (request.form.get("budget") or "").strip()
+        if budget_raw:
+            project.budget_toman = parse_budget(budget_raw)
+        deadline = (request.form.get("deadline") or "").strip()
+        if deadline:
+            project.client_deadline_days = parse_deadline_days(deadline)
+        skills_raw = (request.form.get("skills") or "").strip()
+        if skills_raw:
+            project.skills = [x.strip() for x in skills_raw.split(",") if x.strip()]
+
+        store.upsert_many([project])
+        store.save()
+        # دوباره غربال و قیمت‌گذاری می‌کنیم چون مشخصات عوض شده
+        screen_projects(cfg, store, force=True)
+        price_projects(cfg, store, force=True)
+        store.save()
+        return redirect(url_for("project_detail", pid=pid))
+
     @app.post("/p/<path:pid>/decision")
     def project_decision(pid: str):
         from .. import pipeline
@@ -273,6 +321,72 @@ def create_app(cfg: Config, store: Store, live: bool | None = None) -> Flask:
         pipeline.run_all(cfg, store, offline=offline, demo_limit=limit,
                          base_url=base_url, refresh=not offline)
         return redirect(url_for("index"))
+
+    @app.get("/add")
+    def add_listing_form():
+        """فرمِ «آگهیِ دستی»: آگهی‌ای که خودتان در سایت دیده‌اید وارد کنید."""
+        return render_template(
+            "add_listing.html",
+            stats=summarize(),
+            cfg=cfg,
+            source_info=source_info(),
+            sources=sorted(set((p.source, p.source_label) for p in store.all())),
+        )
+
+    @app.post("/add")
+    def add_listing():
+        """آگهی را می‌گیرد، غربال می‌کند، قیمت می‌گذارد و (در صورت نیاز) دمو می‌سازد."""
+        title = (request.form.get("title") or "").strip()
+        if not title:
+            return redirect(url_for("add_listing_form", err="عنوانِ آگهی را بنویسید"))
+
+        from ..models import Project
+        from ..normalize import parse_budget, parse_deadline_days
+        from ..pipeline import price_projects, screen_projects
+
+        description = (request.form.get("description") or "").strip()
+        url = (request.form.get("url") or "").strip()
+        source_key = (request.form.get("source") or "manual").strip() or "manual"
+        skills = [x.strip() for x in (request.form.get("skills") or "").split(",")
+                  if x.strip()]
+
+        budget_raw = (request.form.get("budget") or "").strip()
+        budget = parse_budget(budget_raw) if budget_raw else None
+        deadline = parse_deadline_days(request.form.get("deadline") or "")
+
+        # شناسه‌ی یکتا بر اساسِ عنوان (تا دوباره وارد کردن تکراری نسازد)
+        import hashlib
+
+        digest = hashlib.md5(f"{title}|{url}".encode("utf-8")).hexdigest()[:10]
+        project = Project.from_scrape(
+            source=source_key if source_key != "manual" else "manual",
+            external_id=f"manual-{digest}",
+            title=title,
+            url=url,
+            description=description,
+            skills=skills,
+            budget_toman=budget,
+            client_deadline_days=deadline,
+        )
+        # برچسبِ منبع از روی کلید ساخته می‌شود؛ برای «manual» مدل خودش
+        # «دستی (من اضافه کردم)» را برمی‌گرداند.
+        store.upsert_many([project])
+        store.save()
+        screen_projects(cfg, store, force=False)
+        price_projects(cfg, store, force=False)
+        store.save()
+
+        wanted = request.form.get("demo") == "1"
+        if wanted:
+            try:
+                from ..pipeline import build_demos
+
+                build_demos(cfg, store, verdicts=("candidate", "review", "rejected"),
+                            limit=1, base_url=request.host_url.rstrip("/"), force=True)
+            except Exception:  # noqa: BLE001 - دمو نباید مانعِ ادامه شود
+                pass
+
+        return redirect(url_for("project_detail", pid=project.id))
 
     @app.get("/scan-report")
     def scan_report():

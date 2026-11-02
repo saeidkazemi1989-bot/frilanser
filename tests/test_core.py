@@ -1876,3 +1876,59 @@ def test_generic_extractor_finds_projects_without_site_parser():
     records = src.generic_records(text)
     assert records and records[0]["title"] == "ساخت فروشگاه"
     assert records[0]["budget_toman"] == 9000000
+
+
+# ---------------------------------------------------------------------------
+# آگهیِ دستی + پیشنهادِ بهتر (۱.۰.۱۴)
+# ---------------------------------------------------------------------------
+def test_upsell_detects_excel_request_and_proposes_app():
+    """کارفرما اکسل خواسته → برنامه پیشنهاد شود."""
+    from frilanser.upsell import detect_request
+
+    found = detect_request("یک فایل اکسل برای حقوق و دستمزد می‌خواهم")
+    assert "اکسل" in found["wanted"]
+    assert "برنامه" in found["alternative"]
+
+
+def test_upsell_prices_both_options():
+    """هر دو گزینه باید قیمت داشته باشند و دومی گران‌تر باشد."""
+    from frilanser.config import Config
+    from frilanser.models import Project
+    from frilanser.upsell import build_upsell
+
+    cfg = Config({"pricing": {"hourly_rate_toman": 450000,
+                              "min_project_price_toman": 5000000,
+                              "round_to_toman": 500000}}, Path(".") / "config.toml")
+    project = Project.from_scrape(
+        source="manual", external_id="x1",
+        title="ساخت فایل اکسل حقوق",
+        url="", description="یک فایل اکسل برای حقوق و دستمزد")
+    info = build_upsell(project, cfg, {"hours": 10.0, "price": 5_500_000,
+                                       "schedule_days": 3})
+    assert info["price"] > info["base_price"]
+    assert "اکسل" in info["wanted"]
+    assert "گزینه‌ی ۲" in info["text"]
+    assert f"{info['price']:,}" in info["text"]
+
+
+def test_manual_listing_can_be_added_and_priced(tmp_path):
+    """آگهیِ دستی باید غربال و قیمت‌گذاری شود."""
+    from frilanser.models import Project
+    from frilanser.pipeline import price_projects, screen_projects
+    from frilanser.store import Store
+
+    cfg = _sources_cfg(tmp_path)
+    store = Store(cfg.data_dir)
+    project = Project.from_scrape(
+        source="manual", external_id="m1",
+        title="ساخت اپلیکیشن رزرو نوبت",
+        url="https://example.com/p/1",
+        description="یک اپلیکیشن تحت‌وب برای رزرو نوبت آرایشگاه",
+        budget_toman=15_000_000)
+    store.upsert_many([project])
+    store.save()
+    screen_projects(cfg, store, force=True)
+    price_projects(cfg, store, force=True)
+    saved = store.get(project.id)
+    assert saved.proposal and saved.proposal["price"] > 0
+    assert saved.source_label == "دستی (من اضافه کردم)"

@@ -114,6 +114,7 @@ class Project:
             "karlancer_programming": "کارلنسر (برنامه‌نویسی)",
             "karlancer_web_design": "کارلنسر (طراحی سایت)",
             "parscoders": "پارس‌کدرز",
+            "manual": "دستی (من اضافه کردم)",
         }.get(self.source, self.source)
 
     def to_dict(self) -> dict:
