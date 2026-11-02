@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import os
 import time
+from datetime import datetime
 from pathlib import Path
 
 from flask import (
@@ -66,6 +67,20 @@ def create_app(cfg: Config, store: Store, live: bool | None = None) -> Flask:
         BUDGET_VERDICT_FA=BUDGET_VERDICT_FA,
     )
     state = {"cfg": cfg, "store": store}
+
+    # بازیابیِ نشانه‌گذاری‌های کاربر (پیشنهاد دادم / گرفتم / …) از پوشه‌های
+    # پایدار و نسخه‌های پشتیبان — پیش از هر چیز، تا هیچ انتخابی از بین نرود.
+    try:
+        from .. import backup as _backup  # noqa: PLC0415
+        _restore = _backup.restore(store)
+        app.config["RESTORE_REPORT"] = _restore
+        if _restore.get("applied") or _restore.get("restored_from_backup"):
+            print(f"[frilanser] بازیابی: {len(_restore.get('applied', []))} مورد از "
+                  f"{len(_restore.get('sources', []))} منبع"
+                  + (f" + پایگاه داده از {_restore['restored_from_backup']}"
+                     if _restore.get("restored_from_backup") else ""))
+    except Exception as _exc:  # noqa: BLE001
+        app.config["RESTORE_REPORT"] = {"error": str(_exc)}
 
     # -------------------------------------------------------------- helpers
     def summarize() -> dict:
@@ -200,6 +215,108 @@ def create_app(cfg: Config, store: Store, live: bool | None = None) -> Flask:
             abort(404)
         return render_template("project.html", p=project, stats=summarize(), cfg=cfg)
 
+    # ------------------------------------------------------------------ #
+    # پیوست‌های آگهی (فایلِ مشخصات، نمونه‌کار، فایلِ تحویل…)
+    # ------------------------------------------------------------------ #
+    ATTACH_MAX_BYTES = 25 * 1024 * 1024
+    ATTACH_EXT = {".pdf", ".doc", ".docx", ".xls", ".xlsx", ".csv", ".txt", ".md",
+                  ".zip", ".rar", ".7z", ".png", ".jpg", ".jpeg", ".gif", ".webp",
+                  ".psd", ".ai", ".fig", ".sketch", ".mp4", ".mp3", ".json", ".xml"}
+
+    def _attach_dir(pid: str) -> Path:
+        safe = "".join(ch if ch.isalnum() or ch in "-_" else "_" for ch in str(pid))[-60:]
+        d = Path(cfg.data_dir) / "attachments" / safe
+        d.mkdir(parents=True, exist_ok=True)
+        return d
+
+    def _store_attachment(project, f, note: str = "") -> str | None:
+        name = Path(f.filename or "").name.strip()
+        if not name:
+            return None
+        data = f.read()
+        if not data or len(data) > ATTACH_MAX_BYTES:
+            return None
+        d = _attach_dir(project.id)
+        stamp = datetime.now().strftime("%Y%m%d-%H%M%S")
+        target = d / f"{stamp}-{name}"
+        i = 1
+        while target.exists():
+            target = d / f"{stamp}-{i}-{name}"
+            i += 1
+        target.write_bytes(data)
+        project.attachments.append({
+            "name": name,
+            "rel": str(target.relative_to(cfg.data_dir)).replace("\\", "/"),
+            "size": len(data),
+            "kind": Path(name).suffix.lower().lstrip("."),
+            "note": note,
+            "added_at": datetime.now().strftime("%Y-%m-%d %H:%M"),
+        })
+        return name
+
+    @app.post("/p/<path:pid>/attach")
+    def project_attach(pid: str):
+        """بارگذاریِ یک یا چند فایل و ضمیمه کردن به آگهی."""
+        from flask import request as _rq
+
+        project = store.get(pid)
+        if project is None:
+            abort(404)
+        files = _rq.files.getlist("files") or []
+        if not files:
+            return redirect(url_for("project_detail", pid=pid, attach="empty"))
+
+        note = (_rq.form.get("note") or "").strip()
+        added: list[str] = []
+        for f in files:
+            got = _store_attachment(project, f, note=note)
+            if got:
+                added.append(got)
+        if added:
+            project.notes.append("پیوست اضافه شد: " + ", ".join(added))
+            store.upsert_many([project])
+            store.save()
+            store.snapshot(force=True)
+        return redirect(url_for("project_detail", pid=pid))
+
+    @app.get("/attachments/<path:filename>")
+    def serve_attachment(filename: str):
+        """دانلودِ یک پیوست.
+
+        ``filename`` همان ``rel``ِ ذخیره‌شده است که نسبت به پوشه‌ی داده‌ها است
+        (مثل ``attachments/<pid>/<file>``)؛ برای سازگاری، اگر فقط نامِ فایل هم
+        رسید آن را در پوشه‌ی پیوست‌ها جست‌وجو می‌کنیم.
+        """
+        from flask import send_file
+
+        base = (Path(cfg.data_dir) / "attachments").resolve()
+        rel = str(filename).replace("\\", "/").lstrip("/")
+        if rel.startswith("attachments/"):
+            rel = rel[len("attachments/"):]
+        target = (base / rel).resolve()
+        # ضدِ بیرون‌زدن از پوشه‌ی پیوست‌ها
+        try:
+            target.relative_to(base)
+        except ValueError:
+            abort(404)
+        if not target.is_file():
+            abort(404)
+        return send_file(str(target), as_attachment=False,
+                         download_name=target.name)
+
+    @app.post("/p/<path:pid>/attachment/<int:idx>/delete")
+    def project_attachment_delete(pid: str, idx: int):
+        project = store.get(pid)
+        if project is None:
+            abort(404)
+        if 0 <= idx < len(project.attachments):
+            item = project.attachments.pop(idx)
+            # فایل را پاک نمی‌کنیم (فقط از فهرست خارج می‌شود) تا چیزی از دست نرود
+            project.notes.append(f"پیوست حذف شد: {item.get('name', '')}")
+            store.upsert_many([project])
+            store.save()
+        return redirect(url_for("project_detail", pid=pid))
+
     @app.get("/p/<path:pid>/upsell")
     def upsell(pid: str):
         """پیشنهادِ بهتر: به‌جای آنچه کارفرما خواسته، چه چیزی بهتر است؟"""
@@ -216,7 +333,7 @@ def create_app(cfg: Config, store: Store, live: bool | None = None) -> Flask:
     @app.post("/p/<path:pid>/edit")
     def edit_project(pid: str):
         """ویرایشِ دستیِ مشخصاتِ آگهی (تا هر تغییری بخواهید در آن بدهید)."""
-        from ..normalize import clean_text, parse_budget, parse_deadline_days
+        from ..normalize import clean_text, parse_amount, parse_days
         from ..pipeline import price_projects, screen_projects
 
         project = store.get(pid)
@@ -232,10 +349,10 @@ def create_app(cfg: Config, store: Store, live: bool | None = None) -> Flask:
             project.url = url
         budget_raw = (request.form.get("budget") or "").strip()
         if budget_raw:
-            project.budget_toman = parse_budget(budget_raw)
+            project.budget_toman = parse_amount(budget_raw)
         deadline = (request.form.get("deadline") or "").strip()
         if deadline:
-            project.client_deadline_days = parse_deadline_days(deadline)
+            project.client_deadline_days = parse_days(deadline)
         skills_raw = (request.form.get("skills") or "").strip()
         if skills_raw:
             project.skills = [x.strip() for x in skills_raw.split(",") if x.strip()]
@@ -322,6 +439,22 @@ def create_app(cfg: Config, store: Store, live: bool | None = None) -> Flask:
                          base_url=base_url, refresh=not offline)
         return redirect(url_for("index"))
 
+    def _save_attachments(project) -> list[str]:
+        """فایل‌های فرستاده‌شده را در data/attachments ذخیره و به پروژه وصل می‌کند."""
+        files = request.files.getlist("files") if hasattr(request, "files") else []
+        note = (request.form.get("note") or "").strip()
+        added: list[str] = []
+        for f in files:
+            got = _store_attachment(project, f, note=note)
+            if got:
+                added.append(got)
+        if added:
+            project.notes.append("پیوست اضافه شد: " + ", ".join(added))
+            store.upsert_many([project])
+            store.save()
+            store.snapshot(force=True)
+        return added
+
     @app.get("/add")
     def add_listing_form():
         """فرمِ «آگهیِ دستی»: آگهی‌ای که خودتان در سایت دیده‌اید وارد کنید."""
@@ -341,7 +474,7 @@ def create_app(cfg: Config, store: Store, live: bool | None = None) -> Flask:
             return redirect(url_for("add_listing_form", err="عنوانِ آگهی را بنویسید"))
 
         from ..models import Project
-        from ..normalize import parse_budget, parse_deadline_days
+        from ..normalize import parse_amount, parse_days
         from ..pipeline import price_projects, screen_projects
 
         description = (request.form.get("description") or "").strip()
@@ -351,8 +484,8 @@ def create_app(cfg: Config, store: Store, live: bool | None = None) -> Flask:
                   if x.strip()]
 
         budget_raw = (request.form.get("budget") or "").strip()
-        budget = parse_budget(budget_raw) if budget_raw else None
-        deadline = parse_deadline_days(request.form.get("deadline") or "")
+        budget = parse_amount(budget_raw) if budget_raw else None
+        deadline = parse_days(request.form.get("deadline") or "")
 
         # شناسه‌ی یکتا بر اساسِ عنوان (تا دوباره وارد کردن تکراری نسازد)
         import hashlib
@@ -372,6 +505,9 @@ def create_app(cfg: Config, store: Store, live: bool | None = None) -> Flask:
         # «دستی (من اضافه کردم)» را برمی‌گرداند.
         store.upsert_many([project])
         store.save()
+
+        # پیوست‌هایی که همراهِ فرم فرستاده شده
+        _save_attachments(project)
         screen_projects(cfg, store, force=False)
         price_projects(cfg, store, force=False)
         store.save()
@@ -509,6 +645,84 @@ def create_app(cfg: Config, store: Store, live: bool | None = None) -> Flask:
     @app.get("/demos/<path:filename>")
     def serve_demo(filename: str):
         return send_from_directory(str(cfg.demo_dir), filename)
+
+    # ------------------------------------------------------------------ #
+    # پشتیبان و بازیابیِ نشانه‌گذاری‌ها
+    # ------------------------------------------------------------------ #
+    @app.get("/backup")
+    def backup_page():
+        """نمایشِ وضعیتِ پشتیبان‌ها و بازیابیِ نشانه‌گذاری‌های کاربر."""
+        from .. import backup as bk
+        from ..backup import stable_dirs, legacy_dirs, writable_dirs, list_backups
+
+        ledger, sources = bk.load_state(legacy_dirs(Path(cfg.data_dir)))
+        marked_now = [p for p in store.all() if (p.proposal_state or "").strip()]
+        return render_template(
+            "backup.html",
+            stats=summarize(),
+            cfg=cfg,
+            data_dir=str(cfg.data_dir),
+            restore_report=app.config.get("RESTORE_REPORT") or {},
+            ledger=ledger,
+            ledger_sources=sources,
+            marked=marked_now,
+            backups=list_backups(Path(cfg.data_dir)),
+            stable=[str(d) for d in stable_dirs()],
+            writable=[str(d) for d in writable_dirs(Path(cfg.data_dir))],
+            state_file=bk.STATE_FILE,
+        )
+
+    @app.get("/backup/export")
+    def backup_export():
+        """دریافتِ یک فایل از نشانه‌گذاری‌ها (برای نگه داشتن یا انتقال)."""
+        from flask import Response
+
+        from ..backup import export_payload
+
+        payload = export_payload(store)
+        body = json.dumps(payload, ensure_ascii=False, indent=2)
+        return Response(
+            body,
+            mimetype="application/json",
+            headers={"Content-Disposition":
+                     'attachment; filename="frilanser-state.json"'},
+        )
+
+    @app.post("/backup/import")
+    def backup_import():
+        """بازگرداندنِ نشانه‌گذاری‌ها از یک فایلِ گرفته‌شده."""
+        from ..backup import import_payload
+
+        f = request.files.get("file")
+        if f is None:
+            return redirect(url_for("backup_page", err="هیچ فایلی انتخاب نشد"))
+        try:
+            payload = json.loads(f.read().decode("utf-8"))
+            applied = import_payload(store, payload)
+        except Exception as exc:  # noqa: BLE001
+            return redirect(url_for("backup_page", err=f"فایل خوانده نشد: {exc}"))
+        store.save()
+        store.snapshot(force=True)
+        return redirect(url_for("backup_page", ok=str(len(applied))))
+
+    @app.post("/backup/restore")
+    def backup_restore():
+        """جست‌وجو در همه‌ی پوشه‌ها و بازگرداندنِ نشانه‌گذاری‌ها."""
+        from .. import backup as bk
+
+        try:
+            rep = bk.restore(store)
+            applied = len(rep.get("applied") or [])
+        except Exception as exc:  # noqa: BLE001
+            return redirect(url_for("backup_page", err=f"بازیابی ناموفق بود: {exc}"))
+        return redirect(url_for("backup_page", ok=str(applied)))
+
+    @app.post("/backup/now")
+    def backup_now():
+        """گرفتنِ یک نسخه‌ی پشتیبانِ فوری از کلِ پایگاه داده."""
+        path = store.snapshot(force=True)
+        return redirect(url_for("backup_page",
+                                ok="نسخه گرفته شد" if path else "نسخه‌ای ساخته نشد"))
 
     @app.get("/activity")
     def activity():

@@ -1978,3 +1978,91 @@ def test_base_template_has_brand_and_active_nav(tmp_path):
     assert "nav" in home
     # در صفحه‌ی اصلی، گزینه‌ی «پروژه‌ها» باید فعال باشد
     assert re.search(r'<a href="/"[^>]*class="[^"]*active', home), "گزینه‌ی فعالِ منو پیدا نشد"
+
+
+# ---------------------------------------------------------------------------
+# پیوست‌ها و حفظِ نشانه‌گذاری‌ها
+# ---------------------------------------------------------------------------
+def test_parse_amount_accepts_persian_digits_and_separators():
+    """فرم باید مبلغ را با ارقامِ فارسی و جداکننده هم بپذیرد."""
+    from frilanser.normalize import parse_amount, parse_days
+
+    assert parse_amount("۶,۰۰۰,۰۰۰") == 6_000_000
+    assert parse_amount("6,000,000") == 6_000_000
+    assert parse_amount("۱۲ میلیون تومان") == 12_000_000
+    assert parse_amount("") is None
+    assert parse_days("۱۰") == 10.0
+    assert parse_days("۲ هفته") == 14.0
+
+
+def test_user_marks_survive_database_wipe(tmp_path):
+    """نشانه‌گذاری کاربر باید بعد از بازنویسیِ پایگاه داده برگردد."""
+    import os
+
+    from frilanser import backup
+    from frilanser.models import Project
+    from frilanser.store import Store
+
+    os.environ["FRILANSER_HOME"] = str(tmp_path / "home")
+    cfg = _sources_cfg(tmp_path)
+    (cfg.data_dir).mkdir(parents=True, exist_ok=True)
+    store = Store(cfg.data_dir)
+
+    p = Project.from_scrape(source="manual", external_id="keep1",
+                            title="پروژه‌ای که نشانه می‌زنم", url="")
+    store.upsert_many([p]); store.save()
+    p.proposal_state = "submitted"
+    p.submitted_price = 7_500_000
+    p.proposal_state_at = "2026-11-01 10:00"
+    store.save()
+
+    assert backup.capture(store).get(p.id, {}).get("proposal_state") == "submitted"
+    # یک نسخه‌ی پشتیبان هم می‌گیریم تا مسیرِ بازیابی از پشتیبان هم سنجیده شود
+    assert store.snapshot(force=True) is not None
+
+    # فاجعه: پایگاه داده با نسخه‌ی بدونِ نشانه‌گذاری جایگزین می‌شود
+    (cfg.data_dir / "projects.json").write_text("{}", encoding="utf-8")
+    fresh = Store(cfg.data_dir)
+    assert fresh.get(p.id) is None or not fresh.get(p.id).proposal_state
+
+    # بازیابی: باید «submitted» برگردد
+    report = backup.restore(fresh)
+    restored = fresh.get(p.id)
+    assert restored is not None, f"پروژه بازنگشت: {report}"
+    assert restored.proposal_state == "submitted"
+    assert restored.submitted_price == 7_500_000
+
+
+def test_manual_state_is_never_overwritten_by_empty(tmp_path):
+    """دفترچه نباید مقدارِ موجود را با مقدارِ خالی جایگزین کند."""
+    from frilanser.models import Project
+    from frilanser.store import Store
+
+    cfg = _sources_cfg(tmp_path)
+    (cfg.data_dir).mkdir(parents=True, exist_ok=True)
+    store = Store(cfg.data_dir)
+    p = Project.from_scrape(source="manual", external_id="x", title="تست", url="")
+    store.upsert_many([p]); store.save()
+
+    from frilanser.backup import apply_state
+
+    apply_state(store, {p.id: {"proposal_state": "won", "submitted_price": 9_000_000}})
+    assert store.get(p.id).proposal_state == "won"
+    # رکوردی که فقط مبلغ دارد نباید وضعیت را پاک کند
+    apply_state(store, {p.id: {"submitted_price": 11_000_000}})
+    assert store.get(p.id).proposal_state == "won"
+    assert store.get(p.id).submitted_price == 11_000_000
+
+
+def test_project_can_have_attachments(tmp_path):
+    """پیوست باید روی پروژه ذخیره شود."""
+    from frilanser.models import Project
+
+    p = Project.from_scrape(source="manual", external_id="att1", title="با پیوست",
+                            url="", attachments=[
+                                {"name": "spec.pdf", "rel": "attachments/a/spec.pdf",
+                                 "size": 2048, "kind": "pdf", "added_at": "2026-11-02"}])
+    data = p.to_dict()
+    back = Project.from_dict(data)
+    assert back.attachments[0]["name"] == "spec.pdf"
+    assert back.attachments[0]["size"] == 2048

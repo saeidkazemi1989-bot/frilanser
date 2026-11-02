@@ -297,6 +297,54 @@
       {% endif %}
     </div>
 
+    {# ---------- پیوست‌ها ---------- #}
+    <div class="panel">
+      <div class="sec-title">
+        <span class="ico">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.4 11.1 12.3 20a5 5 0 0 1-7.1-7l8.5-8.5a3.3 3.3 0 0 1 4.7 4.7l-8.5 8.5a1.6 1.6 0 0 1-2.3-2.3l7.8-7.8"/></svg>
+        </span>
+        پیوست‌ها
+        {% if p.attachments %}<span class="badge neutral">{{ p.attachments|length }}</span>{% endif %}
+      </div>
+
+      {% if p.attachments %}
+        <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:12px">
+        {% for a in p.attachments %}
+          {% set k = (a.kind or '')|lower %}
+          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;border:1px solid var(--ink-200);border-radius:var(--r);padding:9px 12px;background:var(--ink-50)">
+            <span style="font-size:19px;line-height:1">{% if k == 'pdf' %}📕{% elif k in ['doc','docx'] %}📘{% elif k in ['xls','xlsx','csv'] %}📗{% elif k in ['zip','rar','7z'] %}🗜️{% elif k in ['png','jpg','jpeg','gif','webp','psd','ai'] %}🖼️{% elif k == 'mp4' %}🎬{% else %}📄{% endif %}</span>
+            <div style="flex:1;min-width:150px">
+              <a href="{{ url_for('serve_attachment', filename=a.rel) }}" target="_blank" rel="noopener"
+                 style="font-weight:700;font-size:13px;word-break:break-all">{{ a.name }}</a>
+              <div class="muted" style="font-size:11.5px">
+                {{ (a.size or 0) // 1024 }} کیلوبایت{% if a.added_at %} · {{ a.added_at }}{% endif %}{% if a.note %} · {{ a.note }}{% endif %}
+              </div>
+            </div>
+            <a class="btn btn-sm" href="{{ url_for('serve_attachment', filename=a.rel) }}" download="{{ a.name }}">⬇️ دانلود</a>
+            <form method="post" action="{{ url_for('project_attachment_delete', pid=p.id, idx=loop.index0) }}"
+                  onsubmit="return confirm('این پیوست از فهرست حذف شود؟ (خودِ فایل پاک نمی‌شود)')" style="margin:0">
+              <button type="submit" class="btn-danger btn-sm">🗑️</button>
+            </form>
+          </div>
+        {% endfor %}
+        </div>
+      {% else %}
+        <div class="muted" style="margin-bottom:12px">هنوز پیوستی ندارد.</div>
+      {% endif %}
+
+      <form method="post" action="{{ url_for('project_attach', pid=p.id) }}" enctype="multipart/form-data">
+        <div class="field">
+          <label>افزودنِ فایل (مشخصاتِ کارفرما، نمونه، یا فایلِ آماده‌ی تحویل)</label>
+          <input type="file" name="files" multiple class="input" style="padding:8px">
+          <div class="hint">تا ۲۵ مگابایت برای هر فایل. فرمت‌های مجاز: pdf، word، excel، zip، تصویر، متن و…</div>
+        </div>
+        <div class="field">
+          <input name="note" class="input" placeholder="توضیحِ کوتاه (اختیاری) — مثلاً «فایلِ مشخصاتِ کارفرما»">
+        </div>
+        <button type="submit" class="btn-primary">📎 پیوست کن</button>
+      </form>
+    </div>
+
     {# ---------- تصمیم ---------- #}
     <div class="panel">
       <div class="sec-title">
@@ -347,6 +395,24 @@
     {% endif %}
   </div>
 </div>
+
+{% if p.attachment_links %}
+<div class="panel">
+  <div class="sec-title">
+    <span class="ico">🔗</span>
+    فایل‌هایی که در متنِ آگهی پیوند داده شده
+  </div>
+  <div class="muted" style="margin-bottom:10px">
+    این فایل‌ها در خودِ سایت هستند؛ برای دریافتِ بیشترشان باید واردِ حسابِ خود در آن سایت شوید.
+  </div>
+  <div style="display:flex;flex-direction:column;gap:7px">
+    {% for a in p.attachment_links %}
+      <a href="{{ a.url }}" target="_blank" rel="noopener" dir="ltr"
+         style="word-break:break-all;font-size:12.5px">{{ a.name or a.url }}</a>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
 
 {% if p.description %}
 <div class="panel">

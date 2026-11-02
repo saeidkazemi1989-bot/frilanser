@@ -106,6 +106,62 @@ def parse_budget(text: str) -> int | None:
     return None
 
 
+def parse_amount(text: str) -> int | None:
+    """یک مبلغِ واردشده توسط کاربر را به عدد تبدیل می‌کند.
+
+    برخلافِ :func:`parse_budget` (که از **متنِ آگهی** عدد را بیرون می‌کشد و
+    به واژه‌هایی مثل «بودجه»/«تومان» نیاز دارد)، این تابع برای **فرم‌ها** است:
+    کاربر ممکن است فقط بنویسد «۶,۰۰۰,۰۰۰» یا «6.000.000» یا «۱۲ میلیون تومان».
+    """
+    if text is None:
+        return None
+    if isinstance(text, (int, float)) and not isinstance(text, bool):
+        return int(text)
+    # ابتدا تلاش با پارس‌کننده‌ی متنِ آگهی (اگر «تومان»/«بودجه» هم نوشته شده باشد)
+    got = parse_budget(str(text))
+    if got:
+        return got
+    t = to_digits(clean_text(str(text)))
+    if not t:
+        return None
+    # «۱۲ میلیون» / «۳ میلیارد» (بدون تومان)
+    m = re.search(r"(\d+(?:\.\d+)?)\s*(میلیارد|میلیون|هزار)", t)
+    if m:
+        return parse_toman(m.group(0))
+    # فقط عدد: جداکننده‌های هزارگان را برمی‌داریم
+    m = re.search(r"\d[\d,\.\s]{2,}", t)
+    if not m:
+        return None
+    digits = re.sub(r"[^\d]", "", m.group(0))
+    if not digits:
+        return None
+    try:
+        value = int(digits)
+    except ValueError:
+        return None
+    return value or None
+
+
+def parse_days(text) -> float | None:
+    """مهلت به روز — برای فرم‌ها: «۱۰»، «۱۰ روز»، «۲ هفته»، «۳ ماه»."""
+    if text is None or text == "":
+        return None
+    if isinstance(text, (int, float)) and not isinstance(text, bool):
+        return float(text)
+    got = parse_deadline_days(str(text))
+    if got:
+        return got
+    t = to_digits(clean_text(str(text)))
+    m = re.search(r"\d+(?:\.\d+)?", t)
+    if not m:
+        return None
+    try:
+        v = float(m.group(0))
+    except ValueError:
+        return None
+    return v or None
+
+
 def parse_duration_days(text: str) -> float | None:
     """زمان پیشنهادی/مهلت را به روز تبدیل می‌کند (مثلاً «۱۵ روز»، «۳ هفته»)."""
     if not text:

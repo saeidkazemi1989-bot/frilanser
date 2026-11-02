@@ -1,0 +1,169 @@
+{% extends "base.html" %}
+{% block title %}پشتیبان و بازیابیِ نشانه‌گذاری‌ها{% endblock %}
+{% block body %}
+
+<div class="panel" style="background:linear-gradient(135deg,#f7f9ff 0%,#fff 60%);border-color:var(--brand-100)">
+  <div class="sec-title" style="font-size:17px">
+    <span class="ico" style="width:32px;height:32px;border-radius:10px">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 7h-9"/><path d="M20 12h-9"/><path d="M20 17h-9"/><circle cx="5" cy="7" r="2"/><circle cx="5" cy="12" r="2"/><circle cx="5" cy="17" r="2"/></svg>
+    </span>
+    پشتیبان و بازیابیِ نشانه‌گذاری‌ها
+  </div>
+  <p class="muted" style="margin:0;max-width:660px;line-height:2">
+    هر چه خودتان روی آگهی‌ها علامت می‌زنید («پیشنهاد دادم»، «گرفتم»، «نگرفتم»،
+    مبلغِ پیشنهادی) در یک <b>دفترچه‌ی وضعیتِ</b> جداگانه هم نوشته می‌شود — در
+    چند پوشه، <b>بیرون از پوشه‌ی نصب</b>. برای همین با نصبِ نسخه‌ی جدید از بین
+    نمی‌رود. این صفحه نشان می‌دهد کجاها ذخیره شده و اگر لازم شد برمی‌گرداند.
+  </p>
+</div>
+
+{% if request.args.get('ok') %}
+  <div class="alert ok"><div class="t">✓ انجام شد</div>{{ request.args.get('ok') }} مورد بازیابی/به‌روزرسانی شد.</div>
+{% endif %}
+{% if request.args.get('err') %}
+  <div class="alert bad"><div class="t">⚠️ خطا</div>{{ request.args.get('err') }}</div>
+{% endif %}
+
+{% if restore_report and restore_report.applied %}
+<div class="alert ok">
+  <div class="t">↩️ هنگامِ بالا آمدنِ برنامه، این نشانه‌گذاری‌ها خودکار بازگردانده شد</div>
+  <ul style="margin:6px 0 0;padding-inline-start:20px">
+    {% for line in restore_report.applied[:20] %}<li>{{ line }}</li>{% endfor %}
+  </ul>
+</div>
+{% endif %}
+{% if restore_report and restore_report.restored_from_backup %}
+<div class="alert info">
+  <div class="t">💾 پایگاه داده از نسخه‌ی پشتیبان برگردانده شد</div>
+  {{ restore_report.restored_from_backup }}
+</div>
+{% endif %}
+
+{# ---------- وضعیتِ فعلی ---------- #}
+<div class="stats">
+  <div class="stat"><div class="k">آگهی‌های نشانه‌گذاری‌شده (همین حالا)</div><div class="v">{{ marked|length }}</div></div>
+  <div class="stat"><div class="k">رکورد در دفترچه‌ی وضعیت</div><div class="v">{{ ledger|length }}</div></div>
+  <div class="stat"><div class="k">نسخه‌های پشتیبان ذخیره‌شده</div><div class="v">{{ backups|length }}</div></div>
+  <div class="stat"><div class="k">پوشه‌های ذخیره‌ی امن</div><div class="v">{{ writable|length }}</div></div>
+</div>
+
+<div class="panel">
+  <div class="sec-title">
+    <span class="ico">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 7h-9"/><path d="M20 12h-9"/><path d="M20 17h-9"/><circle cx="5" cy="7" r="2"/><circle cx="5" cy="12" r="2"/><circle cx="5" cy="17" r="2"/></svg>
+    </span>
+    عملیات
+  </div>
+  <div style="display:flex;gap:9px;flex-wrap:wrap">
+    <form method="post" action="{{ url_for('backup_restore') }}" style="margin:0">
+      <button type="submit" class="btn-primary">🔎 جست‌وجو و بازیابیِ خودکار</button>
+    </form>
+    <form method="post" action="{{ url_for('backup_now') }}" style="margin:0">
+      <button type="submit">📸 گرفتنِ نسخه‌ی پشتیبانِ فوری</button>
+    </form>
+    <a href="{{ url_for('backup_export') }}" class="btn-primary">⬇️ دریافتِ فایلِ نشانه‌گذاری‌ها</a>
+  </div>
+
+  <details style="margin-top:14px">
+    <summary>📤 بازگرداندن از فایل (اگر فایلِ نشانه‌گذاری‌ها را دارید)</summary>
+    <form method="post" action="{{ url_for('backup_import') }}" enctype="multipart/form-data"
+          style="display:flex;gap:9px;flex-wrap:wrap;align-items:center;margin-top:10px">
+      <input type="file" name="file" accept="application/json,.json" class="input" style="max-width:320px;padding:8px">
+      <button type="submit" class="btn-primary">بازگرداندن</button>
+    </form>
+    <div class="hint muted" style="margin-top:6px">
+      فایلِ <code dir="ltr">frilanser-state.json</code> را که قبلاً گرفته‌اید انتخاب کنید.
+      فقط نشانه‌گذاری‌ها برگردانده می‌شود؛ چیزی پاک نمی‌شود.
+    </div>
+  </details>
+</div>
+
+{# ---------- آگهی‌های نشانه‌گذاری‌شده ---------- #}
+<div class="panel">
+  <div class="sec-title">
+    <span class="ico">📌</span>
+    آگهی‌هایی که نشانه‌گذاری کرده‌اید
+  </div>
+  {% if marked %}
+    <table>
+      <thead><tr><th>آگهی</th><th>وضعیت</th><th>مبلغِ پیشنهادی</th><th>زمان</th></tr></thead>
+      <tbody>
+      {% for p in marked %}
+        <tr>
+          <td><a href="{{ url_for('project_detail', pid=p.id) }}">{{ p.title[:70] }}</a></td>
+          <td><span class="badge prop-{{ p.proposal_state }}">{{ p.state_label }}</span></td>
+          <td>{{ '{:,}'.format(p.submitted_price) if p.submitted_price else '—' }}</td>
+          <td class="muted">{{ p.proposal_state_at or '—' }}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <div class="muted">هیچ آگهی‌ای نشانه‌گذاری نشده است.</div>
+  {% endif %}
+</div>
+
+{# ---------- نسخه‌های پشتیبان ---------- #}
+<div class="panel">
+  <div class="sec-title">
+    <span class="ico">💾</span>
+    نسخه‌های پشتیبانِ پایگاه داده
+  </div>
+  {% if backups %}
+    <table>
+      <thead><tr><th>فایل</th><th>زمان</th><th>تعداد آگهی</th><th>نشانه‌گذاری‌شده</th><th>حجم</th></tr></thead>
+      <tbody>
+      {% for b in backups %}
+        <tr>
+          <td dir="ltr" style="font-size:12px">{{ b.name }}</td>
+          <td>{{ b.mtime }}</td>
+          <td>{{ b.count }}</td>
+          <td><b>{{ b.marked }}</b></td>
+          <td class="muted">{{ (b.size // 1024) }} کیلوبایت</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <div class="muted">هنوز نسخه‌ی پشتیبانی ساخته نشده است.</div>
+  {% endif %}
+</div>
+
+{# ---------- مسیرها ---------- #}
+<div class="panel">
+  <div class="sec-title">
+    <span class="ico">📁</span>
+    کجاها ذخیره می‌شود
+  </div>
+  <div class="field">
+    <label>پوشه‌ی داده‌ی برنامه</label>
+    <div dir="ltr" class="input" style="background:var(--ink-50);font-size:12px;word-break:break-all">{{ data_dir }}</div>
+  </div>
+  <div class="field">
+    <label>پوشه‌های امن (بیرون از پوشه‌ی نصب — در به‌روزرسانی نمی‌ماند/پاک نمی‌شود)</label>
+    {% if writable %}
+      <ul style="margin:0;padding-inline-start:20px">
+        {% for d in writable %}
+          <li dir="ltr" style="font-size:12px;word-break:break-all">{{ d }}/{{ state_file }}</li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <div class="muted">هیچ پوشه‌ی امنی در دسترس نیست — داده فقط در پوشه‌ی برنامه است.</div>
+    {% endif %}
+  </div>
+  {% if ledger_sources %}
+    <div class="field" style="margin-bottom:0">
+      <label>دفترچه در این مسیرها پیدا شد</label>
+      <ul style="margin:0;padding-inline-start:20px">
+        {% for src in ledger_sources %}<li dir="ltr" style="font-size:12px;word-break:break-all">{{ src }}</li>{% endfor %}
+      </ul>
+    </div>
+  {% endif %}
+  <div class="muted" style="margin-top:12px;font-size:12px">
+    در اندروید اگر «حافظه‌ی خارجی» در دسترس باشد، یک نسخه در
+    <code dir="ltr">/sdcard/frilanser/state</code> هم نوشته می‌شود که از مدیرِ
+    فایل هم قابل دسترسی است — نسخه‌ی نصب هرچه باشد، آن می‌ماند.
+  </div>
+</div>
+
+{% endblock %}

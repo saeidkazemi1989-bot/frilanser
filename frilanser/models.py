@@ -84,6 +84,14 @@ class Project:
     missed_scans: int = 0          # چند بار پیاپی در اسکن دیده نشده
     history: list[str] = field(default_factory=list)   # رخدادها (متن فارسی)
 
+    # ---------- پیوست‌ها ----------
+    # فایل‌هایی که به این آگهی ضمیمه شده‌اند: مشخصات/نمونه‌ای که کارفرما فرستاده،
+    # یا فایلی که خودتان برای تحویل آماده کرده‌اید.
+    # هر مورد: {"name","rel","size","kind","added_at","note"}
+    attachments: list[dict] = field(default_factory=list)
+    # پیوندهای فایل که در متنِ آگهی پیدا شده (خودِ فایل دانلود نشده)
+    attachment_links: list[dict] = field(default_factory=list)
+
     # ---------- helpers ----------
     @property
     def state_label(self) -> str:

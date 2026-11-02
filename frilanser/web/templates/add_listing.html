@@ -25,7 +25,7 @@
   </div>
 {% endif %}
 
-<form method="post" action="{{ url_for('add_listing') }}">
+<form method="post" action="{{ url_for('add_listing') }}" enctype="multipart/form-data">
 <div class="panel">
   <div class="field">
     <label>عنوانِ آگهی</label>
@@ -66,6 +66,15 @@
         <option value="manual">دستی (من اضافه می‌کنم)</option>
         {% for s in source_info %}<option value="{{ s.key }}">{{ s.label }}</option>{% endfor %}
       </select>
+    </div>
+  </div>
+
+  <div class="field">
+    <label>پیوستِ آگهی <span class="hint" style="display:inline">(اختیاری)</span></label>
+    <input type="file" name="files" multiple class="input" style="padding:8px">
+    <div class="hint">
+      اگر کارفرما فایلی (مثل pdf یا اکسلِ مشخصات) کنارِ آگهی گذاشته، آن را اینجا
+      ضمیمه کنید تا همراهِ آگهی در برنامه بماند. تا ۲۵ مگابایت برای هر فایل.
     </div>
   </div>
 

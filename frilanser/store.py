@@ -37,6 +37,24 @@ class Store:
         self.projects_file.write_text(
             json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True), encoding="utf-8"
         )
+        # نشانه‌گذاری‌های کاربر را فوراً در پوشه‌های پایدار هم می‌نویسیم تا
+        # با نصبِ نسخه‌ی جدید یا تغییرِ پوشه‌ی داده‌ها از بین نروند.
+        self._mirror_user_state()
+
+    def _mirror_user_state(self) -> None:
+        try:
+            from . import backup  # noqa: PLC0415
+            backup.save_state(self.dir, backup.capture(self))
+        except Exception:  # noqa: BLE001 - هرگز ذخیره‌سازی را مختل نکن
+            pass
+
+    def snapshot(self, force: bool = False):
+        """نسخه‌ی پشتیبانِ گردشی از کلِ پایگاه داده."""
+        try:
+            from . import backup  # noqa: PLC0415
+            return backup.snapshot(self, force=force)
+        except Exception:  # noqa: BLE001
+            return None
 
     # ---------------- projects ----------------
     @property
