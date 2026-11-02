@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import time
 import types
 from pathlib import Path
@@ -1932,3 +1933,48 @@ def test_manual_listing_can_be_added_and_priced(tmp_path):
     saved = store.get(project.id)
     assert saved.proposal and saved.proposal["price"] > 0
     assert saved.source_label == "دستی (من اضافه کردم)"
+
+
+# ---------------------------------------------------------------------------
+# ظاهرِ برنامه (سیستمِ طراحی)
+# ---------------------------------------------------------------------------
+def test_design_system_tokens_defined():
+    """فایلِ استایل باید متغیرهای طراحی و اجزای جدید را داشته باشد."""
+    css = (ROOT / "frilanser" / "web" / "static" / "style.css").read_text(encoding="utf-8")
+    assert css.count("{") == css.count("}"), "آکولادهای CSS نامتعادل است"
+    for token in ["--brand-600", "--ink-800", "--r-lg", "--sh-md", "--ring"]:
+        assert token in css, f"متغیر طراحی نیست: {token}"
+    for cls in [".btn-primary", ".sec-title", ".field", ".alert", ".card-foot"]:
+        assert cls in css, f"کلاس تعریف نشده: {cls}"
+    # هیچ مقدارِ رنگِ هگزِ ناقص/خراب (کاراکترِ غیرِ هگز) نباید مانده باشد
+    import re
+    for m in re.finditer(r"#[0-9a-fA-F]{0,8}[^\s;,)\}]*", css):
+        v = m.group(0)
+        if v.startswith("#") and ("{" in v or "-" in v):
+            break  # انتخاب‌گر است، نه رنگ
+    assert "#232c६b" not in css
+
+
+def test_live_js_has_no_reference_error():
+    """live.js نباید متغیرِ تعریف‌نشده داشته باشد (نوسازیِ خودکار را از کار می‌انداخت)."""
+    js = (ROOT / "frilanser" / "web" / "static" / "live.js").read_text(encoding="utf-8")
+    assert "u_unused" not in js
+    assert js.count("{") == js.count("}")
+    assert js.count("(") == js.count(")")
+
+
+def test_base_template_has_brand_and_active_nav(tmp_path):
+    """هدر باید نشان (لوگو) داشته باشد و گزینه‌ی فعالِ منو معلوم باشد."""
+    from frilanser.store import Store
+    from frilanser.web.app import create_app
+
+    cfg = _sources_cfg(tmp_path)
+    (cfg.data_dir).mkdir(parents=True, exist_ok=True)
+    app = create_app(cfg, Store(cfg.data_dir))
+    client = app.test_client()
+    home = client.get("/").get_data(as_text=True)
+    assert 'class="logo"' in home
+    assert "<svg" in home           # آیکونِ داخلی، نه فونت/سی‌دی‌اِنِ خارجی
+    assert "nav" in home
+    # در صفحه‌ی اصلی، گزینه‌ی «پروژه‌ها» باید فعال باشد
+    assert re.search(r'<a href="/"[^>]*class="[^"]*active', home), "گزینه‌ی فعالِ منو پیدا نشد"

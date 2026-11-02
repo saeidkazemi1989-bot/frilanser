@@ -6,7 +6,7 @@
 
 {# یک خطِ وضعیت: با یک نگاه معلوم شود برنامه چه کرده #}
 {% if last_scan %}
-<div class="panel" id="status-line" style="padding:10px 12px;margin-bottom:12px;background:#f7f9fc">
+<div class="panel tight" id="status-line" style="background:var(--ink-50)">
   <div style="font-size:12.5px;line-height:1.9" dir="auto">
     <b>وضعیت:</b>
     {% if last_scan.get('running') %}
@@ -21,16 +21,16 @@
         <span class="badge warn">این گزارش مالِ نسخه‌ی {{ last_scan.get('app_version') }} است</span>
       {% endif %}
     {% endif %}
-    {% if _err %}<div style="color:#a02626">خطا: {{ _err[:200] }}</div>{% endif %}
+    {% if _err %}<div style="color:var(--bad-700)">خطا: {{ _err[:200] }}</div>{% endif %}
   </div>
 </div>
 {% endif %}
 
 {% set _offline_empty = last_scan and last_scan.get('offline') and not last_scan.get('fetched') %}
 {% if (last_scan and last_scan.get('live_failed')) or _offline_empty %}
-<div class="panel" id="fetch-warning" style="padding:12px 14px;margin-bottom:12px;border-color:#f6c9c9;background:#fff8f8">
-  <div style="font-weight:700;color:#a02626">⚠️ آگهی‌های تازه از سایت‌ها دریافت نشد</div>
-  <div class="muted" style="font-size:13px;margin-top:4px">
+<div class="alert bad" id="fetch-warning">
+  <div class="t">⚠️ آگهی‌های تازه از سایت‌ها دریافت نشد</div>
+  <div>
     {% if _offline_empty %}
       اسکن در حالتِ «آفلاین» اجرا شد و هیچ آگهی‌ای از فایل‌های همراهِ برنامه هم پیدا نکرد
       (تعداد: {{ last_scan.get('fetched', 0) }}، جدید: {{ last_scan.get('new', 0) }}).
@@ -40,39 +40,47 @@
     {% endif %}
     {% if last_scan.get('error') %}<div dir="auto" style="margin-top:4px">علت: {{ last_scan.get('error')[:200] }}</div>{% endif %}
   </div>
-  <div style="margin-top:8px">
-    <a href="{{ url_for('scan_report') }}">🩺 دیدنِ گزارش و کپی برای پشتیبانی</a>
+  <div style="margin-top:9px">
+    <a href="{{ url_for('scan_report') }}" class="btn btn-sm btn-danger">🩺 دیدنِ گزارش و کپی برای پشتیبانی</a>
   </div>
 </div>
 {% endif %}
 
-<div class="panel" id="tracking-panel" style="padding:12px 14px;margin-bottom:12px">
-  <div style="display:flex;gap:16px;flex-wrap:wrap;align-items:center">
-    <div style="font-weight:700">📌 پیگیریِ پیشنهادها</div>
-    <div class="muted">پیشنهاد داده‌ام: <b>{{ tracking.counts.submitted }}</b></div>
-    <div class="muted">گرفتم: <b>{{ tracking.counts.won }}</b></div>
-    <div class="muted">نگرفتم: <b>{{ tracking.counts.lost }}</b></div>
-    <div class="muted">واگذار/بسته: <b>{{ tracking.counts.closed }}</b></div>
-    <div class="muted" style="font-size:12px">
-      وضعیت‌ها در به‌روزرسانی‌های بعدی حفظ می‌شوند و اگر پروژه‌ای واگذار شود خودکار مشخص می‌گردد.
+{# پیگیریِ پیشنهادها #}
+<div class="panel tight" id="tracking-panel">
+  <div style="display:flex;gap:18px;flex-wrap:wrap;align-items:center">
+    <div class="sec-title" style="margin:0">
+      <span class="ico">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v16H4z" opacity=".25"/><path d="m4 12 5 5L20 6"/></svg>
+      </span>
+      پیگیریِ پیشنهادها
     </div>
+    <span class="muted">پیشنهاد داده‌ام: <b style="color:var(--info-800)">{{ tracking.counts.submitted }}</b></span>
+    <span class="muted">گرفتم: <b style="color:var(--ok-700)">{{ tracking.counts.won }}</b></span>
+    <span class="muted">نگرفتم: <b style="color:var(--bad-700)">{{ tracking.counts.lost }}</b></span>
+    <span class="muted">واگذار/بسته: <b>{{ tracking.counts.closed }}</b></span>
+    <span class="muted" style="font-size:11.5px;flex:1;min-width:180px">
+      وضعیت‌ها در به‌روزرسانی‌های بعدی حفظ می‌شوند و اگر پروژه‌ای واگذار شود خودکار مشخص می‌گردد.
+    </span>
   </div>
 </div>
 
+{# کارت‌های آماری #}
 <div class="stats">
   <div class="stat"><div class="k">کل آگهی‌های بررسی‌شده</div><div class="v">{{ stats.total }}</div></div>
   <div class="stat"><div class="k">کاندیدای خوب</div><div class="v">{{ stats.candidate }}</div></div>
   <div class="stat"><div class="k">نیاز به بررسی</div><div class="v">{{ stats.review }}</div></div>
   <div class="stat"><div class="k">رد شده</div><div class="v">{{ stats.rejected }}</div></div>
   <div class="stat"><div class="k">دموهای ساخته‌شده</div><div class="v">{{ stats.demos }}</div></div>
-  <div class="stat"><div class="k">بودجه‌ی کاندیداها (تومان)</div><div class="v">{{ '{:,}'.format(stats.budget_sum) }}</div></div>
-  <div class="stat"><div class="k">قیمت پیشنهادی ما (تومان)</div><div class="v">{{ '{:,}'.format(stats.price_sum) }}</div></div>
-  <div class="stat"><div class="k">زمان کل (ساعت)</div><div class="v">{{ stats.hours_sum }}</div></div>
+  <div class="stat"><div class="k">بودجه‌ی کاندیداها</div><div class="v">{{ '{:,}'.format(stats.budget_sum) }}<small style="display:block;font-size:10.5px;color:var(--ink-500);font-weight:600">تومان</small></div></div>
+  <div class="stat"><div class="k">قیمت پیشنهادی ما</div><div class="v">{{ '{:,}'.format(stats.price_sum) }}<small style="display:block;font-size:10.5px;color:var(--ink-500);font-weight:600">تومان</small></div></div>
+  <div class="stat"><div class="k">زمان کل</div><div class="v">{{ stats.hours_sum }}<small style="display:block;font-size:10.5px;color:var(--ink-500);font-weight:600">ساعت</small></div></div>
 </div>
 
+{# فیلترها #}
 <div class="toolbar">
-  <a href="{{ url_for('index') }}" class="{{ 'active' if not verdict else '' }}">همه</a>
-  <a href="{{ url_for('index', verdict='candidate') }}" class="{{ 'active' if verdict=='candidate' else '' }}">کاندیدا ⭐</a>
+  <a href="{{ url_for('index') }}" class="{{ 'active' if not verdict and not state and not sort else '' }}">همه</a>
+  <a href="{{ url_for('index', verdict='candidate') }}" class="{{ 'active' if verdict=='candidate' else '' }}">⭐ کاندیدا</a>
   <a href="{{ url_for('index', verdict='review') }}" class="{{ 'active' if verdict=='review' else '' }}">نیاز به بررسی</a>
   <a href="{{ url_for('index', verdict='rejected') }}" class="{{ 'active' if verdict=='rejected' else '' }}">رد شده</a>
   <a href="{{ url_for('index', state='submitted') }}" class="{{ 'active' if state=='submitted' else '' }}">✉️ پیشنهادهای من{% if tracking.counts.submitted %}<span class="pill">{{ tracking.counts.submitted }}</span>{% endif %}</a>
@@ -89,18 +97,30 @@
   </form>
 </div>
 
-<div class="panel" style="padding:12px 14px">
-  <form method="post" action="{{ url_for('rescan') }}" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
-    <button type="submit">🔄 الان اسکن کن (از سایت‌ها)</button>
-    <label class="muted"><input type="checkbox" name="offline" value="1"> فقط از فایل‌های همراهِ برنامه (بدون اینترنت)</label>
-    <label class="muted">تعداد دمو: <input type="number" name="demos" value="3" min="0" max="10" style="width:70px"></label>
+{# اسکنِ دستی #}
+<div class="panel tight">
+  <form method="post" action="{{ url_for('rescan') }}" style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+    <button type="submit" class="btn-primary">🔄 الان اسکن کن (از سایت‌ها)</button>
+    <label class="checkbox" style="flex:0 0 auto">
+      <input type="checkbox" name="offline" value="1">
+      <span>فقط از فایل‌های همراهِ برنامه (بدون اینترنت)</span>
+    </label>
+    <label class="muted" style="flex:0 0 auto">تعداد دمو:
+      <input type="number" name="demos" value="3" min="0" max="10" class="input" style="width:80px;display:inline-block">
+    </label>
   </form>
 </div>
 
-<div class="panel" id="sources-panel" style="padding:12px 14px">
+{# انتخابِ سایت‌ها #}
+<div class="panel" id="sources-panel">
   <form method="post" action="{{ url_for('save_sources') }}">
-    <div style="font-weight:700;margin-bottom:6px">🌐 کدام سایت‌ها اسکن شوند؟</div>
-    <div class="muted" style="margin-bottom:10px">
+    <div class="sec-title">
+      <span class="ico">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3a15 15 0 0 1 0 18a15 15 0 0 1 0-18Z"/></svg>
+      </span>
+      کدام سایت‌ها اسکن شوند؟
+    </div>
+    <div class="muted" style="margin-bottom:12px">
       فقط سایت‌هایی را تیک بزنید که در آن‌ها اکانت دارید (یا می‌خواهید آگهی‌هایشان را ببینید)؛
       انتخاب شما ذخیره می‌شود و در به‌روزرسانی‌های بعدی هم می‌ماند.
     </div>
@@ -123,31 +143,34 @@
       </label>
       {% endfor %}
     </div>
-    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
-      <button type="submit">💾 ذخیره</button>
+    <div class="form-actions">
+      <button type="submit" class="btn-primary">💾 ذخیره</button>
       <button type="submit" name="scan" value="1">💾 ذخیره و همین حالا تازه اسکن کن</button>
-      <a href="{{ url_for('scan_report') }}">🩺 گزارشِ اسکن (چرا آگهی جدید نمی‌آید؟)</a>
+      <a class="btn-ghost btn" href="{{ url_for('scan_report') }}" style="margin-inline-start:auto">🩺 گزارشِ اسکن (چرا آگهی جدید نمی‌آید؟)</a>
     </div>
   </form>
 </div>
 
 {% if not projects %}
-<div class="panel" style="border-color:#ffe08a;background:#fff8e6">
-  <h2>هنوز هیچ آگهی‌ای در برنامه نیست</h2>
-  <p class="muted">
+<div class="empty">
+  <div style="font-size:38px;line-height:1;margin-bottom:10px">📭</div>
+  <h3>هنوز هیچ آگهی‌ای در برنامه نیست</h3>
+  <p class="muted" style="margin:0 auto 14px;max-width:520px">
     برای اینکه داده بیاید یکی از این دو کار را انجام دهید:
   </p>
-  <ol style="line-height:2">
-    <li>در پنجره‌ی برنامه روی <b>«اجرای کامل»</b> کلیک کنید
-        (بدون اینترنت هم از اسنپ‌شات‌های داخل برنامه می‌خواند).</li>
-    <li>اگر می‌خواهید از سایت‌ها زنده بخواند، در برنامه <b>«دریافت زنده از سایت‌ها»</b> را بزنید؛
-        اگر سایت‌ها روی شبکه‌ی شما بسته باشند، خودکار به اسنپ‌شات برمی‌گردد.</li>
-  </ol>
+  <div style="text-align:right;max-width:560px;margin:0 auto 16px">
+    <ol style="line-height:2;font-size:13.5px;color:var(--ink-600)">
+      <li>در پنجره‌ی برنامه روی <b>«اجرای کامل»</b> کلیک کنید
+          (بدون اینترنت هم از اسنپ‌شات‌های داخل برنامه می‌خواند).</li>
+      <li>اگر می‌خواهید از سایت‌ها زنده بخواند، در برنامه <b>«دریافت زنده از سایت‌ها»</b> را بزنید؛
+          اگر سایت‌ها روی شبکه‌ی شما بسته باشند، خودکار به اسنپ‌شات برمی‌گردد.</li>
+    </ol>
+  </div>
   <p class="muted">اگر باز هم چیزی نیامد، دکمه‌ی <b>«عیب‌یابی»</b> را در برنامه بزنید؛
   علت دقیق را می‌گوید و فایل <code>outbox/doctor.txt</code> را می‌سازد.</p>
-  <div style="margin-top:10px">
+  <div style="margin-top:14px">
     <form method="post" action="{{ url_for('rescan') }}">
-      <button type="submit">🔄 همین حالا از سایت‌ها اسکن کن</button>
+      <button type="submit" class="btn-primary btn-lg">🔄 همین حالا از سایت‌ها اسکن کن</button>
     </form>
   </div>
 </div>
@@ -155,32 +178,42 @@
 <div class="cards">
 {% for p in projects %}
   <div class="card">
-    <div style="display:flex;justify-content:space-between;gap:8px;align-items:flex-start">
-      <h3>{{ p.title }}</h3>
+    <div class="card-badges">
       {% if p.verdict %}<span class="badge {{ VERDICT_STYLE.get(p.verdict,'neutral') }}">{{ VERDICT_LABELS.get(p.verdict) }}</span>{% endif %}
       {% if p.proposal_state %}<span class="badge prop-{{ p.proposal_state }}">{{ PROPOSAL_STATES.get(p.proposal_state) }}</span>{% endif %}
       {% if p.beginner %}
         <span class="badge beg-{{ p.beginner.level }}" title="احتمال اینکه کارفرما این پروژه را به یک تازه‌کار بسپارد">
-          🌱 {{ 'شانس بالا' if p.beginner.level=='high' else ('شانس متوسط' if p.beginner.level=='medium' else 'شانس کم') }} ({{ p.beginner.score }})
+          🌱 {{ 'شانس بالا' if p.beginner.level=='high' else ('شانس متوسط' if p.beginner.level=='medium' else 'شانس کم') }}
         </span>
       {% endif %}
     </div>
+
+    <h3><a href="{{ url_for('project_detail', pid=p.id) }}">{{ p.title }}</a></h3>
     <div class="desc">{{ (p.description or '')[:220] }}{% if (p.description or '')|length > 220 %}…{% endif %}</div>
+
     <div class="kv">
       <span>{{ p.source_label }}</span>
       {% if p.screening %}<span>{{ p.screening.category_label }}</span>{% endif %}
       {% if p.screening %}<span class="score">{{ p.screening.score }}/۱۰۰</span>{% endif %}
       {% if p.screening %}<span>{{ p.screening.est_hours }} ساعت ≈ {{ p.screening.schedule_days }} روز</span>{% endif %}
       {% if p.budget_toman %}<span>بودجه: {{ '{:,}'.format(p.budget_toman) }}</span>{% else %}<span>بودجه: —</span>{% endif %}
-      {% if p.proposal %}<span style="background:#e7f8ef;border-color:#b7e6cd;color:#16794a">ق پیشنهادی: {{ '{:,}'.format(p.proposal.price) }}</span>{% endif %}
       {% if p.bids is not none %}<span>{{ p.bids }} پیشنهاد</span>{% endif %}
       {% if p.user_decision %}<span class="badge {{ 'ok' if p.user_decision=='approved' else 'bad' }}">{{ 'تایید شما' if p.user_decision=='approved' else 'رد شما' }}</span>{% endif %}
     </div>
+
     {% if p.screening and p.screening.blockers %}
-      <div class="muted">🚧 {{ p.screening.blockers|join(' / ') }}</div>
+      <div class="muted" style="font-size:12px">🚧 {{ p.screening.blockers|join(' / ') }}</div>
     {% endif %}
+
+    <div class="card-foot">
+      <div class="price">
+        {% if p.proposal %}{{ '{:,}'.format(p.proposal.price) }}<small>تومان · قیمت پیشنهادی ما</small>
+        {% else %}—<small>قیمت‌گذاری نشده</small>{% endif %}
+      </div>
+      <a href="{{ url_for('project_detail', pid=p.id) }}" class="btn btn-primary btn-sm">جزئیات و تصمیم</a>
+    </div>
+
     <div class="actions">
-      <a href="{{ url_for('project_detail', pid=p.id) }}">جزئیات و تصمیم</a>
       {% if p.demo %}<a href="{{ url_for('serve_demo', filename=p.demo.rel) }}" target="_blank">دیدن دمو ↗</a>{% endif %}
       <a href="{{ p.url }}" target="_blank" rel="noopener">آگهی اصلی ↗</a>
     </div>
@@ -191,7 +224,12 @@
 
 {% if activity %}
 <div class="panel" style="margin-top:18px">
-  <h2>آخرین فعالیت‌ها</h2>
+  <div class="sec-title">
+    <span class="ico">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h4l3 8 4-16 3 8h4"/></svg>
+    </span>
+    آخرین فعالیت‌ها
+  </div>
   <table>
     {% for a in activity %}
       <tr><td style="width:150px">{{ a.at }}</td><td style="width:130px">{{ a.action }}</td><td>{{ a.detail }}</td></tr>

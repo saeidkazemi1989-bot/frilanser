@@ -211,17 +211,15 @@
 
   if (btnUpd) {
     btnUpd.onclick = () => {
-      const u = (state && state.update) || {};
-      if (el('upd-install')) {            // روی داشبورد: همان کارتِ به‌روزرسانی
-        el('upd-install').click();
-        el('upd-card').scrollIntoView({ behavior: 'smooth', block: 'center' });
+      const install = el('upd-install');
+      if (install) {                      // روی داشبورد: همان کارتِ به‌روزرسانی
+        install.click();
+        const card = el('upd-card');
+        if (card && card.scrollIntoView) card.scrollIntoView({ behavior: 'smooth', block: 'center' });
       } else {                            // صفحه‌های دیگر
         window.location.href = '/';
       }
-      return;
     };
-    // فقط برای جلوگیری از هشدارِ متغیرِ بلااستفاده
-    void u_unused;
   }
 
   poll();

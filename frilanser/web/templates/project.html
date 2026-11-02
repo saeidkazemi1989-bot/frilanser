@@ -2,50 +2,57 @@
 {% block title %}{{ p.title }} — جزئیات{% endblock %}
 {% block body %}
 
-<div class="panel" style="padding:12px 14px">
-  <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
-    <a href="{{ url_for('upsell', pid=p.id) }}"><button type="button">💡 پیشنهادِ بهتر (مثلاً به‌جای اکسل، یک برنامه)</button></a>
+{# ---------- نوارِ اقدامِ بالای صفحه ---------- #}
+<div class="panel tight">
+  <div style="display:flex;gap:9px;flex-wrap:wrap;align-items:center">
+    <a href="{{ url_for('upsell', pid=p.id) }}" class="btn btn-primary">
+      💡 پیشنهادِ بهتر (مثلاً به‌جای اکسل، یک برنامه)
+    </a>
     <button type="button" id="edit-toggle">✏️ ویرایشِ مشخصات</button>
-    {% if p.url %}<a href="{{ p.url }}" target="_blank" rel="noopener">آگهی اصلی ↗</a>{% endif %}
+    {% if p.url %}<a class="btn-ghost btn" href="{{ p.url }}" target="_blank" rel="noopener">آگهی اصلی ↗</a>{% endif %}
+    <a class="btn-ghost btn" href="{{ url_for('index') }}" style="margin-inline-start:auto">← بازگشت به فهرست</a>
   </div>
 </div>
 
-<div class="panel" id="edit-panel" style="display:none;padding:12px 14px">
-  <h3 style="margin-top:0;font-size:15px">✏️ ویرایشِ مشخصات (هر تغییری بخواهید بدهید)</h3>
+{# ---------- ویرایشِ مشخصات (باز/بسته با دکمه‌ی بالا) ---------- #}
+<div class="panel" id="edit-panel" style="display:none">
+  <div class="sec-title">
+    <span class="ico">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+    </span>
+    ویرایشِ مشخصات (هر تغییری بخواهید بدهید)
+  </div>
   <form method="post" action="{{ url_for('edit_project', pid=p.id) }}">
-    <div style="margin:8px 0">
-      <label style="font-size:13px">عنوان:</label><br>
-      <input name="title" value="{{ p.title }}"
-             style="width:100%;border:1px solid #d9deeb;border-radius:10px;padding:7px 10px;font:inherit;font-size:13px">
+    <div class="field">
+      <label>عنوان</label>
+      <input name="title" class="input" value="{{ p.title }}">
     </div>
-    <div style="margin:8px 0">
-      <label style="font-size:13px">متنِ آگهی:</label><br>
-      <textarea name="description" rows="7"
-                style="width:100%;border:1px solid #d9deeb;border-radius:10px;padding:8px 10px;font:inherit;font-size:13px">{{ p.description }}</textarea>
+    <div class="field">
+      <label>متنِ آگهی</label>
+      <textarea name="description" class="textarea" rows="7">{{ p.description }}</textarea>
     </div>
-    <div style="display:flex;gap:10px;flex-wrap:wrap">
-      <div style="flex:1;min-width:180px">
-        <label style="font-size:13px">نشانی:</label><br>
-        <input name="url" dir="ltr" value="{{ p.url or '' }}"
-               style="width:100%;border:1px solid #d9deeb;border-radius:10px;padding:7px 10px;font:inherit;font-size:12.5px">
+    <div class="form-row">
+      <div class="field">
+        <label>نشانی</label>
+        <input name="url" dir="ltr" class="input" value="{{ p.url or '' }}">
       </div>
-      <div style="min-width:140px">
-        <label style="font-size:13px">بودجه (تومان):</label><br>
-        <input name="budget" inputmode="numeric" value="{{ p.budget_toman or '' }}"
-               style="width:100%;border:1px solid #d9deeb;border-radius:10px;padding:7px 10px;font:inherit;font-size:12.5px">
+      <div class="field" style="max-width:190px">
+        <label>بودجه (تومان)</label>
+        <input name="budget" inputmode="numeric" class="input" value="{{ p.budget_toman or '' }}">
       </div>
-      <div style="min-width:120px">
-        <label style="font-size:13px">مهلت (روز):</label><br>
-        <input name="deadline" inputmode="numeric" value="{{ p.client_deadline_days or '' }}"
-               style="width:100%;border:1px solid #d9deeb;border-radius:10px;padding:7px 10px;font:inherit;font-size:12.5px">
+      <div class="field" style="max-width:150px">
+        <label>مهلت (روز)</label>
+        <input name="deadline" inputmode="numeric" class="input" value="{{ p.client_deadline_days or '' }}">
       </div>
     </div>
-    <div style="margin:8px 0">
-      <label style="font-size:13px">مهارت‌ها (با کاما):</label><br>
-      <input name="skills" value="{{ (p.skills or []) | join(', ') }}"
-             style="width:100%;border:1px solid #d9deeb;border-radius:10px;padding:7px 10px;font:inherit;font-size:12.5px">
+    <div class="field">
+      <label>مهارت‌ها</label>
+      <input name="skills" class="input" value="{{ (p.skills or []) | join(', ') }}">
+      <div class="hint">با کاما (،) جدا کنید.</div>
     </div>
-    <button type="submit">💾 ذخیره و دوباره قیمت‌گذاری</button>
+    <div class="form-actions">
+      <button type="submit" class="btn-primary">💾 ذخیره و دوباره قیمت‌گذاری</button>
+    </div>
   </form>
 </div>
 
@@ -56,29 +63,90 @@
     if (b && p) {
       b.addEventListener('click', function () {
         p.style.display = (p.style.display === 'none') ? 'block' : 'none';
+        if (p.style.display === 'block') p.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
       });
     }
   })();
 </script>
 
-<div class="panel" style="border-color:#c7d2fe;background:#f8faff">
-  <h2 style="margin-top:0;font-size:17px">📌 وضعیتِ پیشنهادِ من</h2>
-  <div class="muted" style="margin-bottom:10px">
+{# ---------- سربرگِ پروژه ---------- #}
+<div class="panel" style="background:linear-gradient(135deg,#f7f9ff 0%,#fff 60%);border-color:var(--brand-100)">
+  <div style="display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;align-items:flex-start">
+    <div style="flex:1;min-width:250px">
+      <h1 style="margin:0 0 8px;font-size:19px;line-height:1.6">{{ p.title }}</h1>
+      <div class="muted" style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+        <span>{{ p.source_label }}</span>
+        {% if p.url %}<span>·</span><a href="{{ p.url }}" target="_blank" rel="noopener">مشاهده آگهی اصلی ↗</a>{% endif %}
+        {% if p.bids is not none %}<span>·</span><span>{{ p.bids }} پیشنهاد ثبت شده</span>{% endif %}
+        {% if p.posted_at %}<span>·</span><span>{{ p.posted_at }}</span>{% endif %}
+        {% if p.client_deadline_days %}<span>·</span><span>زمان پیشنهادی کارفرما: {{ p.client_deadline_days }} روز</span>{% endif %}
+      </div>
+    </div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap">
+      {% if p.verdict %}<span class="badge {{ VERDICT_STYLE.get(p.verdict,'neutral') }}">{{ VERDICT_LABELS.get(p.verdict) }}</span>{% endif %}
+      <span class="badge neutral">{{ STATUS_LABELS.get(p.status, p.status) }}</span>
+      {% if p.user_decision %}<span class="badge {{ 'ok' if p.user_decision=='approved' else 'bad' }}">تصمیم شما: {{ p.user_decision }}</span>{% endif %}
+    </div>
+  </div>
+
+  {% if p.proposal %}
+  <div style="display:flex;gap:20px;flex-wrap:wrap;margin-top:14px;padding-top:14px;border-top:1px dashed var(--brand-100)">
+    <div>
+      <div style="font-size:11px;color:var(--ink-500);font-weight:700">قیمت پیشنهادی ما</div>
+      <div style="font-size:21px;font-weight:800;color:var(--ok-700);font-variant-numeric:tabular-nums;line-height:1.5">
+        {{ '{:,}'.format(p.proposal.price) }} <span style="font-size:12px;font-weight:600">تومان</span>
+      </div>
+    </div>
+    <div>
+      <div style="font-size:11px;color:var(--ink-500);font-weight:700">بودجه‌ی کارفرما</div>
+      <div style="font-size:21px;font-weight:800;color:var(--ink-800);font-variant-numeric:tabular-nums;line-height:1.5">
+        {% if p.budget_toman %}{{ '{:,}'.format(p.budget_toman) }} <span style="font-size:12px;font-weight:600">تومان</span>{% else %}—{% endif %}
+      </div>
+    </div>
+    <div>
+      <div style="font-size:11px;color:var(--ink-500);font-weight:700">زمانِ تحویل</div>
+      <div style="font-size:21px;font-weight:800;color:var(--ink-800);line-height:1.5">
+        {{ p.proposal.hours }} <span style="font-size:12px;font-weight:600">ساعت</span>
+      </div>
+    </div>
+    {% set bv = BUDGET_VERDICT_FA.get(p.proposal.budget_verdict, ('—','neutral')) %}
+    <div>
+      <div style="font-size:11px;color:var(--ink-500);font-weight:700">تناسبِ بودجه</div>
+      <div style="line-height:2.4"><span class="badge {{ bv[1] }}">{{ bv[0] }}</span></div>
+    </div>
+  </div>
+  {% endif %}
+
+  {% if p.skills %}
+  <div class="kv" style="margin-top:12px">
+    {% for s in p.skills[:14] %}<span>{{ s }}</span>{% endfor %}
+  </div>
+  {% endif %}
+</div>
+
+{# ---------- وضعیتِ پیشنهادِ من ---------- #}
+<div class="panel accent">
+  <div class="sec-title">
+    <span class="ico">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16v12H4z"/><path d="m4 7 8 6 8-6"/></svg>
+    </span>
+    وضعیتِ پیشنهادِ من
+  </div>
+  <div class="muted" style="margin-bottom:12px">
     وضعیت فعلی: <b>{{ PROPOSAL_STATES.get(p.proposal_state) }}</b>
     {% if p.submitted_price %} · مبلغ پیشنهادی شما: <b>{{ '{:,}'.format(p.submitted_price) }} تومان</b>{% endif %}
     {% if p.missed_scans %} · {{ p.missed_scans }} اسکن پیاپی دیده نشده{% endif %}
   </div>
-  <form method="post" action="{{ url_for('project_proposal_state', pid=p.id) }}"
-        style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-    <button type="submit" name="state" value="submitted">✉️ پیشنهاد دادم</button>
-    <input name="price" placeholder="مبلغ پیشنهادی (تومان)" value="{{ p.submitted_price or '' }}"
-           style="width:170px" inputmode="numeric">
-    <button type="submit" name="state" value="won">🏆 پروژه را گرفتم</button>
-    <button type="submit" name="state" value="lost">↩️ نگرفتم / رد شدم</button>
-    <button type="submit" name="state" value="closed">🔒 واگذار یا بسته شد</button>
-    <button type="submit" name="state" value="">🧹 پاک کردن وضعیت</button>
+  <form method="post" action="{{ url_for('project_proposal_state', pid=p.id) }}" class="form-row" style="gap:9px">
+    <input name="price" class="input" placeholder="مبلغ پیشنهادی (تومان)" value="{{ p.submitted_price or '' }}"
+           inputmode="numeric" style="max-width:210px">
+    <button type="submit" name="state" value="submitted" class="btn-primary" style="flex:0 0 auto">✉️ پیشنهاد دادم</button>
+    <button type="submit" name="state" value="won" class="btn-success" style="flex:0 0 auto">🏆 پروژه را گرفتم</button>
+    <button type="submit" name="state" value="lost" class="btn-danger" style="flex:0 0 auto">↩️ نگرفتم / رد شدم</button>
+    <button type="submit" name="state" value="closed" style="flex:0 0 auto">🔒 واگذار یا بسته شد</button>
+    <button type="submit" name="state" value="" class="btn-ghost" style="flex:0 0 auto">🧹 پاک کردن وضعیت</button>
   </form>
-  <div class="muted" style="font-size:12px;margin-top:8px">
+  <div class="muted" style="font-size:12px;margin-top:10px">
     این وضعیت در اسکن‌های بعدی حفظ می‌شود. اگر آگهی از فهرست سایت حذف شود یا نشانه‌ی
     «واگذار شد» در آن پیدا شود، برنامه خودکار آن را «واگذار/بسته‌شده» علامت می‌زند.
   </div>
@@ -92,29 +160,32 @@
   {% endif %}
 </div>
 
+{# ---------- شانسِ تازه‌کار ---------- #}
 {% if p.beginner %}
-<div class="panel" style="border-color:{% if p.beginner.level=='high' %}#86efac{% elif p.beginner.level=='medium' %}#fcd34d{% else %}#e2e8f0{% endif %}">
-  <h2 style="margin-top:0;font-size:17px">
-    🌱 احتمال اینکه کارفرما این پروژه را به یک تازه‌کار بسپارد:
-    <span style="color:{% if p.beginner.level=='high' %}#166534{% elif p.beginner.level=='medium' %}#92400e{% else %}#475569{% endif %}">
+<div class="panel" style="border-color:{% if p.beginner.level=='high' %}var(--ok-200){% elif p.beginner.level=='medium' %}var(--warn-200){% else %}var(--ink-200){% endif %};
+     background:{% if p.beginner.level=='high' %}var(--ok-50){% elif p.beginner.level=='medium' %}var(--warn-50){% else %}#fff{% endif %}">
+  <div class="sec-title">
+    <span class="ico">🌱</span>
+    احتمال اینکه کارفرما این پروژه را به یک تازه‌کار بسپارد:
+    <span style="color:{% if p.beginner.level=='high' %}var(--ok-800){% elif p.beginner.level=='medium' %}var(--warn-800){% else %}var(--ink-600){% endif %};margin-inline-start:6px">
       {{ p.beginner.score }} از ۱۰۰
       ({{ 'شانس بالا' if p.beginner.level=='high' else ('شانس متوسط' if p.beginner.level=='medium' else 'شانس کم') }})
     </span>
-  </h2>
-  <div style="display:flex;gap:10px;flex-wrap:wrap">
-    <div style="flex:1;min-width:260px">
+  </div>
+  <div style="display:flex;gap:18px;flex-wrap:wrap">
+    <div style="flex:1;min-width:250px">
       <div class="muted" style="font-weight:700;margin-bottom:4px">چرا این امتیاز:</div>
       <ul style="margin:0;padding-inline-start:18px" class="muted">
         {% for r in p.beginner.reasons[:6] %}
           <li>{{ r.text }}
-            <span style="color:{% if r.impact>0 %}#166534{% elif r.impact<0 %}#991b1b{% else %}#64748b{% endif %}">
+            <span style="color:{% if r.impact>0 %}var(--ok-700){% elif r.impact<0 %}var(--bad-700){% else %}var(--ink-500){% endif %}">
               ({{ '%+d' % r.impact if r.impact else '۰' }})
             </span>
           </li>
         {% endfor %}
       </ul>
     </div>
-    <div style="flex:1;min-width:240px">
+    <div style="flex:1;min-width:230px">
       <div class="muted" style="font-weight:700;margin-bottom:4px">توصیه برایتان:</div>
       <ul style="margin:0;padding-inline-start:18px">
         {% for h in p.beginner.hints %}<li>{{ h }}</li>{% endfor %}
@@ -124,45 +195,24 @@
 </div>
 {% endif %}
 
-
-<div class="panel">
-  <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:flex-start">
-    <div>
-      <h2 style="margin:0 0 6px">{{ p.title }}</h2>
-      <div class="muted">
-        {{ p.source_label }} ·
-        <a href="{{ p.url }}" target="_blank" rel="noopener">مشاهده آگهی اصلی ↗</a> ·
-        {% if p.bids is not none %}{{ p.bids }} پیشنهاد ثبت شده{% endif %}
-        {% if p.posted_at %} · {{ p.posted_at }}{% endif %}
-        {% if p.client_deadline_days %} · زمان پیشنهادی کارفرما: {{ p.client_deadline_days }} روز{% endif %}
-      </div>
-    </div>
-    <div style="display:flex;gap:6px;flex-wrap:wrap">
-      {% if p.verdict %}<span class="badge {{ VERDICT_STYLE.get(p.verdict,'neutral') }}">{{ VERDICT_LABELS.get(p.verdict) }}</span>{% endif %}
-      <span class="badge neutral">{{ STATUS_LABELS.get(p.status, p.status) }}</span>
-      {% if p.user_decision %}<span class="badge {{ 'ok' if p.user_decision=='approved' else 'bad' }}">تصمیم شما: {{ p.user_decision }}</span>{% endif %}
-    </div>
-  </div>
-
-  {% if p.skills %}
-  <div style="margin-top:12px" class="kv">
-    {% for s in p.skills[:14] %}<span>{{ s }}</span>{% endfor %}
-  </div>
-  {% endif %}
-</div>
-
 <div class="grid2">
   <div>
+    {# ---------- تحلیلِ اجراپذیری ---------- #}
     <div class="panel">
-      <h2>تحلیل اجراپذیری در آرنا</h2>
+      <div class="sec-title">
+        <span class="ico">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m7 14 4-4 3 3 5-6"/></svg>
+        </span>
+        تحلیل اجراپذیری در آرنا
+      </div>
       {% if p.screening %}
-        <div class="stats" style="margin:0 0 12px">
+        <div class="stats" style="margin:0 0 14px">
           <div class="stat"><div class="k">امتیاز</div><div class="v">{{ p.screening.score }}/۱۰۰</div></div>
-          <div class="stat"><div class="k">قابلیت اجرا</div><div class="v" style="font-size:16px">{{ FIT_FA.get(p.screening.arena_fit) }}</div></div>
-          <div class="stat"><div class="k">زمان برآوردی</div><div class="v">{{ p.screening.est_hours }} ساعت</div></div>
-          <div class="stat"><div class="k">تحویل</div><div class="v">{{ p.screening.schedule_days }} روز</div></div>
+          <div class="stat"><div class="k">قابلیت اجرا</div><div class="v" style="font-size:15px">{{ FIT_FA.get(p.screening.arena_fit) }}</div></div>
+          <div class="stat"><div class="k">زمان برآوردی</div><div class="v">{{ p.screening.est_hours }}<small style="display:block;font-size:10.5px;color:var(--ink-500);font-weight:600">ساعت</small></div></div>
+          <div class="stat"><div class="k">تحویل</div><div class="v">{{ p.screening.schedule_days }}<small style="display:block;font-size:10.5px;color:var(--ink-500);font-weight:600">روز</small></div></div>
         </div>
-        <div class="muted" style="margin-bottom:8px">دسته‌بندی: {{ p.screening.category_label }}</div>
+        <div class="muted" style="margin-bottom:10px">دسته‌بندی: {{ p.screening.category_label }}</div>
         <ul class="reasons">
           {% for r in p.screening.reasons %}
           <li>
@@ -184,19 +234,18 @@
       {% endif %}
     </div>
 
+    {# ---------- قیمت ---------- #}
     <div class="panel">
-      <h2>قیمت پیشنهادی</h2>
+      <div class="sec-title">
+        <span class="ico">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.6 13.4 12 22l-9-9V3h10l7.6 7.6a2 2 0 0 1 0 2.8Z"/><circle cx="7.5" cy="7.5" r="1.2" fill="currentColor"/></svg>
+        </span>
+        قیمت پیشنهادی
+      </div>
       {% if p.proposal %}
-        <div class="stats" style="margin:0 0 12px">
-          <div class="stat"><div class="k">قیمت پیشنهادی</div><div class="v">{{ '{:,}'.format(p.proposal.price) }}</div></div>
-          <div class="stat"><div class="k">بودجه کارفرما</div><div class="v">{{ '{:,}'.format(p.budget_toman) if p.budget_toman else '—' }}</div></div>
-          <div class="stat"><div class="k">زمان</div><div class="v">{{ p.proposal.hours }} ساعت</div></div>
-          <div class="stat"><div class="k">وضعیت بودجه</div>
-            <div class="v" style="font-size:15px">
-              {% set bv = BUDGET_VERDICT_FA.get(p.proposal.budget_verdict, ('—','neutral')) %}
-              <span class="badge {{ bv[1] }}">{{ bv[0] }}</span>
-            </div>
-          </div>
+        <div class="kv" style="margin-bottom:12px">
+          <span class="hi">قیمت: {{ '{:,}'.format(p.proposal.price) }}</span>
+          <span>زمان: {{ p.proposal.hours }} ساعت</span>
         </div>
         <ul class="reasons">
           {% for n in p.proposal.pricing_notes %}<li>{{ n }}</li>{% endfor %}
@@ -204,7 +253,12 @@
         {% if p.proposal.alternative %}
           <div class="muted" style="margin-top:8px">جایگزین: {{ p.proposal.alternative.note }}</div>
         {% endif %}
-        <h2 style="margin-top:18px">برنامه‌ی پرداخت</h2>
+        <div class="sec-title" style="margin-top:20px;font-size:14.5px">
+          <span class="ico">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h13"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M3 6h.01"/><path d="M3 12h.01"/><path d="M3 18h.01"/></svg>
+          </span>
+          برنامه‌ی پرداخت
+        </div>
         <ul class="reasons">
           {% for m in p.proposal.milestones %}
           <li><b>{{ m.title }}</b> — {{ (m.share*100)|int }}٪ <span class="muted">({{ m.when }})</span></li>
@@ -217,13 +271,19 @@
   </div>
 
   <div>
+    {# ---------- دمو ---------- #}
     <div class="panel">
-      <h2>دموی ساخته‌شده</h2>
+      <div class="sec-title">
+        <span class="ico">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8"/><path d="M12 17v4"/></svg>
+        </span>
+        دموی ساخته‌شده
+      </div>
       {% if p.demo %}
-        <div class="muted" style="margin-bottom:8px">
-          نوع پیش‌نمایش: {{ p.demo.get('archetype_label', p.demo.kind) }}
-          {% if p.demo.style_label %} · سبک طراحی: {{ p.demo.style_label }}{% endif %}
-          {% if p.demo.bilingual %} · دو زبانه (فارسی/انگلیسی){% endif %}
+        <div class="kv" style="margin-bottom:10px">
+          <span>{{ p.demo.get('archetype_label', p.demo.kind) }}</span>
+          {% if p.demo.style_label %}<span>سبک: {{ p.demo.style_label }}</span>{% endif %}
+          {% if p.demo.bilingual %}<span>دو زبانه (فارسی/انگلیسی)</span>{% endif %}
         </div>
         <iframe class="demo" src="{{ url_for('serve_demo', filename=p.demo.rel) }}"></iframe>
         <div class="actions" style="margin-top:10px">
@@ -237,10 +297,18 @@
       {% endif %}
     </div>
 
+    {# ---------- تصمیم ---------- #}
     <div class="panel">
-      <h2>تصمیم شما</h2>
+      <div class="sec-title">
+        <span class="ico">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12l2 2 4-4"/><rect x="3" y="4" width="18" height="16" rx="2"/></svg>
+        </span>
+        تصمیم شما
+      </div>
       <form method="post" action="{{ url_for('project_decision', pid=p.id) }}">
-        <input name="note" placeholder="یادداشت (اختیاری)" style="width:100%;border:1px solid #d9deeb;border-radius:10px;padding:8px;font:inherit;margin-bottom:10px">
+        <div class="field">
+          <input name="note" class="input" placeholder="یادداشت (اختیاری)">
+        </div>
         <div class="actions">
           <button class="go" name="decision" value="approved">✅ تایید — کار را انجام بده</button>
           <button class="no" name="decision" value="rejected">❌ رد کن</button>
@@ -248,19 +316,28 @@
         </div>
       </form>
       {% if p.screening and p.screening.needs_you %}
-        <h2 style="margin-top:16px">مواردی که نیاز به ورود شما دارد</h2>
+        <div class="sec-title" style="margin-top:20px;font-size:14.5px">
+          <span class="ico">🙋</span>
+          مواردی که نیاز به ورود شما دارد
+        </div>
         <ul class="reasons">
           {% for n in p.screening.needs_you %}<li><b>{{ n.kind }}</b>: {{ n.text }}</li>{% endfor %}
         </ul>
       {% endif %}
     </div>
 
+    {# ---------- متنِ پیشنهادِ آماده ---------- #}
     {% if p.proposal %}
     <div class="panel">
-      <h2>متن پیشنهاد آماده (کپی و ثبت در سایت)</h2>
+      <div class="sec-title">
+        <span class="ico">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        </span>
+        متن پیشنهاد آماده (کپی و ثبت در سایت)
+      </div>
       <pre class="prop" id="prop">{{ p.proposal.proposal_text }}</pre>
       <div class="actions">
-        <button data-copy="prop">📋 کپی متن پیشنهاد</button>
+        <button data-copy="prop" class="btn-primary">📋 کپی متن پیشنهاد</button>
         <a href="{{ p.url }}" target="_blank" rel="noopener">رفتن به صفحه ثبت پیشنهاد ↗</a>
       </div>
       <details style="margin-top:12px"><summary>سوالاتی که همراه پیشنهاد بفرستید</summary>
@@ -273,8 +350,13 @@
 
 {% if p.description %}
 <div class="panel">
-  <h2>متن کامل آگهی</h2>
-  <div style="white-space:pre-wrap;font-size:13.5px">{{ p.description }}</div>
+  <div class="sec-title">
+    <span class="ico">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/></svg>
+    </span>
+    متن کامل آگهی
+  </div>
+  <div style="white-space:pre-wrap;font-size:13.5px;line-height:2;color:var(--ink-700)">{{ p.description }}</div>
 </div>
 {% endif %}
 
