@@ -25,7 +25,8 @@ Parsing [Setup] section, line 18
 Parsing [Setup] section, line 19
 Parsing [Setup] section, line 20
 Parsing [Setup] section, line 21
-Parsing [Setup] section, line 22
+Parsing [Setup] section, line 25
+Parsing [Setup] section, line 26
 Reading file (WizardImageFile)
 Reading file (WizardSmallImageFile)
 Preparing Setup program executable
@@ -33,26 +34,26 @@ Preparing Setup program executable
    Updating icons (Setup.e32)
    Updating version info (Setup.e32)
 Determining language code pages
-Parsing [Languages] section, line 25
+Parsing [Languages] section, line 29
    Reading file: C:\Program Files (x86)\Inno Setup 6\Default.isl
    Messages in script file
 Reading default messages from Default.isl
-Parsing [Languages] section, line 25
+Parsing [Languages] section, line 29
    Reading file: C:\Program Files (x86)\Inno Setup 6\Default.isl
 Parsing [LangOptions], [Messages], and [CustomMessages] sections
    Messages in script file
 Reading [Code] section
-Parsing [Tasks] section, line 28
-Parsing [Icons] section, line 38
-Parsing [Icons] section, line 39
-Parsing [Icons] section, line 40
-Parsing [Icons] section, line 41
-Parsing [Run] section, line 44
-Parsing [Files] section, line 31
-Parsing [Files] section, line 32
-Parsing [Files] section, line 33
-Parsing [Files] section, line 34
+Parsing [Tasks] section, line 32
+Parsing [Icons] section, line 42
+Parsing [Icons] section, line 43
+Parsing [Icons] section, line 44
+Parsing [Icons] section, line 45
+Parsing [Run] section, line 48
 Parsing [Files] section, line 35
+Parsing [Files] section, line 36
+Parsing [Files] section, line 37
+Parsing [Files] section, line 38
+Parsing [Files] section, line 39
 Deleting Frilanser-Setup.exe from output directory
 Creating setup files
    Verification successful
@@ -75,7 +76,7 @@ Creating setup files
 
 Warning: Architecture identifier "x64" is deprecated. Substituting "x64os", but note that "x64compatible" is preferred in most cases. See the "Architecture Identifiers" topic in help file for more information.
 
-Successful compile (4.813 sec). Resulting Setup program filename is:
+Successful compile (4.922 sec). Resulting Setup program filename is:
 D:\a\frilanser\frilanser\dist\Frilanser-Setup.exe
 
 --- stderr ---
@@ -84,11 +85,11 @@ D:\a\frilanser\frilanser\dist\Frilanser-Setup.exe
 android-build.log: 121824 بایت
 android-versions.txt: 468 بایت
 ci-report.md: 5235 بایت
-frilanser-gui.exe: 15567846 بایت
-frilanser-portable.zip: 27624736 بایت
-Frilanser-Setup.exe: 29578409 بایت
-frilanser.apk: 16785551 بایت
-frilanser.exe: 12535109 بایت
+frilanser-gui.exe: 15566007 بایت
+frilanser-portable.zip: 27622093 بایت
+Frilanser-Setup.exe: 29575928 بایت
+frilanser.apk: 16787095 بایت
+frilanser.exe: 12534611 بایت
 installer.log: 0 بایت
 updates: 0 بایت
 zip.log: 47 بایت
